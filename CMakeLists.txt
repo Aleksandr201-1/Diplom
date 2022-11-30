@@ -1,31 +1,25 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+  
+project(Diplom LANGUAGES CXX)
 
-project(Diplom VERSION 0.0.1 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#add_subdirectory()
-set(MAIN main)
+include(GNUInstallDirs)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+  ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+  ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+  ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
 
-#set(COMPILE_KEYS -std=c++11 -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
-set(COMPILE_KEYS -std=c++11 -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
+# defines targets and sources
+add_subdirectory(src)
 
-set(G General)
-set(N NotTough)
-set(T Tough)
+# contains an "external" library we will link to
+add_subdirectory(external)
 
-target_include_directories(main PRIVATE ${G})
-set(GENERAL_SOURCE ${G}/General.hpp ${G}/General.cpp ${G}/FuncMaker.hpp ${G}/FuncMaker.cpp)
-
-target_include_directories(main PRIVATE ${N})
-set(NOT_TOUGH_SOURCE ${N}/RungeKutta.hpp ${N}/RungeKutta.hpp)
-
-#target_include_directories(main PRIVATE ${T})
-#set(TOUGH_SOURCE ${T}/RungeKutta.hpp ${T}/RungeKutta.cpp)
-
-set(MAIN_SOURCE ${GENERAL_SOURCE} ${NOT_TOUGH_SOURCE} NotTough.hpp main.cpp)
-
-#set(BOOST_LIBS boost_iostreams boost_system boost_filesystem)
-
-add_executable(${MAIN} ${MAIN_SOURCE})
-#target_link_libraries(${MAIN} ${BOOST_LIBS})
-
-add_definitions(${COMPILE_KEYS})
+# enable testing and define tests
+#enable_testing()
+#add_subdirectory(tests)

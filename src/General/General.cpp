@@ -1,5 +1,20 @@
 #include "General.hpp"
 
+uint64_t getOrder (const std::string &task) {
+    uint64_t ans = 0;
+    for (uint64_t i = 0; i < task.size(); ++i) {
+        if (task[i] == 'y') {
+            ++i;
+            uint64_t tmp = 0;
+            while (i < task.size() && task[i] == '\'') {
+                ++tmp;
+            }
+            ans = std::max(ans, tmp);
+        }
+    }
+    return ans;
+}
+
 void printVector(const std::vector<double> &vec) {
     for (double el : vec) {
         std::cout << el << " ";

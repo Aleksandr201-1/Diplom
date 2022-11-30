@@ -1,0 +1,20 @@
+add_executable(main main.cpp)
+
+#set(COMPILE_FLAGS -std=c++11 -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
+set(COMPILE_FLAGS -std=c++11 -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
+
+set(BOOST_LIBS boost_iostreams boost_system boost_filesystem)
+
+add_subdirectory(General)
+add_subdirectory(Tough)
+add_subdirectory(NotTough)
+
+target_link_libraries(main
+    PRIVATE
+        GeneralLIB
+        #ToughLIB
+        NotToughLIB
+        ${BOOST_LIBS}
+)
+
+add_definitions(${COMPILE_FLAGS})

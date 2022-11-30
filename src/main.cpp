@@ -56,7 +56,7 @@ int main () {
     std::cout << "Введите функцию для сравнения:\n";
     checkSTR = readLine();
     task = getTaskInfo(system);
-    task.X0 = task.Xn + 1;
+    task.Xn = task.X0 + 1;
 
     std::cout << "=====Рунге=====\n";
     res1 = RungeKutta4(task, h);
@@ -67,7 +67,9 @@ int main () {
     printVector(res1.second);
     //std::cout << "Погрешность: " << RungeRomberg(res1.second[2], res2.second[1]) << "\n";
 
-    //auto func = LeastSquareMethod(res1.first, res1.second, 3);
+    auto func = LeastSquareMethod(res1.first, res1.second, 3);
+    std::cout << LSMToText(func) << "\n";
+    plot({LSMToText(func), checkSTR}, res1.first[0], res1.first.back());
     //plot({LSMToText(func), checkSTR}, res1.first[0], res1.first.back());
 
     return 0;
