@@ -10,25 +10,25 @@
 #include <functional>
 #include <iostream>
 
-// struct OperationS {
-//     std::string str;
+// struct OperationStruct {
+//     std::vector<std::string> op_str;
 //     std::function<double (double, double)> func;
 //     Operation op;
 // };
 
-// const std::vector<OperationS> ope = {
-//     {"+", [] (double x, double y) {return x + y;}, Operation::PLUS},
-//     {"-", [] (double x, double y) {return x - y;}, Operation::MINUS},
-//     {"*", [] (double x, double y) {return x * y;}, Operation::MUL},
-//     {"/", [] (double x, double y) {return x / y;}, Operation::DIV}
+// const std::vector<OperationStruct> operations = {
+//     {{"+"}, [] (double x, double y) {return x + y;}, Operation::PLUS},
+//     {{"-"}, [] (double x, double y) {return x - y;}, Operation::MINUS},
+//     {{"*"}, [] (double x, double y) {return x * y;}, Operation::MUL},
+//     {{"/"}, [] (double x, double y) {return x / y;}, Operation::DIV}
 // };
 
 //PRIORITY
-//val,() 0
-//^ 1
-//sin,cos,... 2
-//*,/,% 3
-//+- 4
+//val, ()       0
+//^             1
+//sin, cos, ... 2
+//*, /, %       3
+//+, -          4
 enum class NodeType {
     OPERATION,
     VALUE,

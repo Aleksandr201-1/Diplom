@@ -163,7 +163,7 @@ double FunctionalTree::useOperation (Operation op, double x, double y) const {
         case Operation::ATAN:
             return std::atan(y);
         case Operation::ACOT:
-            return M_PI_2 -  std::atan(y);
+            return std::acos(-1) / 2 -  std::atan(y);
         case Operation::LOG:
             return std::log10(y);
         case Operation::LN:

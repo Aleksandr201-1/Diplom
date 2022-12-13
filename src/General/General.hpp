@@ -9,13 +9,14 @@
 #include <functional>
 #include <iostream>
 #include "FuncMaker.hpp"
+#include "ButcherTable.hpp"
 #include "LSM.hpp"
 
 struct Task {
     std::vector<FunctionalTree> trees;
     std::vector<double> Y;
-    double X0, Xn, a, b, h;
-    uint64_t n;
+    double X0, Xn;
+    uint64_t order;
 };
 
 const uint64_t ITERATION_CAP = 200;
@@ -33,6 +34,6 @@ double derivative (const std::function<double(double)> &f, double x, uint64_t de
 
 std::string toString (double val, uint64_t precision);
 
-Task getTaskInfo(const std::vector<std::string> &system);
+Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn);
 
 #endif

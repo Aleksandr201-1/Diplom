@@ -1,9 +1,15 @@
+#if(${PLATFORM} EQUAL ${WINDOWS})
+#set(MAIN main)
+
 add_executable(main main.cpp)
 
 #set(COMPILE_FLAGS -std=c++11 -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
 set(COMPILE_FLAGS -std=c++11 -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
 
-set(BOOST_LIBS boost_iostreams boost_system boost_filesystem)
+
+
+#set(BOOST_LIBS boost_iostreams boost_system boost_filesystem)
+set(BOOST_LIBS )
 
 add_subdirectory(General)
 add_subdirectory(Tough)

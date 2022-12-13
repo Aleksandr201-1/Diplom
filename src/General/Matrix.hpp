@@ -20,7 +20,9 @@ class Matrix {
         //конструктор нулевой матрицы n строк на m столбцов
         Matrix (uint64_t n, uint64_t m);
         //конструктор копирования
-        Matrix (const Matrix<T> &m);
+        Matrix (const Matrix<T> &matrix);
+        //конструктор перемещения
+        Matrix (Matrix<T> &&matrix);
         //конструктор преобразования вектора в матрицу n x m
         Matrix (uint64_t n, uint64_t m, const std::vector<T> &vec);
         //стандартный деструктор
@@ -132,6 +134,13 @@ Matrix<T>::Matrix (uint64_t n, uint64_t m) : buff(n * m, T(0)), n(n), m(m) {}
 template <class T>
 Matrix<T>::Matrix (const Matrix<T> &matrix) {
     buff = matrix.buff;
+    n = matrix.n;
+    m = matrix.m;
+}
+
+template <class T>
+Matrix<T>::Matrix (Matrix<T> &&matrix) {
+    buff = std::move(matrix.buff);
     n = matrix.n;
     m = matrix.m;
 }
@@ -593,9 +602,10 @@ std::ifstream &operator>> (std::ifstream &input, Matrix<T> &m) {
     input.read(reinterpret_cast<char*>(&m.n), sizeof(m.n));
     input.read(reinterpret_cast<char*>(&m.m), sizeof(m.m));
     m.buff.resize(m.m * m.n);
-    for (uint64_t i = 0; i < m.m * m.n; ++i) {
-        input.read(reinterpret_cast<char*>(&m.buff[i]), sizeof(T));
-    }
+    input.read(reinterpret_cast<char*>(&m.buff[0]), sizeof(T) * m.buff.size());
+    //for (uint64_t i = 0; i < m.m * m.n; ++i) {
+    //    input.read(reinterpret_cast<char*>(&m.buff[i]), sizeof(T));
+    //}
     return input;
 }
 
@@ -603,9 +613,10 @@ template <class T>
 std::ofstream &operator<< (std::ofstream &output, const Matrix<T> &m) {
     output.write(reinterpret_cast<const char*>(&m.n), sizeof(m.n));
     output.write(reinterpret_cast<const char*>(&m.m), sizeof(m.m));
-    for (uint64_t i = 0; i < m.buff.size(); ++i) {
-        output.write(reinterpret_cast<const char*>(&m.buff[i]), sizeof(T));
-    }
+    output.write(reinterpret_cast<const char*>(&m.buff[0]), sizeof(T) * m.buff.size());
+    //for (uint64_t i = 0; i < m.buff.size(); ++i) {
+    //    output.write(reinterpret_cast<const char*>(&m.buff[i]), sizeof(T));
+    //}
     return output;
 }
 
