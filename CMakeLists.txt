@@ -1,8 +1,21 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
-  
+
+set(WINDOWS 1)
+set(LINUX 2)
+
+set(PLATFORM ${LINUX})
+
+if(${PLATFORM} EQUAL ${WINDOWS})
+  message(STATUS "Working for Window ver.")
+  set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
+else()
+  message(STATUS "Working for Linux ver.")
+  set(CMAKE_CXX_COMPILER g++)
+endif()
+
 project(Diplom LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
