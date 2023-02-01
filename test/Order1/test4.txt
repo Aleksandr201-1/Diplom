@@ -1,0 +1,8 @@
+y' - sin(x)*y + sin(x)*cos(x) = 0
+y(-2) = 0.099
+
+0.2
+
+-2 3
+
+cos(x) - 1 + exp(-cos(x))
