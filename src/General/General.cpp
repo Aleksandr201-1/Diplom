@@ -59,13 +59,54 @@ double stringFix (std::string &str) {
                 valStr += tmp[i];
                 ++i;
             }
-            val = std::atof(valStr.c_str());
+            val = FunctionalTree(valStr).calculate();
         } else {
             str += tmp[i];
         }
     }
     return val;
 }
+
+// Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn) {
+//     uint64_t idx = 0, size = 0;
+//     Task task;
+//     std::string tmp = "y";
+//     std::vector<std::string> args; //x y y' y'' ...
+//     args.push_back("x");
+//     for (uint64_t i = 0; i <= order; ++i) {
+//         args.push_back(tmp);
+//         tmp += "'";
+//     }
+//     //double a, b, X1, X2;
+//     //std::vector<FunctionalTree> trees;
+
+//     idx = system[0].find('=');
+//     size = system[0].size();
+//     task.trees.push_back(std::move(FunctionalTree(system[0].substr(0, idx), args)));
+//     task.trees.push_back(std::move(FunctionalTree(system[0].substr(idx + 1, size - idx), args)));
+
+//     for (uint64_t i = 1; i <= order; ++i) {
+//         idx = system[i].find('=');
+//         size = system[i].size();
+//         tmp = system[i].substr(0, idx);
+//         task.X0 = stringFix(tmp);
+//         //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
+//         task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+//         task.trees.push_back(std::move(FunctionalTree(tmp, args)));
+//     }
+//     task.order = order;
+//     task.X0 = X0;
+//     task.Xn = Xn;
+
+//     // idx = system[2].find('=');
+//     // size = system[2].size();
+//     // tmp = system[2].substr(0, idx);
+//     // task.Xn = stringFix(tmp);
+//     // task.b = FunctionalTree(system[2].substr(idx + 1, size - idx), {}).func(0);
+//     // task.trees.push_back(std::move(FunctionalTree(tmp, {"y", "y'"})));
+
+//     return task;
+// }
 
 Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn) {
     uint64_t idx = 0, size = 0;
@@ -77,13 +118,16 @@ Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double 
         args.push_back(tmp);
         tmp += "'";
     }
-    //double a, b, X1, X2;
-    //std::vector<FunctionalTree> trees;
 
     idx = system[0].find('=');
     size = system[0].size();
     task.trees.push_back(std::move(FunctionalTree(system[0].substr(0, idx), args)));
     task.trees.push_back(std::move(FunctionalTree(system[0].substr(idx + 1, size - idx), args)));
+    //task.trees[0]({0, 2});
+    auto function = [=] (const std::vector<double> &args) -> double {
+        return task.trees[0](args);
+    };
+    task.f.push_back(function);
 
     for (uint64_t i = 1; i <= order; ++i) {
         idx = system[i].find('=');
@@ -91,19 +135,16 @@ Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double 
         tmp = system[i].substr(0, idx);
         task.X0 = stringFix(tmp);
         //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
-        task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0));
-        task.trees.push_back(std::move(FunctionalTree(tmp, args)));
+        task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+        auto func = [=] (const std::vector<double> &args) -> double {
+            return args[i];
+        };
+        task.f.push_back(func);
+        //task.trees.push_back(std::move(FunctionalTree(tmp, args)));
     }
     task.order = order;
     task.X0 = X0;
     task.Xn = Xn;
-
-    // idx = system[2].find('=');
-    // size = system[2].size();
-    // tmp = system[2].substr(0, idx);
-    // task.Xn = stringFix(tmp);
-    // task.b = FunctionalTree(system[2].substr(idx + 1, size - idx), {}).func(0);
-    // task.trees.push_back(std::move(FunctionalTree(tmp, {"y", "y'"})));
 
     return task;
 }

@@ -9,11 +9,13 @@
 #include <functional>
 #include <iostream>
 #include "FuncMaker.hpp"
-#include "ButcherTable.hpp"
-#include "LSM.hpp"
+// #include "ButcherTable.hpp"
+// //#include "ToughDet.hpp"
+// #include "LSM.hpp"
 
 struct Task {
     std::vector<FunctionalTree> trees;
+    std::vector<std::function<double(const std::vector<double> &)>> f;
     std::vector<double> Y;
     double X0, Xn;
     uint64_t order;

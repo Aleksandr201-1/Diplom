@@ -3,6 +3,16 @@
 
 #include "Matrix.hpp"
 
-Matrix<double> createButcherTable (uint64_t order, uint64_t way);
+enum class SolveMethod {
+    RUNGE_KUTTA,
+    FALBERG,
+    CHESKINO,
+    MERSON,
+    RADO,
+    GAUSS,
+    LOBATTO
+};
+
+Matrix<double> createButcherTable (SolveMethod method, uint64_t order, uint64_t way);
 
 #endif

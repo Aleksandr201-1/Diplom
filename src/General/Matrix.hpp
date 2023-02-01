@@ -17,8 +17,8 @@ class Matrix {
         Matrix ();
         //конструктор единичной матрицы n x n
         Matrix (uint64_t n);
-        //конструктор нулевой матрицы n строк на m столбцов
-        Matrix (uint64_t n, uint64_t m);
+        //конструктор матрицы n строк на m столбцов, заполненной элементами el
+        Matrix (uint64_t n, uint64_t m, T el = 0);
         //конструктор копирования
         Matrix (const Matrix<T> &matrix);
         //конструктор перемещения
@@ -129,13 +129,13 @@ Matrix<T>::Matrix (uint64_t n) : buff(n * n, T(0)), n(n), m(n) {
 }
 
 template <class T>
-Matrix<T>::Matrix (uint64_t n, uint64_t m) : buff(n * m, T(0)), n(n), m(m) {}
+Matrix<T>::Matrix (uint64_t n, uint64_t m, T el) : buff(n * m, el), n(n), m(m) {}
 
 template <class T>
-Matrix<T>::Matrix (const Matrix<T> &matrix) {
-    buff = matrix.buff;
-    n = matrix.n;
-    m = matrix.m;
+Matrix<T>::Matrix (const Matrix<T> &matrix) : buff(matrix.buff), n(matrix.n), m(matrix.m) {
+    //buff = matrix.buff;
+    //n = matrix.n;
+    //m = matrix.m;
 }
 
 template <class T>
