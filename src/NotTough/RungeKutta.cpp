@@ -1,5 +1,12 @@
 #include "RungeKutta.hpp"
 
+//модуль определения жёсткости
+//сохранение функционального дерева в файл
+//добавить в метод рунге-кутты возможность вставлять критерий выбора шага
+//итерационные методы (неявные, то есть с полной таблицей бутчера)
+//печать отчёта
+//графический интерфейс
+
 std::pair<std::vector<double>, std::vector<double>> RungeKutta4 (const Task &task, double h) {
     double X0 = task.X0, Xn = task.Xn;
     const std::vector<FunctionalTree> &trees = task.trees;
@@ -50,24 +57,38 @@ std::pair<std::vector<double>, std::vector<double>> RungeKutta4 (const Task &tas
         K[1][2] = L3;
         K[0][3] = K4;
         K[1][3] = L4;
-        for (uint64_t j = 0; j < 4; ++j) {
-            for (uint64_t k = 0; k < 2; ++k) {
-                std::cout << "K[" << k << "][" << j << "] = " << K[k][j] << "\n";
-            }
-        }
+        // for (uint64_t j = 0; j < 4; ++j) {
+        //     for (uint64_t k = 0; k < 2; ++k) {
+        //         std::cout << "K[" << k << "][" << j << "] = " << K[k][j] << "\n";
+        //     }
+        // }
     }
+    printVector(Z);
     return std::make_pair(X, Y);
+}
+
+double norma (const std::vector<double> &a, const std::vector<double> &b) {
+    uint64_t size = std::min(a.size(), b.size());
+    // if (a.size() != b.size()) {
+    //     return 0;
+    // }
+    double ans = 0;
+    for (uint64_t i = 0; i < a.size(); ++i) {
+        ans = std::max(ans, std::abs(a[i] - b[i]));
+    }
+    return ans;
 }
 
 std::pair<std::vector<double>, std::vector<double>> RungeKutta6 (const Task &task, const Matrix<double> butcher, double h) {
     double X0 = task.X0, Xn = task.Xn;
     const std::vector<FunctionalTree> &trees = task.trees;
-    uint64_t orderOfTask = task.order, orderOfApprox = butcher.size().n - 1;
+    uint64_t orderOfTask = task.order, orderOfApprox = butcher.size().m - 1;
 
-    std::vector<std::vector<double>> Yi(orderOfTask + 1);
-    for (double i = X0; i <= Xn; i += h) {
-        Yi[0].push_back(i);
-    }
+    std::vector<std::vector<double>> Yi(orderOfTask + 1); //X Y Y' Y''...
+    // for (double i = X0; i <= Xn; i += h) {
+    //     Yi[0].push_back(i);
+    // }
+    Yi[0].push_back(X0);
     for (uint64_t i = 0; i < orderOfTask; ++i) {
         Yi[i + 1].push_back(task.Y[i]);
     }
@@ -77,25 +98,39 @@ std::pair<std::vector<double>, std::vector<double>> RungeKutta6 (const Task &tas
     };
     std::vector<std::vector<double>> K(orderOfTask, std::vector<double>(orderOfApprox, 0));
     std::vector<double> args(orderOfTask + 2, 0);
-    for (uint64_t i = 1; i < Yi[0].size(); ++i) {
+    uint64_t i = 1;
+    //for (uint64_t i = 1; i < Yi[0].size(); ++i) {
+    while (Yi[0].back() + h < Xn) {
+        //std::cout << i << "\n";
 
         //начальная инициализация
-        args[0] = Yi[0][i - 1];
-        for (uint64_t j = 0; j < orderOfTask - 1; ++j) {
-            args[j + 1] = Yi[j + 1][i - 1];
-            K[j][0] = h * Yi[orderOfTask - j][i - 1];
-        }
-        args[orderOfTask] = Yi[orderOfTask][i - 1];
-        K[orderOfTask - 1][0] = h * g(args);
+        // for (uint64_t j = 0; j < args.size() - 1; ++j) {
+        //     args[j] = Yi[j][i - 1];
+        // }
+        // //args[0] = Yi[0][i - 1];
+        // for (uint64_t j = 0; j < orderOfTask - 1; ++j) {
+        //     //args[j + 1] = Yi[j + 1][i - 1];
+        //     K[j][0] = h * Yi[orderOfTask - j][i - 1];
+        // }
+        // //args[orderOfTask] = Yi[orderOfTask][i - 1];
+        // K[orderOfTask - 1][0] = h * g(args);
 
-        for (uint64_t j = 1; j < orderOfApprox; ++j) {
-            //args[0] = X[i - 1] + butcher(j, 0) * h;
+        for (uint64_t j = 0; j < orderOfApprox; ++j) {
+
+            //аргументы для функций
+            args[0] = Yi[0][i - 1] + butcher(j, 0) * h;
+            for (uint64_t k = 1; k < args.size() - 1; ++k) {
+                args[k] = Yi[k][i - 1];
+                for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+                    args[k] += butcher(j, l + 1) * K[k - 1][l];
+                }
+            }
 
             //коэффициенты
             for (uint64_t k = 0; k < orderOfTask - 1; ++k) {
                 //args[k + 1] = Yi[k][i - 1];
                 K[k][j] = Yi[orderOfTask - k][i - 1];// + butcher(j, k + 1) * K[orderOfTask - k - 1][j - 1];
-                for (uint64_t l = 0; l < orderOfApprox; ++l) {
+                for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
                     // K[k][j] += butcher(j, l + 1) * K[orderOfTask - 1 - k][j - 1];
                     K[k][j] += butcher(j, l + 1) * K[orderOfTask - 1 - k][l]; //???
                 }
@@ -103,20 +138,20 @@ std::pair<std::vector<double>, std::vector<double>> RungeKutta6 (const Task &tas
             }
 
             //аргументы
-            args[0] = Yi[0][i - 1] + butcher(j, 0) * h;
-            for (uint64_t k = 1; k < orderOfTask + 1; ++k) {
-                args[k] = Yi[k][i - 1];
-                for (uint64_t l = 0; l < orderOfApprox; ++l) {
-                    args[k] += butcher(j, l + 1) * K[k - 1][l];
-                }
-            }
+            // args[0] = Yi[0][i - 1] + butcher(j, 0) * h;
+            // for (uint64_t k = 1; k < args.size() - 1; ++k) {
+            //     args[k] = Yi[k][i - 1];
+            //     for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+            //         args[k] += butcher(j, l + 1) * K[k - 1][l];
+            //     }
+            // }
             K[orderOfTask - 1][j] = h * g(args);
         }
-        for (uint64_t j = 0; j < orderOfApprox; ++j) {
-            for (uint64_t k = 0; k < orderOfTask; ++k) {
-                std::cout << "K[" << k << "][" << j << "] = " << K[k][j] << "\n";
-            }
-        }
+        // for (uint64_t j = 0; j < orderOfApprox; ++j) {
+        //     for (uint64_t k = 0; k < orderOfTask; ++k) {
+        //         std::cout << "K[" << k << "][" << j << "] = " << K[k][j] << "\n";
+        //     }
+        // }
 
         // K[0][0] = h * Yi[2][i - 1]; //k1
         // K[1][0] = h * g({Yi[0][i - 1], Yi[1][i - 1], Yi[2][i - 1], 0}); //l1
@@ -127,6 +162,9 @@ std::pair<std::vector<double>, std::vector<double>> RungeKutta6 (const Task &tas
         // K[0][3] = h * (Yi[2][i - 1] + K[1][2]); //k4
         // K[1][3] = h * g({Yi[0][i - 1] + h, Yi[1][i - 1] + K[0][2], Yi[2][i - 1] + K[1][2], 0}); //l4
         //std::cout << K[0][3] << " " << K[1][3] << "\n";
+
+        //добавление нового значения
+        Yi[0].push_back(Yi[0][i - 1] + h);
         for (uint64_t j = 0; j < orderOfTask; ++j) {
             double delta = 0;
             for (uint64_t k = 1; k <= orderOfApprox; ++k) {
@@ -134,6 +172,269 @@ std::pair<std::vector<double>, std::vector<double>> RungeKutta6 (const Task &tas
             }
             Yi[j + 1].push_back(Yi[j + 1][i - 1] + delta);
         }
+
+        //изменение шага
+        //std::cout << K[0][1] << " " << K[0][2] << " " << K[0][0] << " " << K[0][1] << "\n";
+        if (!isEqual(K[0][1], K[0][2]) && !isEqual(K[0][0], K[0][1])) {
+            double Q = std::abs(K[0][1] - K[0][2]) / std::abs(K[0][0] - K[0][1]);
+            //std::cout << K[0][1] << " " << K[0][2] << " " << K[0][0] << " " << K[0][1] << "\n";
+            // if (i == 4) {
+            //     exit(-1);
+            // }
+            if (Q > 0.6) { //0.1
+                h /= 2;
+            } else if (Q < 0.01) {
+                h *= 2;
+            }
+            std::cout << "Q = " << Q << "\nh = " << h << "\n";
+        }
+        std::cout << "X = " << Yi[0].back() << "\n";
+        ++i;
+        //printVector(Yi[1]);
+    }
+    //printVector(Yi[2]);
+    return std::make_pair(Yi[0], Yi[1]);
+}
+
+std::pair<std::vector<double>, std::vector<double>> Falberg (const Task &task, const Matrix<double> butcher, double h) {
+    double X0 = task.X0, Xn = task.Xn;
+    const std::vector<FunctionalTree> &trees = task.trees;
+    uint64_t orderOfTask = task.order, orderOfApprox = butcher.size().m - 1;
+
+    std::vector<std::vector<double>> Yi(orderOfTask + 1); //X Y Y' Y''...
+    std::vector<double> control;
+    Yi[0].push_back(X0);
+    for (uint64_t i = 0; i < orderOfTask; ++i) {
+        Yi[i + 1].push_back(task.Y[i]);
+    }
+    control.push_back(task.Y[0]);
+    auto g = [&] (const std::vector<double> &args) -> double {
+        static auto c2 = trees[0].getCoeff(orderOfTask + 1);
+        return -trees[0](args) / c2(args[0]);
+    };
+    std::vector<std::vector<double>> K(orderOfTask, std::vector<double>(orderOfApprox, 0));
+    std::vector<double> args(orderOfTask + 2, 0);
+    uint64_t i = 1;
+    while (Yi[0].back() + h < Xn) {
+
+        for (uint64_t j = 0; j < orderOfApprox; ++j) {
+
+            //аргументы для функций
+            args[0] = Yi[0][i - 1] + butcher(j, 0) * h;
+            for (uint64_t k = 1; k < args.size() - 1; ++k) {
+                args[k] = Yi[k][i - 1];
+                for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+                    args[k] += butcher(j, l + 1) * K[k - 1][l];
+                }
+            }
+
+            //коэффициенты
+            for (uint64_t k = 0; k < orderOfTask - 1; ++k) {
+                K[k][j] = Yi[orderOfTask - k][i - 1];
+                for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+                    K[k][j] += butcher(j, l + 1) * K[orderOfTask - 1 - k][l]; //???
+                }
+                K[k][j] *= h;
+            }
+
+            K[orderOfTask - 1][j] = h * g(args);
+        }
+
+        //добавление нового значения
+        Yi[0].push_back(Yi[0][i - 1] + h);
+        for (uint64_t j = 0; j < orderOfTask; ++j) {
+            double delta = 0;
+            for (uint64_t k = 1; k <= orderOfApprox; ++k) {
+                delta += butcher(orderOfApprox, k) * K[j][k - 1];
+            }
+            Yi[j + 1].push_back(Yi[j + 1][i - 1] + delta);
+        }
+        
+        double delta_control = 0;
+        for (uint64_t k = 1; k <= orderOfApprox; ++k) {
+            delta_control += butcher(orderOfApprox + 1, k) * K[0][k - 1];
+        }
+        control.push_back(control[i - 1] + delta_control);
+
+        //изменение шага
+        double R = norma(Yi[1], control);
+        double eps = 0.1;
+        if (R > eps) {
+            h /= 2;
+        } else if (R < eps / 64) {
+            h *= 2;
+        }
+        // if (!isEqual(K[0][1], K[0][2]) && !isEqual(K[0][0], K[0][1])) {
+        //     double Q = std::abs(K[0][1] - K[0][2]) / std::abs(K[0][0] - K[0][1]);
+        //     if (Q > 0.1) {
+        //         h /= 2;
+        //     } else if (Q < 0.01) {
+        //         h *= 2;
+        //     }
+        // }
+        ++i;
+        std::cout << R << "\n";
+    }
+    return std::make_pair(Yi[0], Yi[1]);
+}
+
+// void Zeidel (std::vector<std::vector<double>> &K, const std::vector<std::vector<double>> &Yi, const std::vector<std::function<double(const std::vector<double> &)>> &func, const Matrix<double> butcher, double h) {
+//     std::vector<double> args(Yi.size() + 1, 0);
+//     for (uint64_t i = 0; i < K.size(); ++i) {
+//         for (uint64_t j = 0; j < K[0].size(); ++j) {
+//             for (uint64_t k = 0; k < args.size(); ++k) {
+//                 args[k] = Yi[k][0];
+//             }
+//         }
+//     }
+// }
+
+// void Newton (std::vector<std::vector<double>> &K, const std::vector<std::vector<double>> &Yi, const std::vector<std::function<double(const std::vector<double> &)>> &func, const Matrix<double> butcher, double h) {
+    
+// }
+
+std::pair<std::vector<double>, std::vector<double>> NonExplZeidel (const Task &task, const Matrix<double> butcher, double h) {
+    double X0 = task.X0, Xn = task.Xn;
+    const std::vector<FunctionalTree> &trees = task.trees;
+    uint64_t orderOfTask = task.order, orderOfApprox = butcher.size().m - 1;
+
+    std::vector<std::vector<double>> Yi(orderOfTask + 1); //X Y Y' Y''...
+    //std::vector<double> control;
+    Yi[0].push_back(X0);
+    for (uint64_t i = 0; i < orderOfTask; ++i) {
+        Yi[i + 1].push_back(task.Y[i]);
+    }
+    //control.push_back(task.Y[0]);
+    auto g = [&] (const std::vector<double> &args) -> double {
+        static auto c2 = trees[0].getCoeff(orderOfTask + 1);
+        return -trees[0](args) / c2(args[0]);
+    };
+    std::vector<std::vector<double>> K(orderOfTask, std::vector<double>(orderOfApprox, 0));
+    std::vector<double> args(orderOfTask + 2, 0);
+    uint64_t i = 1;
+    while (Yi[0].back() + h < Xn) {
+
+        std::vector<double> Ktmp;
+        do {
+            for (uint64_t j = 0; j < orderOfApprox; ++j) {
+                Ktmp = K[orderOfTask - 1];
+
+                //аргументы для функций
+                args[0] = Yi[0][i - 1] + butcher(j, 0) * h;
+                for (uint64_t k = 1; k < args.size() - 1; ++k) {
+                    args[k] = Yi[k][i - 1];
+                    for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+                        args[k] += butcher(j, l + 1) * K[k - 1][l];
+                    }
+                }
+
+                //коэффициенты
+                for (uint64_t k = 0; k < orderOfTask - 1; ++k) {
+                    K[k][j] = Yi[orderOfTask - k][i - 1];
+                    for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+                        K[k][j] += butcher(j, l + 1) * K[orderOfTask - 1 - k][l]; //???
+                    }
+                    K[k][j] *= h;
+                }
+
+                K[orderOfTask - 1][j] = h * g(args);
+                std::cout << "norma: " << norma(Ktmp, K[orderOfTask - 1]) << "\n";
+            }
+        } while (norma(Ktmp, K[orderOfTask - 1]) > 0.01);
+
+        //добавление нового значения
+        Yi[0].push_back(Yi[0][i - 1] + h);
+        for (uint64_t j = 0; j < orderOfTask; ++j) {
+            double delta = 0;
+            for (uint64_t k = 1; k <= orderOfApprox; ++k) {
+                delta += butcher(orderOfApprox, k) * K[j][k - 1];
+            }
+            Yi[j + 1].push_back(Yi[j + 1][i - 1] + delta);
+        }
+
+        // //изменение шага
+        // double R = norma(Yi[1], control);
+        // double eps = 0.1;
+        // if (R > eps) {
+        //     h /= 2;
+        // } else if (R < eps / 64) {
+        //     h *= 2;
+        // }
+        ++i;
+        // std::cout << R << "\n";
+    }
+    return std::make_pair(Yi[0], Yi[1]);
+}
+
+std::pair<std::vector<double>, std::vector<double>> NonExplNewton (const Task &task, const Matrix<double> butcher, double h) {
+    double X0 = task.X0, Xn = task.Xn;
+    const std::vector<FunctionalTree> &trees = task.trees;
+    uint64_t orderOfTask = task.order, orderOfApprox = butcher.size().m - 1;
+
+    std::vector<std::vector<double>> Yi(orderOfTask + 1); //X Y Y' Y''...
+    //std::vector<double> control;
+    Yi[0].push_back(X0);
+    for (uint64_t i = 0; i < orderOfTask; ++i) {
+        Yi[i + 1].push_back(task.Y[i]);
+    }
+    //control.push_back(task.Y[0]);
+    auto g = [&] (const std::vector<double> &args) -> double {
+        static auto c2 = trees[0].getCoeff(orderOfTask + 1);
+        return -trees[0](args) / c2(args[0]);
+    };
+    std::vector<std::vector<double>> K(orderOfTask, std::vector<double>(orderOfApprox, 0));
+    std::vector<double> args(orderOfTask + 2, 0);
+    uint64_t i = 1;
+    while (Yi[0].back() + h < Xn) {
+
+        std::vector<double> Ktmp;
+        do {
+            for (uint64_t j = 0; j < orderOfApprox; ++j) {
+                Ktmp = K[orderOfTask - 1];
+
+                //аргументы для функций
+                args[0] = Yi[0][i - 1] + butcher(j, 0) * h;
+                for (uint64_t k = 1; k < args.size() - 1; ++k) {
+                    args[k] = Yi[k][i - 1];
+                    for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+                        args[k] += butcher(j, l + 1) * K[k - 1][l];
+                    }
+                }
+
+                //коэффициенты
+                for (uint64_t k = 0; k < orderOfTask - 1; ++k) {
+                    K[k][j] = Yi[orderOfTask - k][i - 1];
+                    for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+                        K[k][j] += butcher(j, l + 1) * K[orderOfTask - 1 - k][l]; //???
+                    }
+                    K[k][j] *= h;
+                }
+
+                K[orderOfTask - 1][j] = h * g(args);
+                std::cout << "norma: " << norma(Ktmp, K[orderOfTask - 1]) << "\n";
+            }
+        } while (norma(Ktmp, K[orderOfTask - 1]) > 0.01);
+
+        //добавление нового значения
+        Yi[0].push_back(Yi[0][i - 1] + h);
+        for (uint64_t j = 0; j < orderOfTask; ++j) {
+            double delta = 0;
+            for (uint64_t k = 1; k <= orderOfApprox; ++k) {
+                delta += butcher(orderOfApprox, k) * K[j][k - 1];
+            }
+            Yi[j + 1].push_back(Yi[j + 1][i - 1] + delta);
+        }
+
+        // //изменение шага
+        // double R = norma(Yi[1], control);
+        // double eps = 0.1;
+        // if (R > eps) {
+        //     h /= 2;
+        // } else if (R < eps / 64) {
+        //     h *= 2;
+        // }
+        ++i;
+        // std::cout << R << "\n";
     }
     return std::make_pair(Yi[0], Yi[1]);
 }
