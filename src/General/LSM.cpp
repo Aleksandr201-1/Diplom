@@ -58,7 +58,7 @@ std::string LSMToText (const std::vector<double> &poly) {
         } else {
             func += " + ";
         }
-        func += toString(std::abs(poly[i]), PRECISION) + " * x**" + std::to_string(i);
+        func += toString(std::abs(poly[i]), PRECISION) + "x^" + std::to_string(i);
     }
     return func;
 }

@@ -3,8 +3,8 @@
 
 add_executable(main main.cpp)
 
-#set(COMPILE_FLAGS -std=c++11 -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
-set(COMPILE_FLAGS -std=c++11 -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
+#set(COMPILE_FLAGS -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
+set(COMPILE_FLAGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
 
 
 
@@ -12,12 +12,14 @@ set(COMPILE_FLAGS -std=c++11 -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
 set(BOOST_LIBS )
 
 add_subdirectory(General)
+add_subdirectory(PDF-reporter)
 add_subdirectory(Tough)
 add_subdirectory(NotTough)
 
 target_link_libraries(main
     PRIVATE
         GeneralLIB
+        ReportLIB
         #ToughLIB
         NotToughLIB
         ${BOOST_LIBS}

@@ -1,28 +1,6 @@
 #include "FuncMaker.hpp"
 
-//const std::vector<std::string> FunctionalTree::operations = {"+", "-", "*", "/", "%", "^", "sqrt", "sin", "cos", "tan", "cot", "asin", "acos", "atan", "acot", "log", "ln", "exp", "abs"};
-
-// const std::vector<OperationStruct> operations = {
-//     {{"+"},       [] (double x, double y) {return x + y;},                                Operation::PLUS,  4},
-//     {{"-"},       [] (double x, double y) {return x - y;},                                Operation::MINUS, 4},
-//     {{"*"},       [] (double x, double y) {return x * y;},                                Operation::MUL,   3},
-//     {{"/"},       [] (double x, double y) {return x / y;},                                Operation::DIV,   3},
-//     {{"%"},       [] (double x, double y) {return std::fmod(x, y);},                      Operation::MOD,   3},
-//     {{"^", "**"}, [] (double x, double y) {return std::pow(x, y);},                       Operation::POW,   1},
-//     {{"sqrt"},    [] (double x, double y) {return std::sqrt(x);},                         Operation::SQRT,  2},
-//     {{"sin"},     [] (double x, double y) {return std::sin(x);},                          Operation::SIN,   2},
-//     {{"cos"},     [] (double x, double y) {return std::cos(x);},                          Operation::COS,   2},
-//     {{"tan"},     [] (double x, double y) {return std::tan(x);},                          Operation::TAN,   2},
-//     {{"ctg"},     [] (double x, double y) {return 1.0 / std::tan(x);},                    Operation::CTG,   2},
-//     {{"asin"},    [] (double x, double y) {return std::asin(x);},                         Operation::ASIN,  2},
-//     {{"acos"},    [] (double x, double y) {return std::acos(x);},                         Operation::ACOS,  2},
-//     {{"atan"},    [] (double x, double y) {return std::atan(x);},                         Operation::ATAN,  2},
-//     {{"acot"},    [] (double x, double y) {return std::acos(-1.0) / 2.0 - std::atan(x);}, Operation::ACOT,  2},
-//     {{"log"},     [] (double x, double y) {return std::log10(x);},                        Operation::LOG,   2},
-//     {{"ln"},      [] (double x, double y) {return std::log(x);},                          Operation::LN,    2},
-//     {{"exp"},     [] (double x, double y) {return std::exp(x);},                          Operation::EXP,   2},
-//     {{"abs"},     [] (double x, double y) {return std::abs(x);},                          Operation::ABS,   2}
-// };
+//var style
 
 OperationStruct::OperationStruct (const std::vector<std::string> &op_str, const std::function<double (double, double)> &func, uint64_t priority) 
 : op_str(op_str), func(func), priority(priority) {}
@@ -33,31 +11,31 @@ ConstantValue::ConstantValue (const std::string &val_name, double val) : val_nam
 ConstantValue::~ConstantValue () {}
 
 const std::vector<OperationStruct> FunctionalTree::operations = {
-    {{"+"},           [] (double x, double y) {return x + y;},                                4},
-    {{"-"},           [] (double x, double y) {return x - y;},                                4},
-    {{"*"},           [] (double x, double y) {return x * y;},                                3},
-    {{"/"},           [] (double x, double y) {return x / y;},                                3},
-    {{"%"},           [] (double x, double y) {return std::fmod(x, y);},                      3},
-    {{"^", "**"},     [] (double x, double y) {return std::pow(x, y);},                       2},
-    {{"sqrt"},        [] (double x, double y) {return std::sqrt(x);},                         1},
-    {{"sin"},         [] (double x, double y) {return std::sin(x);},                          1},
-    //{{"QWERTY"},      [] (double x, double y) {return std::sin(x) + std::cos(y);},            1},
-    {{"cos"},         [] (double x, double y) {return std::cos(x);},                          1},
-    {{"tan", "tg"},   [] (double x, double y) {return std::tan(x);},                          1},
-    {{"cot", "ctg"},  [] (double x, double y) {return 1.0 / std::tan(x);},                    1},
-    {{"sinh"},        [] (double x, double y) {return std::sinh(x);},                         1},
-    {{"cosh"},        [] (double x, double y) {return std::cosh(x);},                         1},
-    {{"tanh", "th"},  [] (double x, double y) {return std::tanh(x);},                         1},
-    {{"coth", "cth"}, [] (double x, double y) {return 1.0 / std::tanh(x);},                   1},
-    {{"asin"},        [] (double x, double y) {return std::asin(x);},                         1},
-    {{"acos"},        [] (double x, double y) {return std::acos(x);},                         1},
-    {{"atan"},        [] (double x, double y) {return std::atan(x);},                         1},
-    {{"acot"},        [] (double x, double y) {return std::acos(-1.0) / 2.0 - std::atan(x);}, 1},
-    {{"log"},         [] (double x, double y) {return std::log10(x);},                        1},
-    {{"ln"},          [] (double x, double y) {return std::log(x);},                          1},
-    {{"exp"},         [] (double x, double y) {return std::exp(x);},                          1},
-    {{"abs"},         [] (double x, double y) {return std::abs(x);},                          1}
-    //{{""},            [] (double x, double y) {return 0;},                                    0}
+    {{"+"},                        [] (double x, double y) {return x + y;},                                4},
+    {{"-"},                        [] (double x, double y) {return x - y;},                                4},
+    {{"*"},                        [] (double x, double y) {return x * y;},                                3},
+    {{"/"},                        [] (double x, double y) {return x / y;},                                3},
+    {{"%"},                        [] (double x, double y) {return std::fmod(x, y);},                      3},
+    {{"^", "**"},                  [] (double x, double y) {return std::pow(x, y);},                       2},
+    {{"sqrt"},                     [] (double x, double y) {return std::sqrt(x);},                         1},
+    {{"sin"},                      [] (double x, double y) {return std::sin(x);},                          1},
+    //{{"QWERTY"},                   [] (double x, double y) {return std::sin(x) + std::cos(y);},            1},
+    {{"cos"},                      [] (double x, double y) {return std::cos(x);},                          1},
+    {{"tan", "tg"},                [] (double x, double y) {return std::tan(x);},                          1},
+    {{"cot", "ctg"},               [] (double x, double y) {return 1.0 / std::tan(x);},                    1},
+    {{"sinh"},                     [] (double x, double y) {return std::sinh(x);},                         1},
+    {{"cosh"},                     [] (double x, double y) {return std::cosh(x);},                         1},
+    {{"tanh", "tgh"},              [] (double x, double y) {return std::tanh(x);},                         1},
+    {{"coth", "ctgh"},             [] (double x, double y) {return 1.0 / std::tanh(x);},                   1},
+    {{"arcsin", "asin"},           [] (double x, double y) {return std::asin(x);},                         1},
+    {{"arccos", "acos"},           [] (double x, double y) {return std::acos(x);},                         1},
+    {{"arctan", "arctg", "atan"},  [] (double x, double y) {return std::atan(x);},                         1},
+    {{"arccot", "arcctg", "acot"}, [] (double x, double y) {return std::acos(-1.0) / 2.0 - std::atan(x);}, 1},
+    {{"log"},                      [] (double x, double y) {return std::log10(x);},                        1},
+    {{"ln"},                       [] (double x, double y) {return std::log(x);},                          1},
+    {{"exp"},                      [] (double x, double y) {return std::exp(x);},                          1},
+    {{"abs"},                      [] (double x, double y) {return std::abs(x);},                          1},
+    {{"sign"},                     [] (double x, double y) {return x > 0.0 ? 1 : -1;},                     1}
 };
 
 const std::vector<ConstantValue> FunctionalTree::const_val = {
@@ -83,11 +61,18 @@ void FunctionalTree::inputCheck (const std::vector<std::string> &vars) const {
     }
     for (uint64_t i = 0; i < vars.size(); ++i) {
         for (uint64_t j = 0; j < operations.size(); ++j) {
-            std::vector<std::string>::const_iterator it = std::find(operations[j].op_str.cbegin(), operations[j].op_str.cend(), vars[i]);
+            auto it = std::find(operations[j].op_str.cbegin(), operations[j].op_str.cend(), vars[i]);
             uint64_t idx = std::distance(operations[j].op_str.cbegin(), it);
             if (idx != operations[j].op_str.size()) {
                 throw std::logic_error("Operation \"inputCheck\": used var name \"" + vars[i] + "\" which is a name of operation");
             }
+        }
+    }
+    for (uint64_t i = 0; i < const_val.size(); ++i) {
+        auto it = std::find(vars.cbegin(), vars.cend(), const_val[i].val_name);
+        uint64_t idx = std::distance(vars.cbegin(), it);
+        if (idx != vars.size()) {
+            throw std::logic_error("Operation \"inputCheck\": used var name \"" + vars[idx] + "\" which is a name of constant");
         }
     }
     for (uint64_t i = 0; i < vars.size(); ++i) {
@@ -204,53 +189,49 @@ double FunctionalTree::useOperation (Operation op, double x, double y) const {
 double FunctionalTree::getVal (const NodePtr &node, const std::vector<double> &X) const {
     if (!node->left.get() && !node->right.get()) {
         if (node->type == NodeType::VALUE) {
-            ValueNode* value = (ValueNode*) node.get();
-            return value->val;
+            return static_cast<ValueNode *>(node.get())->val;
         } else {
-            VariableNode* var = (VariableNode*) node.get();
-            return X[var->idx];
+            return X[static_cast<VariableNode *>(node.get())->idx];
         }
     }
-    OperationNode* operation = (OperationNode*) node.get();
+    OperationNode *operation = static_cast<OperationNode *>(node.get());
     if (node->left && !node->right) {
         return useOperation(operation->op, getVal(operation->left, X), 0);
-        //return useOperation(operation->op, 0, getVal(operation->left, X));
     }
     if (!node->left && node->right) {
         return useOperation(operation->op, getVal(operation->right, X), 0);
-        //return useOperation(operation->op, 0, getVal(operation->right, X));
     }
     double a = getVal(node->left, X);
     double b = getVal(node->right, X);
     return useOperation(operation->op, a, b);
 }
 
-void FunctionalTree::addToTree (NodePtr &tree, NodePtr &toAdd) {
+void FunctionalTree::addToTree (NodePtr &tree, NodePtr &node) {
     if (!tree.get()) {
-        if (toAdd->type == NodeType::OPERATION && toAdd->priority != 0) {
-            OperationNode *node = (OperationNode *) toAdd.get();
-            if (node->op == Operation::MINUS) {
+        if (node->type == NodeType::OPERATION && node->priority != 0) {
+            OperationNode *operation = static_cast<OperationNode *>(node.get());
+            if (operation->op == Operation::MINUS) {
                 NodePtr zero = std::make_unique<ValueNode>(0);
-                toAdd->left = std::move(zero);
+                node->left = std::move(zero);
             }
         }
-        tree = std::move(toAdd);
+        tree = std::move(node);
         return;
     }
-    if (tree->priority > toAdd->priority) {
+    if (tree->priority > node->priority) {
         if (!tree->left) {
-            tree->left = std::move(toAdd);
+            tree->left = std::move(node);
         } else if (!tree->right) {
-            tree->right = std::move(toAdd);
-        } else if (tree->right->priority > toAdd->priority) {
-            addToTree(tree->right, toAdd);
+            tree->right = std::move(node);
+        } else if (tree->right->priority > node->priority) {
+            addToTree(tree->right, node);
         } else {
-            toAdd->left = std::move(tree->right);
-            tree->right = std::move(toAdd);
+            node->left = std::move(tree->right);
+            tree->right = std::move(node);
         }
     } else {
-        toAdd->left = std::move(tree);
-        tree = std::move(toAdd);
+        node->left = std::move(tree);
+        tree = std::move(node);
     }
 }
 
@@ -261,7 +242,7 @@ FunctionalTree::NodePtr FunctionalTree::buildTree (const std::string &func) {
     double num;
     Operation op;
     uint64_t idx;
-    NodePtr currentNode, node;
+    NodePtr current, node;
     while (i < func.size()) {
         if (func[i] == ' ') {
             ++i;
@@ -269,34 +250,33 @@ FunctionalTree::NodePtr FunctionalTree::buildTree (const std::string &func) {
         }
         if ((func[i] >= '0' && func[i] <= '9') || func[i] == '.') {
             num = readNumber(func, i);
-            currentNode = std::make_unique<ValueNode>(num);
+            current = std::make_unique<ValueNode>(num);
         } else if (func[i] == '(') {
             tmp = readInbrace(func, i);
-            currentNode = buildTree(tmp);
-            currentNode->priority = 0;
+            current = buildTree(tmp);
+            current->priority = 0;
         } else {
             tmp = readWord(func, i);
             op = getOperation(tmp);
             if (op == Operation::NOT_AN_OPERATION) {
                 double constant = getConstant(tmp);
                 if (constant == 0.0) {
-                    std::vector<std::string>::const_iterator it = std::find(vars.cbegin(), vars.cend(), tmp);
+                    auto it = std::find(vars.cbegin(), vars.cend(), tmp);
                     idx = std::distance(vars.cbegin(), it);
                     if (idx == vars.size()) {
                         throw std::logic_error("Operation \"buildTree\": var \"" + tmp + "\" not found in var list");;
                     }
-                    currentNode = std::make_unique<VariableNode>(idx);
+                    current = std::make_unique<VariableNode>(idx);
                 } else {
-                    currentNode = std::make_unique<ValueNode>(constant);
+                    current = std::make_unique<ValueNode>(constant);
                     
                 }
             } else {
-                currentNode = std::make_unique<OperationNode>(op);
-                currentNode->priority = getPriority(op);
+                current = std::make_unique<OperationNode>(op);
+                current->priority = getPriority(op);
             }
         }
-        addToTree(node, currentNode);
-        //std::cout << "Current tree: "; printFunc(node, std::cout); std::cout << "\n";
+        addToTree(node, current);
     }
     return node;
 }
@@ -305,15 +285,17 @@ void FunctionalTree::printTree (const NodePtr &node, std::ostream &out) const {
     if (!node) {
         return;
     }
+    Operation op;
     switch (node->type) {
         case NodeType::VALUE:
-            out << ((ValueNode *) node.get())->val;
+            out << static_cast<ValueNode *>(node.get())->val;
             break;
         case NodeType::VARIABLE:
-            out << vars[((VariableNode *) node.get())->idx];
+            out << vars[static_cast<VariableNode *>(node.get())->idx];
             break;
         case NodeType::OPERATION:
-            out << operations[static_cast<uint64_t>(((OperationNode *) node.get())->op)].op_str[0];
+            op = static_cast<OperationNode *>(node.get())->op;
+            out << operations[static_cast<uint64_t>(op)].op_str[0];
             break;
         default:
             break;
@@ -338,22 +320,18 @@ void FunctionalTree::printFunc (const NodePtr &node, std::ostream &out) const {
     if (!node->left && !node->right) {
         switch (node->type) {
             case NodeType::VALUE:
-                //std::unique_ptr<ValueNode> val_node = node;
-                //auto ac = static_cast<ValueNode*>(node.get());// static_pointer_cast<ValueNode>(node);
-                //std::cout << std::dynamic_pointer_cast<ValueNode>(node)->val;
-                //std::cout << ((ValueNode *) node.get())->val;
-                //auto nn = std::const_pointer_cast<ValueNode>(node);
-                out << static_cast<ValueNode*>(node.get())->val;
+                out << static_cast<ValueNode *>(node.get())->val;
                 break;
             case NodeType::VARIABLE:
-                out << vars[((VariableNode *) node.get())->idx];
+                out << vars[static_cast<VariableNode *>(node.get())->idx];
                 break;
             default:
                 break;
         }
     } else if (!node->left != !node->right) {
-        out << operations[static_cast<uint64_t>(((OperationNode *) node.get())->op)].op_str[0];
-        if (((OperationNode *) node.get())->op == Operation::MINUS) {
+        Operation op = static_cast<OperationNode *>(node.get())->op;
+        out << operations[static_cast<uint64_t>(op)].op_str[0];
+        if (op == Operation::MINUS) {
             printFunc(node->left ? node->left : node->right, out);
         } else {
             out << "(";
@@ -361,6 +339,7 @@ void FunctionalTree::printFunc (const NodePtr &node, std::ostream &out) const {
             out << ")";
         }
     } else {
+        Operation op = static_cast<OperationNode *>(node.get())->op;
         if (node->left->priority == 0 && node->left->type == NodeType::OPERATION) {
             out << "(";
             printFunc(node->left, out);
@@ -368,7 +347,7 @@ void FunctionalTree::printFunc (const NodePtr &node, std::ostream &out) const {
         } else {
             printFunc(node->left, out);
         }
-        out << operations[static_cast<uint64_t>(((OperationNode *) node.get())->op)].op_str[0];
+        out << operations[static_cast<uint64_t>(op)].op_str[0];
         if (node->right->priority == 0 && node->right->type == NodeType::OPERATION) {
             out << "(";
             printFunc(node->right, out);
@@ -379,32 +358,177 @@ void FunctionalTree::printFunc (const NodePtr &node, std::ostream &out) const {
     }
 }
 
-FunctionalTree::NodePtr FunctionalTree::copyTree (const NodePtr &toCopy) const {
-    if (!toCopy) {
+void FunctionalTree::toStringDefault (const NodePtr &node, std::string &str) const {
+    if (!node) {
+        return;
+    }
+    std::ostringstream str_stream;
+    if (!node->left && !node->right) {
+        switch (node->type) {
+            case NodeType::VALUE:
+                str_stream << static_cast<ValueNode *>(node.get())->val;
+                str += str_stream.str();
+                break;
+            case NodeType::VARIABLE:
+                str += vars[static_cast<VariableNode *>(node.get())->idx];
+                break;
+            default:
+                break;
+        }
+    } else if (!node->left != !node->right) {
+        Operation op = static_cast<OperationNode *>(node.get())->op;
+        str += operations[static_cast<uint64_t>(op)].op_str[0];
+        if (op == Operation::MINUS) {
+            toStringDefault(node->left ? node->left : node->right, str);
+        } else {
+            str += "(";
+            toStringDefault(node->left ? node->left : node->right, str);
+            str += ")";
+        }
+    } else {
+        Operation op = static_cast<OperationNode *>(node.get())->op;
+        if (node->left->priority == 0 && node->left->type == NodeType::OPERATION) {
+            str += "(";
+            toStringDefault(node->left, str);
+            str += ")";
+        } else {
+            toStringDefault(node->left, str);
+        }
+        str += " " + operations[static_cast<uint64_t>(op)].op_str[0] + " ";
+        if (node->right->priority == 0 && node->right->type == NodeType::OPERATION) {
+            str += "(";
+            toStringDefault(node->right, str);
+            str += ")";
+        } else {
+            toStringDefault(node->right, str);
+        }
+    }
+}
+
+//void FunctionalTree::toStringGNUPlot (const NodePtr &node, std::string &str) const {}
+
+void FunctionalTree::toStringLatex (const NodePtr &node, std::string &str) const {
+    if (!node) {
+        return;
+    }
+    std::ostringstream str_stream;
+    if (!node->left && !node->right) {
+        switch (node->type) {
+            case NodeType::VALUE:
+                str_stream << static_cast<ValueNode *>(node.get())->val;
+                str += str_stream.str();
+                break;
+            case NodeType::VARIABLE:
+                str += vars[static_cast<VariableNode *>(node.get())->idx];
+                break;
+            default:
+                break;
+        }
+    } else if (!node->left != !node->right) {
+        Operation op = static_cast<OperationNode *>(node.get())->op;
+        char bracketL = '(', bracketR = ')';
+        switch (op) {
+            case Operation::LOG:
+                str += "\\log_10";
+                break;
+            case Operation::LN:
+                str += "\\log_e";
+                break;
+            case Operation::ABS:
+                bracketL = '|';
+                bracketR = '|';
+                break;
+            default:
+                str += "\\" + operations[static_cast<uint64_t>(op)].op_str[0];
+                break;
+        }
+        //str += operations[static_cast<uint64_t>(op)].op_str[0];
+        //if (op == Operation::MINUS) {
+        //    toStringDefault(node->left ? node->left : node->right, str);
+        //} else {
+        str += bracketL;
+        toStringLatex(node->left ? node->left : node->right, str);
+        str += bracketR;
+        //}
+    } else {
+        Operation op = static_cast<OperationNode *>(node.get())->op;
+        switch (op) {
+            case Operation::DIV:
+                str += "\\dfrac{";
+                toStringLatex(node->left, str);
+                str += "}{";
+                toStringLatex(node->right, str);
+                str += "}";
+                break;
+            case Operation::POW:
+                toStringLatex(node->left, str);
+                str += "^{";
+                toStringLatex(node->right, str);
+                str += "}";
+                break;
+            default:
+                if (node->left->priority == 0 && node->left->type == NodeType::OPERATION) {
+                    str += "(";
+                    toStringLatex(node->left, str);
+                    str += ")";
+                } else {
+                    toStringLatex(node->left, str);
+                }
+                if (op != Operation::MUL) {
+                    str += " " + operations[static_cast<uint64_t>(op)].op_str[0] + " ";
+                }
+                if (node->right->priority == 0 && node->right->type == NodeType::OPERATION) {
+                    str += "(";
+                    toStringLatex(node->right, str);
+                    str += ")";
+                } else {
+                    toStringLatex(node->right, str);
+                }
+                break;
+        }
+        // if (node->left->priority == 0 && node->left->type == NodeType::OPERATION) {
+        //     str += "(";
+        //     toStringLatex(node->left, str);
+        //     str += ")";
+        // } else {
+        //     toStringLatex(node->left, str);
+        // }
+        // str += " " + operations[static_cast<uint64_t>(op)].op_str[0] + " ";
+        // if (node->right->priority == 0 && node->right->type == NodeType::OPERATION) {
+        //     str += "(";
+        //     toStringLatex(node->right, str);
+        //     str += ")";
+        // } else {
+        //     toStringLatex(node->right, str);
+        // }
+    }
+}
+
+FunctionalTree::NodePtr FunctionalTree::copyTree (const NodePtr &node) const {
+    if (!node) {
         return nullptr;
     }
-    NodePtr node;
-    auto tmp1 = (const OperationNode *) toCopy.get();
-    auto tmp2 = (const ValueNode *) toCopy.get();
-    auto tmp3 = (const VariableNode *) toCopy.get();
-    //FunctionalTreeNode *tmp;
-    switch (toCopy->type) {
+    NodePtr copy;
+    const OperationNode *operation = static_cast<const OperationNode *>(node.get());
+    const ValueNode *value = static_cast<const ValueNode *>(node.get());
+    const VariableNode *variable = static_cast<const VariableNode *>(node.get());
+    switch (node->type) {
         case NodeType::OPERATION:
-            node = std::make_unique<OperationNode>(tmp1->op);
+            copy = std::make_unique<OperationNode>(operation->op);
             break;
         case NodeType::VALUE:
-            node = std::make_unique<ValueNode>(tmp2->val);
+            copy = std::make_unique<ValueNode>(value->val);
             break;
         case NodeType::VARIABLE:
-            node = std::make_unique<VariableNode>(tmp3->idx);
+            copy = std::make_unique<VariableNode>(variable->idx);
             break;
         default:
             break;
     }
-    node->priority = toCopy->priority;
-    node->left = copyTree(toCopy->left);
-    node->right = copyTree(toCopy->right);
-    return node;
+    copy->priority = node->priority;
+    copy->left = copyTree(node->left);
+    copy->right = copyTree(node->right);
+    return copy;
 }
 
 FunctionalTree::FunctionalTree (const NodePtr &node) {
@@ -428,10 +552,6 @@ FunctionalTree::FunctionalTree (const std::string &func, const std::string &var)
 FunctionalTree::FunctionalTree (const std::string &func, const std::vector<std::string> &vars) {
     reset(func, vars);
 }
-
-// FunctionalTree::FunctionalTree (const std::string &func, const std::string &var) {
-//     FunctionalTree(func, {var});
-// }
 
 FunctionalTree::FunctionalTree (const FunctionalTree &tree) {
     root = copyTree(tree.root);
@@ -472,29 +592,26 @@ FunctionalTree FunctionalTree::getCoeff (uint64_t idx) const {
     while (tmp->left && tmp->type == NodeType::OPERATION) {
         if (tmp->right) {
             if (tmp->right->type == NodeType::VARIABLE) {
-                auto n = (VariableNode *) tmp->right.get();
-                auto o = (OperationNode *) tmp;
-                //std::cout << "here\n";
-                if (n->idx == idx) {
-                    if (o->op == Operation::MINUS) {
-                        return FunctionalTree("-1", std::vector<std::string>());
+                VariableNode *var = static_cast<VariableNode *>(tmp->right.get());
+                OperationNode *operation = static_cast<OperationNode *>(tmp);
+                if (var->idx == idx) {
+                    if (operation->op == Operation::MINUS) {
+                        return FunctionalTree("-1");
                     }
-                    if (o->op == Operation::PLUS) {
-                        return FunctionalTree("1", std::vector<std::string>());
+                    if (operation->op == Operation::PLUS) {
+                        return FunctionalTree("1");
                     }
-                    if (o->op == Operation::MUL) {
+                    if (operation->op == Operation::MUL) {
                         return FunctionalTree(tmp->left);
                     }
                 }
             }
             if (tmp->right->right && tmp->right->right->type == NodeType::VARIABLE) {
-                auto n = (VariableNode *) tmp->right->right.get();
-                auto o = (OperationNode *) tmp;
-                if (n->idx == idx) {
-                    //std::cout << "got it!\n";
+                VariableNode *var = static_cast<VariableNode *>(tmp->right->right.get());
+                OperationNode *operation = static_cast<OperationNode *>(tmp);
+                if (var->idx == idx) {
                     FunctionalTree tr(tmp->right->left);
-                    if (o->op == Operation::MINUS) {
-                        //std::cout << "got it! again...\n";
+                    if (operation->op == Operation::MINUS) {
                         tr.root->priority = 0;
                         auto node = tr.buildTree("-");
                         tr.addToTree(tr.root, node);
@@ -506,18 +623,17 @@ FunctionalTree FunctionalTree::getCoeff (uint64_t idx) const {
         tmp = tmp->left.get();
     }
     if (tmp->type == NodeType::VARIABLE) {
-        auto n = (VariableNode *) tmp;
-        //std::cout << "i: " << idx << " " << n->idx << "\n";
+        VariableNode *n = static_cast<VariableNode *>(tmp);
         if (n->idx == idx) {
-            return FunctionalTree("1", std::vector<std::string>());
+            return FunctionalTree("1");
         }
     }
-    return FunctionalTree("0", std::vector<std::string>());
+    return FunctionalTree("0");
 }
 
 FunctionalTree FunctionalTree::getCoeff (const std::string &param) const {
     uint64_t idx;
-    std::vector<std::string>::const_iterator it = std::find(vars.cbegin(), vars.cend(), param);
+    auto it = std::find(vars.cbegin(), vars.cend(), param);
     idx = std::distance(vars.begin(), it);
     if (idx == vars.size()) {
         throw std::logic_error("Operation \"getCoeff\": var \"" + param + "\" not found in var list");;
@@ -525,13 +641,13 @@ FunctionalTree FunctionalTree::getCoeff (const std::string &param) const {
     return getCoeff(idx);
 }
 
-FunctionalTree FunctionalTree::getDiv () const {
-    if (root->type == NodeType::OPERATION) {
-        return FunctionalTree(root->right);
-    } else {
-        return FunctionalTree();
-    }
-}
+// FunctionalTree FunctionalTree::getDiv () const {
+//     if (root->type == NodeType::OPERATION) {
+//         return FunctionalTree(root->right);
+//     } else {
+//         return FunctionalTree();
+//     }
+// }
 
 void FunctionalTree::printTree () const {
     printTree(root, std::cout);
@@ -539,6 +655,27 @@ void FunctionalTree::printTree () const {
 
 void FunctionalTree::printFunc () const {
     printFunc(root, std::cout);
+}
+
+std::string FunctionalTree::toString (Style style) const {
+    std::string str;
+    if (style == Style::LATEX) {
+
+    }
+    switch (style) {
+        case Style::DEFAULT:
+            toStringDefault(root, str);
+            break;
+        case Style::GNUPLOT:
+            //toStringGNUPlot(root, str);
+            break;
+        case Style::LATEX:
+            toStringLatex(root, str);
+            break;
+        default:
+            break;
+    }
+    return str;
 }
 
 //void FunctionalTree::simplify () {}
@@ -564,12 +701,14 @@ FunctionalTree &FunctionalTree::operator= (FunctionalTree &&tree) {
 double FunctionalTree::operator() (double x) const {
     return getVal(root, {x});
 }
+
 double FunctionalTree::operator() (const std::vector<double> &X) const {
     return getVal(root, X);
 }
 
 std::ostream &operator<< (std::ostream &output, const FunctionalTree &tree) {
-    tree.printFunc(tree.root, output);
+    //tree.printFunc(tree.root, output);
+    output << tree.toString(Style::DEFAULT);
     return output;
 }
 

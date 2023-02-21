@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <cstdlib>
 #include <cmath>
 #include <memory>
@@ -12,30 +13,14 @@
 #include <fstream>
 
 // TODO:
-// - исправить унарный оператор
-// - добавить числовые константы
+// V исправить унарный оператор
+// V добавить числовые константы
 // - улучшить нахождение коэффициентов
-// - улучшить печать функции
+// V улучшить печать функции
 // - добавить конвертацию в массив
-// - изменить формат добавления новых функций и их аналогов
-
-struct OperationStruct {
-    std::vector<std::string> op_str;
-    std::function<double (double, double)> func;
-    //Operation op;
-    uint64_t priority;
-
-    OperationStruct (const std::vector<std::string> &op_str, const std::function<double (double, double)> &func, uint64_t priority);
-    ~OperationStruct ();
-};
-
-struct ConstantValue {
-    std::string val_name;
-    double val;
-
-    ConstantValue (const std::string &val_name, double val);
-    ~ConstantValue ();
-};
+// V изменить формат добавления новых функций и их аналогов
+// - добавить поддержку функций от 2х и более переменных
+// - добавить вложенные функции
 
 //PRIORITY
 //val, ()       0
@@ -73,7 +58,31 @@ enum class Operation {
     LN,     // log_e, ln
     EXP,    // exp
     ABS,    // abs, ||
+    SIGN,   // sign
     NOT_AN_OPERATION
+};
+
+enum class Style {
+    DEFAULT,
+    GNUPLOT,
+    LATEX
+};
+
+struct OperationStruct {
+    std::vector<std::string> op_str;
+    std::function<double (double, double)> func;
+    uint64_t priority;
+
+    OperationStruct (const std::vector<std::string> &op_str, const std::function<double (double, double)> &func, uint64_t priority);
+    ~OperationStruct ();
+};
+
+struct ConstantValue {
+    std::string val_name;
+    double val;
+
+    ConstantValue (const std::string &val_name, double val);
+    ~ConstantValue ();
 };
 
 class FunctionalTree;
@@ -121,24 +130,44 @@ class FunctionalTree {
     private:
         using NodePtr = std::unique_ptr<FunctionalTreeNode>;
     private:
+        //проверка имён переменных на корректность
         void inputCheck (const std::vector<std::string> &vars) const; 
+        //чтение операции
         std::string readOperation (const std::string &func, uint64_t &i) const;
+        //чтение слова
         std::string readWord (const std::string &func, uint64_t &i) const;
+        //чтение числа
         double readNumber (const std::string &func, uint64_t &i) const;
+        //чтение выражения в скобках
         std::string readInbrace (const std::string &func, uint64_t &i) const;
+        //конвертация строки в операцию
         Operation getOperation (const std::string &str) const;
+        //конвертация строки в числовую константу
         double getConstant (const std::string &str) const;
+        //получение приоритета операции (0 - выполяться сразу, 4 - выполняться в конце)
         uint64_t getPriority (Operation op) const;
+        // использование операции на 2х переменных
         double useOperation (Operation op, double x, double y) const;
+        //вычисление выражение в поддереве node
         double getVal (const NodePtr &node, const std::vector<double> &X) const;
-        void addToTree (NodePtr &root, NodePtr &toAdd);
+        //добавление узла в дерево
+        void addToTree (NodePtr &tree, NodePtr &node);
+        //построение дерева по строке
         NodePtr buildTree (const std::string &func);
+        //вспомогательные функции для вывода дерева
         void printTree (const NodePtr &node, std::ostream &out) const;
         void printFunc (const NodePtr &node, std::ostream &out) const;
+        //void printNode (const NodePtr &node) const;
+        void toStringDefault (const NodePtr &node, std::string &str) const;
+        //void toStringGNUPlot (const NodePtr &node, std::string &str) const;
+        void toStringLatex (const NodePtr &node, std::string &str) const;
+        //копирование дерева
         NodePtr copyTree (const NodePtr &node) const;
+        //конструкторы копирования поддерева
         FunctionalTree (const NodePtr &node);
         FunctionalTree (NodePtr &&tree);
     public:
+        //конструкторы
         FunctionalTree ();
         FunctionalTree (const std::string &func);
         FunctionalTree (const std::string &func, const std::string &var);
@@ -146,19 +175,28 @@ class FunctionalTree {
         FunctionalTree (const FunctionalTree &tree);
         FunctionalTree (FunctionalTree &&tree);
         ~FunctionalTree ();
+        //сброс дерева
         void reset (const std::string &func, const std::vector<std::string> &vars);
+        //вызов функции
         double func (double x) const;
         double func (const std::vector<double> &X) const;
+        //посчитать выражение без переменных
         double calculate () const;
+        //список переменных
         std::vector<std::string> getVarList () const;
+        //коэффициент при переменной
         FunctionalTree getCoeff (uint64_t idx) const;
         FunctionalTree getCoeff (const std::string &param) const;
-        FunctionalTree getDiv () const;
+        //FunctionalTree getDiv () const;
+        //печать содержимого
         void printTree () const;
         void printFunc () const;
+        std::string toString (Style style) const;
         //void simplify ();
         FunctionalTree &operator= (const FunctionalTree &tree);
         FunctionalTree &operator= (FunctionalTree &&tree);
+
+        //оператор функции
         double operator() (double x) const;
         double operator() (const std::vector<double> &X) const;
 
@@ -169,7 +207,6 @@ class FunctionalTree {
         friend std::ifstream &operator>> (std::ifstream &file, FunctionalTree &tree);
         friend std::ofstream &operator<< (std::ofstream &file, const FunctionalTree &tree);
     private:
-        //static const std::vector<std::string> operations;
         static const std::vector<OperationStruct> operations;
         static const std::vector<ConstantValue> const_val;
         static const uint64_t VARIABLE_LIMIT = 10;

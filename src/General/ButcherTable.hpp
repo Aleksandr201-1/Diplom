@@ -13,6 +13,8 @@ enum class SolveMethod {
     LOBATTO
 };
 
+std::string solveMethodToString (SolveMethod method);
+
 Matrix<double> createButcherTable (SolveMethod method, uint64_t order, uint64_t way);
 
 #endif

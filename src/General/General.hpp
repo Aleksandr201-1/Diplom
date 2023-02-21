@@ -15,7 +15,7 @@
 
 struct Task {
     std::vector<FunctionalTree> trees;
-    std::vector<std::function<double(const std::vector<double> &)>> f;
+    std::vector<std::function<double(const std::vector<double> &)>> odu_system;
     std::vector<double> Y;
     double X0, Xn;
     uint64_t order;
@@ -35,6 +35,8 @@ bool isEqual(double x, double y);
 double derivative (const std::function<double(double)> &f, double x, uint64_t degree = 1);
 
 std::string toString (double val, uint64_t precision);
+
+std::string readLine ();
 
 Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn);
 

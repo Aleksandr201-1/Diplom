@@ -1,50 +1,44 @@
 #include "ToughDet.hpp"
 
 double ToughCoeff (const Task &task) {
-    double coeff = 0;
+    double coeff = 0, curr_coeff;
     uint64_t order = task.order;
-    Matrix<double> A(order, order);
-    std::vector<double> args(order, 0);
-    for (uint64_t i = 0; i < order; ++i) {
-        for (uint64_t j = 0; j < order; ++j) {
-
-        }
-    }
-    return coeff;
-}
-
-double ToughCoeff (const std::vector<std::function<double(const std::vector<double> &)>> &system, const Task &task) {
-    double coeff = 0;
-    uint64_t order = task.order;
+    auto &system = task.odu_system;
     Matrix<double> A(order, order);
     std::vector<double> args(order + 2, 0);
-    args[0] = task.Xn;
-    for (uint64_t i = 0; i < order; ++i) {
-        args[i + 1] = 1;
-        for (uint64_t j = 0; j < order; ++j) {
-            A(j, i) = system[j](args);
+    double step = (task.Xn - task.X0) / 10;
+    for (double x = task.X0; x <= task.Xn; x += step) {
+        args[0] = x;
+        for (uint64_t i = 0; i < order; ++i) {
+            args[i + 1] = 1;
+            for (uint64_t j = 0; j < order; ++j) {
+                A(j, i) = system[j](args);
+            }
+            args[i + 1] = 0;
         }
-        args[i + 1] = 0;
+        //std::cout << std::scientific << A(3, 0) << "\n";
+        // if (A(3, 0) == 0.0) {
+        //     std::cout << "good\n";
+        // } else {
+        //     std::cout << "bad\n";
+        // }
+        std::cout << "\ncurrent A:\n" << A << "\n";
+        std::vector<double> lambdas = QRFindLambda(A, 0.01);
+        std::cout << "lambdas: ";
+        printVector(lambdas);
+        double max = *std::max_element(lambdas.begin(), lambdas.end());
+        double min = *std::min_element(lambdas.begin(), lambdas.end());
+        if (max >= 0 || min >= 0) {
+            curr_coeff = 0;
+        } else {
+            if (max == min) {
+                curr_coeff = std::abs(max);
+            } else {
+                curr_coeff = std::max(max / min, min / max);
+            }
+        }
+        coeff = std::max(coeff, curr_coeff);
+        std::cout << "curr coeff: " << coeff << "\n";
     }
-    std::cout << "\ncurrent A:\n" << A << "\n";
-    std::vector<double> lambdas = QRFindLambda(A, 0.01);
-    std::cout << "lambdas: ";
-    printVector(lambdas);
-    double max = *std::max_element(lambdas.begin(), lambdas.end());
-    double min = *std::min_element(lambdas.begin(), lambdas.end());
-    if (max >= 0 && min >= 0) {
-        return 0;
-    } else {
-        max = std::abs(max);
-        min = std::abs(min);
-        return std::max(max / min, min / max);
-    }
-    // if (min > max) {
-    //     std::swap(max, min);
-    // }
-    // //auto Matr = Matrix<double>(3, 3, {1, 2, 3, 4, 4, 0, 7, 0, 9});
-    // auto Matr = Matrix<double>(2, 2, {0, 1, 1, -2});
-    // std::cout << "\n" << Matr << "\n";
-    // printVector(QRFindLambda(Matr, 0.01));
-    // return max / min;
+    return coeff;
 }

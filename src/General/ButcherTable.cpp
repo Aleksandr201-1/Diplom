@@ -28,6 +28,9 @@ Matrix<double> createButcherTable (SolveMethod method, uint64_t order, uint64_t 
     //std::cout << filename << "\n";
     //system("ls -l");
     std::ifstream file(filename);
+    if (!file.good()) {
+        throw std::logic_error("createButcherTable: cant open file with name \"" + filename + "\"");
+    }
     file >> butcher;
     file.close();
     return butcher;

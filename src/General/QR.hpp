@@ -7,7 +7,7 @@
 template <class T>
 T getMainEl (const Matrix<T> &matrix, uint64_t i) {
     T ans = matrix(i, i), tmp = 0;
-    T sign = ans > T(0) ? T(1) : T(-1);
+    T sign = ans >= T(0) ? T(1) : T(-1);
     for (uint64_t j = i; j < matrix.size().n; ++j) {
         tmp += matrix(j, i) * matrix(j, i);
     }
@@ -22,9 +22,13 @@ std::tuple<Matrix<T>, Matrix<T>> QR (const Matrix<T> &matrix) {
     Matrix<T> Q(n), R(matrix), v(n, 1);
     //std::cout << "------------\n";
     //std::cout << "Step 0:\nA(0) = A\n";
+    auto pred = [] (T el) -> bool {
+        return el == T(0);
+    };
     for (uint64_t i = 0; i < n - 1; ++i) {
         //std::cout << "------------\n";
         //std::cout << "Step " << i + 1 << ":\n";
+
         for (uint64_t j = 0; j < i; ++j) {
             v(j, 0) = 0;
         }
@@ -32,7 +36,11 @@ std::tuple<Matrix<T>, Matrix<T>> QR (const Matrix<T> &matrix) {
         for (uint64_t j = i + 1; j < n; ++j) {
             v(j, 0) = R(j, i);
         }
-        //std::cout << "Vector v(" << i << "):\n" << v << "\n";
+
+        if (std::count_if(v.toVector().cbegin(), v.toVector().cend(), pred) == n) {
+            ++i;
+            continue;
+        }
 
         //std::cout << "H = E - 2 * (v * vT / vT * v)\n";
         Matrix<T> H = Matrix<T>(n) - 2 * ((v * v.transp()) / (v.transp() * v)(0, 0));
@@ -48,6 +56,8 @@ std::tuple<Matrix<T>, Matrix<T>> QR (const Matrix<T> &matrix) {
     }
     //R(1, 0) = R(2, 0) = R(2, 1) = T(0);
     //std::cout << "==============DONE==============\n";
+    //std::cout << "QR: " << Q * R << "\nQ: " << Q << "\nR: " << R << "\n";
+    //exit(1);
     return std::make_tuple(Q, R);
 }
 
@@ -90,8 +100,9 @@ std::vector<double> QRFindLambda (const Matrix<T> &matrix, T approx) {
         if (sum <= approx) {
             //std::cout << "x[" << i << "] = " << A(i, i) << "\n";
             lambda.push_back(A(i, i));
+            //lambda.push_back(1);
         } else {
-            T b = -(A(i, i) + A(j, j)), c = A(i, i) * A(j, j) - A(i, j) * A(j, i), a = 1;
+            T b = -(A(i, i) + A(j, j)), c = A(i, i) * A(j, j) - A(i, j) * A(j, i), a = T(1);
             T D = b * b - 4 * a * c;
             //std::cout << "x[" << i << "] = " << -b / 2 << " + " << std::sqrt(std::abs(D)) / 2 << "i\n";
             ++i;
