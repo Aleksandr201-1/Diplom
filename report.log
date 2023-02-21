@@ -1,0 +1,130 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdftex 2022.5.20)  10 FEB 2023 01:10
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**report/report.tex
+(./report/report.tex
+! Undefined control sequence.
+l.1 \documentclass
+                  [a4paper,14pt]{extarticle}
+? 
+! Undefined control sequence.
+l.2 \usepackage
+               [left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
+? 
+! Undefined control sequence.
+l.3 \usepackage
+               [T2A]{fontenc}
+? 
+! Undefined control sequence.
+l.4 \usepackage
+               [utf8x]{inputenc}
+? 
+! Undefined control sequence.
+l.5 \usepackage
+               [russian]{babel}
+? 
+! Undefined control sequence.
+l.6 \usepackage
+               {amsmath}
+? 
+! Undefined control sequence.
+l.7 \usepackage
+               {graphicx}
+? 
+! Undefined control sequence.
+l.8 \usepackage
+               [table]{xcolor}
+? 
+! Undefined control sequence.
+l.9 \usepackage
+               {titlesec}
+? 
+! Undefined control sequence.
+l.10 \usepackage
+                {longtable}
+? 
+! Undefined control sequence.
+l.11 \usepackage
+                {tocloft}
+? 
+! Undefined control sequence.
+l.12 \usepackage
+                {pgfplots}
+? 
+! Undefined control sequence.
+l.13 \pgfplotsset
+                 {width=10cm, compat=1.18}
+? 
+
+Overfull \hbox (36.74622pt too wide) in paragraph at lines 1--14
+[]\tenrm [a4paper,14pt]extarticle [left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]ge
+ometry [T2A]fontenc [utf8x]inputenc|
+
+\hbox(7.5+2.5)x469.75499, glue set - 1.0
+.\hbox(0.0+0.0)x20.0
+.\tenrm [
+.\tenrm a
+.\tenrm 4
+.\tenrm p
+.etc.
+
+! Undefined control sequence.
+l.15 \titleformat
+                 {\section}
+? 
+! Undefined control sequence.
+l.15 \titleformat{\section
+                          }
+? 
+! Undefined control sequence.
+l.16 {\normalfont
+                 \bfseries}{}{0pt}{\fontsize{16}{12}\selectfont}
+? 
+! Undefined control sequence.
+l.16 {\normalfont\bfseries
+                          }{}{0pt}{\fontsize{16}{12}\selectfont}
+? 
+! Undefined control sequence.
+l.16 {\normalfont\bfseries}{}{0pt}{\fontsize
+                                            {16}{12}\selectfont}
+? 
+! Undefined control sequence.
+l.16 ...eries}{}{0pt}{\fontsize{16}{12}\selectfont
+                                                  }
+? 
+! Undefined control sequence.
+l.17 \titlespacing
+                  *{\section}{\parindent}{5ex}{1.0ex}
+? 
+! Undefined control sequence.
+l.17 \titlespacing*{\section
+                            }{\parindent}{5ex}{1.0ex}
+? 
+! Missing number, treated as zero.
+<to be read again> 
+                   }
+l.17 \titlespacing*{\section}{\parindent}
+                                         {5ex}{1.0ex}
+? 
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   }
+l.17 \titlespacing*{\section}{\parindent}
+                                         {5ex}{1.0ex}
+? 
+! Interruption.
+l.17 \titlespacing*{\section}{\parindent}
+                                         {5ex}{1.0ex}
+? ^^X
+Type <return> to proceed, S to scroll future error messages,
+R to run without stopping, Q to run quietly,
+I to insert something, E to edit your file,
+H for help, X to quit.
+? X
+No pages of output.
+PDF statistics:
+ 0 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+
