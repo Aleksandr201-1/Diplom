@@ -209,7 +209,7 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
 
     //Жёсткость
     out << "\\section{Жёсткость}\n\n"
-           "Коэффициент жёсткости задачи: " << info.tough_coeff << "\\\\\n" << "Задача " << (info.tough_coeff > 100.0 ? "" : "не ") << "жёсткая\n\n";
+           "Коэффициент жёсткости задачи: " << info.tough_coeff << "\\\\\n" << "Задача " << (info.tough_coeff >= 99.0 ? "" : "не ") << "жёсткая\n\n";
 
     //Решение задачи
     auto &X = info.solution.first, &Yn = info.solution.second;

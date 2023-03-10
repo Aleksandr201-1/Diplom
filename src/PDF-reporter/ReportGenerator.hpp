@@ -8,6 +8,7 @@
 #include <ctime>
 //#include <regex>
 #include "../General/General.hpp"
+#include "../General/IterationAlgo.hpp"
 #include "../General/LSM.hpp"
 #include "../General/ButcherTable.hpp"
 
@@ -19,12 +20,13 @@ enum class ReportType {
 
 struct ReportInfo {
     SolveMethod method;
+    IterationAlgo algo;
     uint64_t order, way;
     Matrix<double> butcher;
 
     std::vector<std::string> input_task;
     Task task;
-    double h, tough_coeff;
+    double h, tough_coeff, approx;
 
     //std::vector<double> X, Ynum;
     std::pair<std::vector<double>, std::vector<double>> solution;
