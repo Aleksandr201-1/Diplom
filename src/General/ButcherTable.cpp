@@ -17,9 +17,44 @@ std::string solveMethodToString (SolveMethod method) {
             return "Gauss";
         case SolveMethod::LOBATTO:
             return "Lobatto";
+        case SolveMethod::L_STABLE_DIAGONAL:
+            return "L Stable Diagonal";
+        case SolveMethod::DORMAN_PRINCE:
+            return "Dorman Prince";
         default:
-            return "";
+            return "Not a method";
     }
+}
+
+SolveMethod stringToSolveMethod (const std::string &str) {
+    if (str == "RungeKutta") {
+        return SolveMethod::RUNGE_KUTTA;
+    }
+    if (str == "Falberg") {
+        return SolveMethod::FALBERG;
+    }
+    if (str == "Cheskino") {
+        return SolveMethod::CHESKINO;
+    }
+    if (str == "Merson") {
+        return SolveMethod::MERSON;
+    }
+    if (str == "Rado") {
+        return SolveMethod::RADO;
+    }
+    if (str == "Gauss") {
+        return SolveMethod::GAUSS;
+    }
+    if (str == "Lobatto") {
+        return SolveMethod::LOBATTO;
+    }
+    if (str == "LStableDiagonal") {
+        return SolveMethod::L_STABLE_DIAGONAL;
+    }
+    if (str == "DormanPrince") {
+        return SolveMethod::DORMAN_PRINCE;
+    }
+    throw std::logic_error("stringToSolveMethod: method \"" + str + "\" doesnt exist");
 }
 
 Matrix<double> createButcherTable (SolveMethod method, uint64_t order, uint64_t way) {

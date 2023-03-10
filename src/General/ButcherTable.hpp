@@ -10,10 +10,15 @@ enum class SolveMethod {
     MERSON,
     RADO,
     GAUSS,
-    LOBATTO
+    LOBATTO,
+    L_STABLE_DIAGONAL,
+    DORMAN_PRINCE
+    //NOT_A_METHOD
 };
 
 std::string solveMethodToString (SolveMethod method);
+
+SolveMethod stringToSolveMethod (const std::string &str);
 
 Matrix<double> createButcherTable (SolveMethod method, uint64_t order, uint64_t way);
 

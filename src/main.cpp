@@ -58,14 +58,70 @@
 //     }
 // }
 
-int main () {
+void help (const std::string &name) {
+    std:: cout << "Usage: " << name << " [KEYS] [OPTIONS]\n"
+                  "\t-m, --method\t[METHOD]\tРешать задачу методом [METHOD]\n"
+                  "\t\tПоддерживаемые методы:\n\t\tRunge-Kutta, Cheskino, Dorman-Prince, Falberg, Gauss, Lobatto, L Stable Diagonal, Merson, Rado\n"
+                  "\t-o, --order\t[ORDER]\t\tРешать задачу методом [METHOD] с порядком точности [ORDER]\n"
+                  "\t-w, --way\t[WAY]\t\tРешать задачу методом [METHOD] с порядком точности [ORDER] и способом реализации [WAY]\n"
+                  "\t-i, --iter\t[ALGORYTHM]\tИспользовать алгоритм [ALGORYTHM] для решения системы уравнений в жёстких методах\n"
+                  "\t\tПоддерживаемые алгоритмы:\n\t\tSI, Zeidel, Newton\n"
+                  "\t-a, --approx\t[NUM]\t\tПродолжать процесс итераций в жёстких методах пока не будет достигнута точность [NUM]\n";
+}
+
+int main (int argc, char* argv[]) {
     ReportInfo info;
-    info.method = SolveMethod::GAUSS;
-    info.order = 6;
-    info.way = 1;
+    std::vector<std::string> args(argv, argv + argc);
+    for (auto el : args) {
+        std::cout << el << "\n";
+    }
+    for (uint64_t i = 1; i < args.size(); ++i) {
+        if (args[i] == "--help" || args[i] == "-h") {
+            help(args[0]);
+            exit(0);
+        } else if (args[i] == "--method" || args[i] == "-m") {
+            if (args.size() > i + 1) {
+                info.method = stringToSolveMethod(args[i + 1]);
+                ++i;
+            }
+        } else if (args[i] == "--order" || args[i] == "-o") {
+            if (args.size() > i + 1) {
+                info.order = std::stoull(args[i + 1]);
+                ++i;
+            }
+        } else if (args[i] == "--way" || args[i] == "-w") {
+            if (args.size() > i + 1) {
+                info.way = std::stoull(args[i + 1]);
+                ++i;
+            }
+        } else if (args[i] == "--iter" || args[i] == "-i") {
+            if (args.size() > i + 1) {
+                //info.way = std::stoull(args[i + 1]);
+                if (args[i + 1] == "Newton") {
+                    info.algo = IterationAlgo::NEWTON;
+                } else if (args[i + 1] == "Zeidel") {
+                    info.algo = IterationAlgo::ZEIDEL;
+                } else if (args[i + 1] == "SI") {
+                    info.algo = IterationAlgo::SIMPLE_ITERATION;
+                }
+                ++i;
+            }
+        } else if (args[i] == "--approx" || args[i] == "-a") {
+            if (args.size() > i + 1) {
+                info.approx = std::stod(args[i + 1]);
+                ++i;
+            }
+        }
+    }
+    // info.method = SolveMethod::RUNGE_KUTTA;
+    // info.order = 4;
+    // info.way = 1;
     // info.method = SolveMethod::FALBERG;
     // info.order = 2;
     // info.way = 2;
+    //info.method = SolveMethod::GAUSS;
+    //info.order = 4;
+    //info.way = 1;
     info.butcher = createButcherTable(info.method, info.order, info.way);
 
     std::cout << "Введите задачу:\n";
@@ -105,7 +161,7 @@ int main () {
     //info.solution = RungeKutta6(info.task, info.butcher, info.h);
     //info.solution = Falberg(info.task, info.butcher, info.h);
     //info.solution = NonExplZeidel(info.task, info.butcher, info.h);
-    info.solution = ODUSolve(info.method, info.task, info.butcher, info.h);
+    info.solution = ODESolve(info.method, info.task, info.butcher, info.h, info.algo, info.approx);
 
     
     std::ofstream file("./report/report.tex");

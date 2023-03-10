@@ -39,6 +39,20 @@ double derivative (const std::function<double(double)> &f, double x, uint64_t de
     return (derivative(f, x + eps, degree - 1) - derivative(f, x - eps, degree - 1)) / (2 * eps);
 }
 
+double derivative (const std::function<double(std::vector<double> &)> &f, const std::vector<double> &X, double h, uint64_t idx) {
+    std::vector<double> args(X);
+    double a, b, c, d;
+    args[idx] += 2 * h;
+    a = f(args);
+    args[idx] -= h;
+    b = f(args);
+    args[idx] -= 2 * h;
+    c = f(args);
+    args[idx] -= h;
+    d = f(args);
+    return (-a + 8 * b - 8 * c + d) / 12 * h;
+}
+
 std::string toString (double val, uint64_t precision) {
     return std::to_string(val).substr(0, std::to_string(val).find(".") + precision + 1);
 }

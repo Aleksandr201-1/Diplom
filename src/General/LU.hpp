@@ -72,7 +72,7 @@ std::vector<double> LUsolveSLAE (const Matrix<T> &matrix, const std::vector<T> &
     uint64_t n = matrix.size().n;
 
     if (!matrix.isSquare() || n != ans.size()) {
-        //std::cout << "Matrix is not square. Stop working.\n";
+        std::cerr << "Matrix is not square. Stop working.\n";
         exit(-1);
     }
     if (n != ans.size()) {
@@ -111,6 +111,47 @@ std::vector<double> LUsolveSLAE (const Matrix<T> &matrix, const std::vector<T> &
         //std::cout << ") / U(" << i << " ," << i << ") = " << x[i] << "\n";
     }
     return x;
+}
+
+template <class T>
+std::vector<double> LUReverseMatrix (const Matrix<T> &matrix) {
+    uint64_t n = matrix.size().n;
+
+    if (!matrix.isSquare() || n != ans.size()) {
+        std::cerr << "Matrix is not square. Stop working.\n";
+        exit(-1);
+    }
+
+    Matrix<T> A(matrix);
+    Matrix<T> L, U, P;
+    std::tie(L, U, P) = LU(A);
+
+    Matrix<T> Ar(A), Lr(n), Ur(n);
+    
+    for (uint64_t i = 0; i < n; ++i) {
+        Lr(i, i) = 1.0 / L(i, i);
+        for (uint64_t j = i + 1; j < n; ++j) {
+            T tmp = 0;
+            for (uint64_t k = 0; k < j; ++k) {
+                tmp -= L(j, k) * Lr(k, i);
+            }
+            Lr(j, i) = tmp / L(j, j);
+        }
+    }
+
+    for (uint64_t i = n - 1; i < n; --i) {
+        Ur(i, i) = 1.0 / U(i, i);
+        for (uint64_t j = i - 1; j < n; --j) {
+            T tmp = 0;
+            for (uint64_t k = i; k > j; --k) {
+                tmp -= U(j, k) * Ur(k, i);
+            }
+            Ur(j, i) = tmp / U(j, j);
+        }
+    }
+
+    Ar = Ur * Lr * P;
+    return Ar;
 }
 
 #endif

@@ -34,6 +34,8 @@ bool isEqual(double x, double y);
 
 double derivative (const std::function<double(double)> &f, double x, uint64_t degree = 1);
 
+double derivative (const std::function<double(std::vector<double> &)> &f, const std::vector<double> &X, double h, uint64_t idx);
+
 std::string toString (double val, uint64_t precision);
 
 std::string readLine ();
