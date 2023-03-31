@@ -65,6 +65,8 @@ class Matrix {
 
         //оператор присваивания
         Matrix<T> &operator= (const Matrix<T> &mat);
+        //оператор перемещения
+        Matrix<T> &operator= (Matrix<T> &&mat);
 
         //проверка матрицы на квадратность
         bool isSquare () const;
@@ -314,6 +316,15 @@ bool operator!= (const Matrix<T> &m1, const Matrix<T> &m2) {
 template <class T>
 Matrix<T> &Matrix<T>::operator= (const Matrix<T> &mat) {
     buff = mat.buff;
+    n = mat.n;
+    m = mat.m;
+    return *this;
+}
+
+//оператор перемещения
+template <class T>
+Matrix<T> &Matrix<T>::operator= (Matrix<T> &&mat) {
+    buff = std::move(mat.buff);
     n = mat.n;
     m = mat.m;
     return *this;

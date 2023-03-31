@@ -21,3 +21,5 @@ target_include_directories(GeneralLIB
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )
+
+add_definitions(${COMPILE_FLAGS})

@@ -110,10 +110,73 @@ Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double 
     }
 
     idx = system[0].find('=');
+    size = system[0].size();
+    FunctionalTree y_order1(system[0].substr(0, idx), args), y_order2(system[0].substr(idx + 1, size - idx), args);
+    FunctionalTree coeff = y_order1.getCoeff(order + 1);
+    //std::cout << "General: " << y_order.toString(Style::LATEX) << "\n";
+    auto func = [=] (const std::vector<double> &args) -> double {
+        return (y_order2(args) - y_order1(args)) / coeff(args);
+    };
+    task.odu_system.push_back(func);
+
+    for (uint64_t i = 1; i <= order; ++i) {
+        idx = system[i].find('=');
+        size = system[i].size();
+        tmp = system[i].substr(0, idx);
+        task.X0 = stringFix(tmp);
+        //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
+        task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+    }
+    task.order = order;
+    task.X0 = X0;
+    task.Xn = Xn;
+
+    return task;
+}
+
+Task getSysInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn) {
+    uint64_t idx = 0, size = 0;
+    Task task;
+    std::string tmp = "y";
+    std::vector<std::string> args; //x y y' y'' ...
+    args.push_back("x");
+    for (uint64_t i = 0; i <= order; ++i) {
+        args.push_back(tmp);
+        tmp += "'";
+    }
+    for (uint64_t i = 0; i < order - 1; ++i) {
+        auto func = [=] (const std::vector<double> &args) -> double {
+            return args[i + 2];
+        };
+        task.odu_system.push_back(func);
+    }
+
+    for (uint64_t i = 0; i < system.size() / 2; i += 2) {
+        idx = system[i].find('=');
+        size = system[i].size();
+        tmp = system[i].substr(0, idx);
+        //task.X0 = stringFix(tmp);
+        //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
+        FunctionalTree funcTree(system[i].substr(idx + 1, size - idx), args);
+        auto func = [=] (const std::vector<double> &args) -> double {
+            return funcTree(args);
+        };
+        task.odu_system.push_back(func);
+        //task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+
+        idx = system[i + 1].find('=');
+        size = system[i + 1].size();
+        tmp = system[i + 1].substr(0, idx);
+        //task.X0 = stringFix(tmp);
+        //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
+        task.Y.push_back(FunctionalTree(system[i + 1].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+    }
+
+    idx = system[0].find('=');
     //size = system[0].size();
     FunctionalTree y_order(system[0].substr(0, idx), args);
     FunctionalTree coeff = y_order.getCoeff(order + 1);
-    std::cout << "General: " << y_order.toString(Style::LATEX) << "\n";
+    //std::cout << "General: " << y_order.toString(Style::LATEX) << "\n";
     auto func = [=] (const std::vector<double> &args) -> double {
         return -y_order(args) / coeff(args);
     };

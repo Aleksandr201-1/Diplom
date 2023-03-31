@@ -1,6 +1,8 @@
 #ifndef BUTCHER_TABLE_HPP
 #define BUTCHER_TABLE_HPP
 
+#include <algorithm>
+#include <map>
 #include "Matrix.hpp"
 
 enum class SolveMethod {
@@ -12,8 +14,8 @@ enum class SolveMethod {
     GAUSS,
     LOBATTO,
     L_STABLE_DIAGONAL,
-    DORMAN_PRINCE
-    //NOT_A_METHOD
+    DORMAN_PRINCE,
+    NOT_A_METHOD
 };
 
 std::string solveMethodToString (SolveMethod method);

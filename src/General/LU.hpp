@@ -114,10 +114,10 @@ std::vector<double> LUsolveSLAE (const Matrix<T> &matrix, const std::vector<T> &
 }
 
 template <class T>
-std::vector<double> LUReverseMatrix (const Matrix<T> &matrix) {
+Matrix<double> LUReverseMatrix (const Matrix<T> &matrix) {
     uint64_t n = matrix.size().n;
 
-    if (!matrix.isSquare() || n != ans.size()) {
+    if (!matrix.isSquare()) {
         std::cerr << "Matrix is not square. Stop working.\n";
         exit(-1);
     }

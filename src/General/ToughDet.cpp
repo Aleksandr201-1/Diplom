@@ -7,6 +7,7 @@ double ToughCoeff (const Task &task) {
     Matrix<double> A(order, order);
     std::vector<double> args(order + 2, 0);
     double step = (task.Xn - task.X0) / 10;
+    double det = 0;
     for (double x = task.X0; x <= task.Xn; x += step) {
         args[0] = x;
         for (uint64_t i = 0; i < order; ++i) {
@@ -16,6 +17,7 @@ double ToughCoeff (const Task &task) {
             }
             args[i + 1] = 0;
         }
+        det = std::max(det, A.det());
         //std::cout << std::scientific << A(3, 0) << "\n";
         // if (A(3, 0) == 0.0) {
         //     std::cout << "good\n";
@@ -40,5 +42,6 @@ double ToughCoeff (const Task &task) {
         coeff = std::max(coeff, curr_coeff);
         std::cout << "curr coeff: " << coeff << "\n";
     }
-    return coeff;
+    //return coeff;
+    return det;
 }
