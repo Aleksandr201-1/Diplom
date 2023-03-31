@@ -217,13 +217,20 @@ std::pair<std::vector<double>, std::vector<double>> NonExpl (const Task &task, c
     }
     control.push_back(task.Y[0]);
 
+    //order of approx
+    //----->
+    //K1 K2 K3 K4 | order of task
+    //L1 L2 L3 L4 |
+    //M1 M2 M3 M4 V
     std::vector<std::vector<double>> K(orderOfTask, std::vector<double>(orderOfApprox, 0));
     std::vector<double> args(orderOfTask + 2, 0);
 
+    uint64_t stepNum = 1;
+
     while (true) {
-        auto KK = K;
-        double nor = 0;
-        uint64_t iter = 0;
+        //auto KK = K;
+        //double nor = 0;
+        //uint64_t iter = 0;
         //std::cout << "func: " << func[0]({0, 1, 1}) << "\n";
         for (uint64_t i = 0; i < args.size() - 1; ++i) {
             args[i] = Yi[i].back();
@@ -231,26 +238,28 @@ std::pair<std::vector<double>, std::vector<double>> NonExpl (const Task &task, c
         for (uint64_t i = 0; i < K[0].size(); ++i) {
             for (uint64_t j = 0; j < K.size(); ++j) {
                 //K[i][j] = butcher(0, j + 1);// * Yi[i + 1][j];
-                K[j][i] = func[j](args);
+                //K[j][i] = func[j](args);
+                K[j][i] = 0;
             }
         }
         if (1) {
-            K = Iteration(K, args, func, butcher, h, approx, iter_alg);
+            K = IterationStep(K, args, func, butcher, h, approx, iter_alg);
         } else {
-            for (uint64_t j = 0; j < orderOfApprox; ++j) {
-                //аргументы для функций
-                args[0] = Yi[0].back() + butcher(j, 0) * h;
-                for (uint64_t k = 1; k < args.size() - 1; ++k) {
-                    args[k] = Yi[k].back();
-                    for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
-                        args[k] += butcher(j, l + 1) * K[k - 1][l];
-                    }
-                }
-                //коэффициенты
-                for (uint64_t k = 0; k < orderOfTask; ++k) {
-                    K[k][j] = h * func[k](args);
-                }
-            }
+            // for (uint64_t j = 0; j < orderOfApprox; ++j) {
+            //     //аргументы для функций
+            //     args[0] = Yi[0].back() + butcher(j, 0) * h;
+            //     for (uint64_t k = 1; k < args.size() - 1; ++k) {
+            //         args[k] = Yi[k].back();
+            //         for (uint64_t l = 0; l < orderOfApprox; ++l) { //change orderOfApprox to j?
+            //             args[k] += butcher(j, l + 1) * K[k - 1][l];
+            //         }
+            //     }
+            //     //коэффициенты
+            //     for (uint64_t k = 0; k < orderOfTask; ++k) {
+            //         K[k][j] = h * func[k](args);
+            //     }
+            // }
+            K = ExplicitStep(K, args, Yi, stepNum - 1, func, butcher, h, approx);
         }
 
         //добавление нового значения
@@ -279,6 +288,7 @@ std::pair<std::vector<double>, std::vector<double>> NonExpl (const Task &task, c
                 h *= 2;
             }
         }
+        //корректировка шага
         if (Yi[0].back() + h > Xn) {
             if (Xn - Yi[0].back() > min_h) {
                 h = Xn - Yi[0].back();
@@ -286,6 +296,7 @@ std::pair<std::vector<double>, std::vector<double>> NonExpl (const Task &task, c
                 break;
             }
         }
+        ++stepNum;
     }
     return std::make_pair(Yi[0], Yi[1]);
 }

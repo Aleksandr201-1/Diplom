@@ -11,3 +11,5 @@ target_include_directories(ReportLIB
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )
+
+add_definitions(${COMPILE_FLAGS})

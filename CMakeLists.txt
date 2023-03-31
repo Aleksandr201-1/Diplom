@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 set(WINDOWS 1)
 set(LINUX 2)
+set(DEBUG 1)
 
 set(PLATFORM ${LINUX})
 
@@ -11,6 +12,13 @@ if(${PLATFORM} EQUAL ${WINDOWS})
 else()
   message(STATUS "Working for Linux ver.")
   set(CMAKE_CXX_COMPILER g++)
+endif()
+
+if(${DEBUG} EQUAL 1)
+    message(STATUS "Its debugging time!")
+    set(COMPILE_FLAGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result -O3)
+else()
+    set(COMPILE_FLAGS -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
 endif()
 
 project(Diplom LANGUAGES CXX)
@@ -29,6 +37,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 
 # defines targets and sources
 add_subdirectory(src)
+add_subdirectory(test)
 
 # contains an "external" library we will link to
 add_subdirectory(external)

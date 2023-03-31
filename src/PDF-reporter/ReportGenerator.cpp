@@ -63,10 +63,11 @@ std::string toPgfplotsString (const std::string &str) {
                 }
                 ++end;
             } while (brace != 0);
-            sub_str = "deg(" + toPgfplotsString(new_str.substr(start, end - start)) + ")";
+            //sub_str = "deg(" + toPgfplotsString(new_str.substr(start, end - start)) + ")";
+            sub_str = "deg(" + new_str.substr(start, end - start) + ")";
             std::cout << "sub str: " << el + sub_str << "\n";
             //new_str = std::regex_replace(new_str, std::regex(el + "\(.\)"), "deg(");
-            i = start + sub_str.size();
+            i = start + el.size();
             new_str = new_str.substr(0, start) + sub_str + new_str.substr(end, new_str.size() - end);
         }
     }
@@ -169,7 +170,7 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
     out << "\\section{Задача}\n\n"
            "$$\n"
            "\\begin{cases}\n";
-    out << "\t" << FunctionalTree(info.input_task[0].substr(0, idx), var_list).toString(Style::LATEX) << " = 0\\\\\n";
+    out << "\t" << FunctionalTree(info.input_task[0].substr(0, idx), var_list).toString(FunctionalTree::Style::LATEX) << " = 0\\\\\n";
     for (uint64_t i = 1; i < info.input_task.size(); ++i) {
         //auto func = FunctionalTree(info.input_task[i]);
         out << "\t" << info.input_task[i] << "\\\\\n";
@@ -292,7 +293,7 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
                "\tcolor=red,\n"
                "\tsamples=100\n"
                "]{";
-        out << toPgfplotsString(info.analitic.toString(Style::DEFAULT));
+        out << toPgfplotsString(info.analitic.toString(FunctionalTree::Style::DEFAULT));
         out << "};\n"
                "\\addlegendentry{Аналитическое решение}\n\n";
     }

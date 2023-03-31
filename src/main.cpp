@@ -4,7 +4,8 @@
 //#include <fcntl.h>
 //#include "gnuplot-iostream.h"
 #include "NotTough.hpp"
-#include "General/LSM.hpp"
+//#include "General/LSM.hpp"
+#include "RightPartGen.hpp"
 #include "PDF-reporter/ReportGenerator.hpp"
 
 // void plot (const std::vector<std::string> &func, double a, double b) {
@@ -70,7 +71,11 @@ void help (const std::string &name) {
 }
 
 int main (int argc, char* argv[]) {
+    //ChemicalReaction::setAtomList({"H", "O"});
+    //ChemicalReaction::setSubstanceList({"H2", "O2", "H2O", "OH", "H", "O"});
+    //ChemicalReaction("H + OH => H2O");
     ReportInfo info;
+    //uint64_t methodPos = 0;
     std::vector<std::string> args(argv, argv + argc);
     for (auto el : args) {
         std::cout << el << "\n";
@@ -82,6 +87,7 @@ int main (int argc, char* argv[]) {
         } else if (args[i] == "--method" || args[i] == "-m") {
             if (args.size() > i + 1) {
                 info.method = stringToSolveMethod(args[i + 1]);
+                //methodPos = i + 1;
                 ++i;
             }
         } else if (args[i] == "--order" || args[i] == "-o") {
@@ -119,9 +125,9 @@ int main (int argc, char* argv[]) {
     // info.method = SolveMethod::FALBERG;
     // info.order = 2;
     // info.way = 2;
-    //info.method = SolveMethod::GAUSS;
-    //info.order = 4;
-    //info.way = 1;
+    // info.method = SolveMethod::GAUSS;
+    // info.order = 4;
+    // info.way = 1;
     info.butcher = createButcherTable(info.method, info.order, info.way);
 
     std::cout << "Введите задачу:\n";
@@ -146,6 +152,7 @@ int main (int argc, char* argv[]) {
     check.reset(readLine(), {"x"});
     info.task = getTaskInfo(info.input_task, order, X0, Xn);
     info.analitic = check;
+    std::cout << "analitic: " << info.analitic << "\n";
 
     // std::vector<std::function<double(const std::vector<double> &)>> sus = {
     //     [&] (const std::vector<double> &args) -> double {
