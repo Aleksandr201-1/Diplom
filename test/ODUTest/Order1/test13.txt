@@ -1,0 +1,10 @@
+y' - y * x - cos(x) * x - sin(x) + sin(x) * x^2 = 0
+y(-2) = sin(-2) * (-2)
+
+0.1
+
+-2 7
+
+sin(x) * x
+
+#sin(x) + cos(x) * x
