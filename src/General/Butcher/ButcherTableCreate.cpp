@@ -2,22 +2,6 @@
 #include <cmath>
 #include "../Matrix.hpp"
 
-// void butcherWrite () {
-//     Matrix<double> matrix(4, 4, {
-//         0, 0, 0, 0,
-//         1.0/3.0, 1.0/3.0, 0, 0,
-//         2.0/3.0, 0, 2.0/3.0, 0,
-//         0, 1.0/4.0, 0, 3.0/4.0
-//     });
-//     std::string filename = "BT-RK-3-1.bin";
-
-//     std::ofstream file(filename);
-//     file << matrix;
-//     file.close();
-// }
-
-// touch test{1..15}.txt
-
 void butcherWrite (const std::vector<std::pair<Matrix<double>, std::string>> &tables) {
     for (uint64_t i = 0; i < tables.size(); ++i) {
         std::ofstream file(tables[i].second);
@@ -279,6 +263,13 @@ int main () {
             0, 59.0/48.0, -17.0/96.0, 225.0/32.0, -85.0/12.0, 0
 
         }), "BT-LStableDiagonal-4-1.bin"},
+
+        {Matrix<double>(3, 3, {
+            (3.0+std::sqrt(3.0))/6.0, (3.0+std::sqrt(3.0))/6.0, 0,
+            (3.0-std::sqrt(3.0))/6.0, (-std::sqrt(3.0))/3.0, (3.0+std::sqrt(3.0))/6.0,
+            0, 1.0/2.0, 1.0/2.0
+
+        }), "BT-LStableDiagonal-3-1.bin"},
 
         {Matrix<double>(9, 8, {
             0, 0, 0, 0, 0, 0, 0, 0,
