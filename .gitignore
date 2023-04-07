@@ -1,0 +1,11 @@
+*/bin
+*/lib
+*/CMakeFiles
+*/CMakeCache.txt
+*/cmake_install.cmake
+
+bin
+lib
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
