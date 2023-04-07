@@ -68,25 +68,24 @@ std::string readLine () {
     return str;
 }
 
-double stringFix (std::string &str) {
+double stringFix (const std::string &str) {
     double val = 0;
-    std::string tmp(str);
-    str = "";
-    for (uint64_t i = 0; i < tmp.size(); ++i) {
-        if (tmp[i] == 'y') {
+    std::string ans = "";
+    for (uint64_t i = 0; i < str.size(); ++i) {
+        if (str[i] == 'y') {
             std::string valStr;
-            while (tmp[i] != '(') {
-                str += tmp[i];
+            while (str[i] != '(') {
+                ans += str[i];
                 ++i;
             }
             ++i;
-            while (tmp[i] != ')') {
-                valStr += tmp[i];
+            while (str[i] != ')') {
+                valStr += str[i];
                 ++i;
             }
             val = FunctionalTree(valStr).calculate();
         } else {
-            str += tmp[i];
+            ans += str[i];
         }
     }
     return val;
@@ -124,6 +123,9 @@ Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double 
         size = system[i].size();
         tmp = system[i].substr(0, idx);
         task.X0 = stringFix(tmp);
+        if (task.X0 != X0) {
+            throw std::logic_error("getSysInfo: y(X0) != X0");
+        }
         //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
         task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
     }
@@ -137,56 +139,35 @@ Task getTaskInfo(const std::vector<std::string> &system, uint64_t order, double 
 Task getSysInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn) {
     uint64_t idx = 0, size = 0;
     Task task;
-    std::string tmp = "y";
     std::vector<std::string> args; //x y y' y'' ...
     args.push_back("x");
-    for (uint64_t i = 0; i <= order; ++i) {
-        args.push_back(tmp);
-        tmp += "'";
+    for (uint64_t i = 0; i < order; ++i) {
+        uint64_t pos = system[i].find('\'');
+        args.push_back(system[i].substr(0, pos));
+        std::cout << "var: " << args.back() << "\n";
     }
-    for (uint64_t i = 0; i < order - 1; ++i) {
-        auto func = [=] (const std::vector<double> &args) -> double {
-            return args[i + 2];
-        };
-        task.odu_system.push_back(func);
-    }
+    // for (uint64_t i = 0; i < order - 1; ++i) {
+    //     auto func = [=] (const std::vector<double> &args) -> double {
+    //         return args[i + 2];
+    //     };
+    //     task.odu_system.push_back(func);
+    // }
 
-    for (uint64_t i = 0; i < system.size() / 2; i += 2) {
+    for (uint64_t i = 0; i < order; ++i) {
         idx = system[i].find('=');
         size = system[i].size();
-        tmp = system[i].substr(0, idx);
-        //task.X0 = stringFix(tmp);
-        //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
-        FunctionalTree funcTree(system[i].substr(idx + 1, size - idx), args);
-        auto func = [=] (const std::vector<double> &args) -> double {
-            return funcTree(args);
-        };
-        task.odu_system.push_back(func);
-        //task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
-
-        idx = system[i + 1].find('=');
-        size = system[i + 1].size();
-        tmp = system[i + 1].substr(0, idx);
-        //task.X0 = stringFix(tmp);
-        //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
-        task.Y.push_back(FunctionalTree(system[i + 1].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+        FunctionalTree y_n(system[i].substr(idx + 1, size - idx), args);
+        task.odu_system.push_back(y_n);
     }
 
-    idx = system[0].find('=');
-    //size = system[0].size();
-    FunctionalTree y_order(system[0].substr(0, idx), args);
-    FunctionalTree coeff = y_order.getCoeff(order + 1);
-    //std::cout << "General: " << y_order.toString(Style::LATEX) << "\n";
-    auto func = [=] (const std::vector<double> &args) -> double {
-        return -y_order(args) / coeff(args);
-    };
-    task.odu_system.push_back(func);
-
-    for (uint64_t i = 1; i <= order; ++i) {
+    for (uint64_t i = order; i < order * 2; ++i) {
         idx = system[i].find('=');
         size = system[i].size();
-        tmp = system[i].substr(0, idx);
-        task.X0 = stringFix(tmp);
+        //tmp = system[i].substr(0, idx);
+        task.X0 = stringFix(system[i].substr(0, idx));
+        if (task.X0 != X0) {
+            throw std::logic_error("getSysInfo: y(X0) != X0");
+        }
         //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
         task.Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
     }

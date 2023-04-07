@@ -1,9 +1,11 @@
 #include "ReportGenerator.hpp"
 
-std::vector<double> getAnaliticSolution (const std::vector<double> &X, const std::function<double (double)> &func) {
-    std::vector<double> Ya(X.size());
-    for (uint64_t i = 0; i < X.size(); ++i) {
-        Ya[i] = func(X[i]);
+std::vector<std::vector<double>> getAnaliticSolution (const std::vector<double> &X, const std::vector<FunctionalTree> &func) {
+    std::vector<std::vector<double>> Ya(func.size(), std::vector<double>(X.size()));
+    for (uint64_t i = 0; i < func.size(); ++ i) {
+        for (uint64_t j = 0; j < X.size(); ++j) {
+            Ya[i][j] = func[i](X[j]);
+        }
     }
     return Ya;
 }
@@ -19,21 +21,47 @@ std::tuple<double, double> getAnaliticCompare (const std::vector<double> &Yn, co
     return std::make_tuple(max_miss, average_miss);
 }
 
-void printTable (const std::vector<double> &X, const std::vector<double> &Yn, const std::vector<double> &Ya, std::ostream &out) {
+void printTable (const std::vector<std::vector<double>> &Yn, const std::vector<std::vector<double>> &Ya, std::ostream &out) {
     const uint64_t WIDTH = 12;
+    const std::string space = "______________";
+    const std::vector<double> &X = Yn[0];
     out << "Таблица:\n";
-    out << " ____________________________________________\n";
+    for (uint64_t i = 0; i < Yn.size() + Ya.size(); ++i) {
+        out << space;
+    }
+    for (uint64_t i = 0; i < Yn.size() + Ya.size() - 1; ++i) {
+        out << "_";
+    }
+    //out << " ____________________________________________\n";
     out << "| " << std::setw(WIDTH) << "X";
-    out << " | " << std::setw(WIDTH) << "Y nu";
-    out << " | " << std::setw(WIDTH) << "Y an";
+    for (uint64_t i = 0; i < Ya.size(); ++i) {
+        out << " | " << std::setw(WIDTH) << "Y nu" << i + 1;
+        out << " | " << std::setw(WIDTH) << "Y an" << i + 1;
+    }
+    for (uint64_t i = Ya.size(); i < Yn.size() - 1; ++i) {
+        out << " | " << std::setw(WIDTH) << "Y nu" << i + 1;
+    }
     out << " |\n";
-    out << "|______________|______________|______________|\n";
+    for (uint64_t i = 0; i < Yn.size() + Ya.size(); ++i) {
+        out << "|" << space;
+    }
+    out << "|\n";
+    //out << "|______________|______________|______________|\n";
     for (uint64_t i = 0; i < X.size(); ++i) {
         out << "| " << std::setw(WIDTH) << X[i];
-        out << " | " << std::setw(WIDTH) << Yn[i];
-        out << " | " << std::setw(WIDTH) << Ya[i];
+        for (uint64_t j = 0; j < Ya.size(); ++j) {
+            out << " | " << std::setw(WIDTH) << Yn[j + 1][i];
+            out << " | " << std::setw(WIDTH) << Ya[j][i];
+        }
+        for (uint64_t j = Ya.size(); j < Yn.size() - 1; ++j) {
+            out << " | " << std::setw(WIDTH) << Yn[j + 1][i];
+        }
         out << " |\n";
-        out << "|______________|______________|______________|\n";
+        for (uint64_t i = 0; i < Yn.size() + Ya.size(); ++i) {
+            out << "|"  << space;
+        }
+        out << "|\n";
+        //out << "|______________|______________|______________|\n";
     }
 }
 
@@ -89,7 +117,22 @@ void generateTEXT (const ReportInfo &info, std::ostream &out) {
     out << divider;
     out << "Метод решения: " << solveMethodToString(info.method) << "\n"
            "Порядок точности: " << info.order << "\n"
-           "Способ: " << info.way << "\n";
+           "Способ: " << info.way << "\n"
+           "Метод итерации: ";
+    switch (info.algo) {
+        case IterationAlgo::EXPLICIT_STEP:
+            std::cout << "явный шаг\n";
+            break;
+        case IterationAlgo::SIMPLE_ITERATION:
+            std::cout << "метод простых итераций\n";
+            break;
+        case IterationAlgo::ZEIDEL:
+            std::cout << "метод Зейделя\n";
+            break;
+        case IterationAlgo::NEWTON:
+            std::cout << "метод Ньютона\n";
+            break;
+    }
     out << divider;
     out << "Таблица Бутчера:\n" << info.butcher;
     out << divider;
@@ -97,18 +140,27 @@ void generateTEXT (const ReportInfo &info, std::ostream &out) {
            "Задача " << (info.tough_coeff > 100.0 ? "" : "не ") << "жёсткая\n";
     out << divider;
     out << "Решение задачи\n";
-    auto &X = info.solution.first, &Yn = info.solution.second;
-    auto Ya = getAnaliticSolution(X, info.analitic);
-    printTable(X, Yn, Ya, out);
-    if (!std::isnan(info.analitic(0))) {
+    //auto &X = info.solution.first, &Yn = info.solution.second;
+    const auto &Yn = info.solution;
+    auto Ya = getAnaliticSolution(info.solution[0], info.analitic);
+    printTable(info.solution, Ya, out);
+    for (uint64_t i = 0; i < Ya.size(); ++i) {
         double max_miss, average_miss;
-        std::tie(max_miss, average_miss) = getAnaliticCompare(Yn, Ya);
-        out << "\nСреднее отклонение от аналитического решения: " << average_miss << "\n"
-               "Максимальное отклонение от аналитического решения: " << max_miss << "\n";
+        std::tie(max_miss, average_miss) = getAnaliticCompare(Yn[i + 1], Ya[i]);
+        out << "\nСреднее отклонение от аналитического решения для функции " << i << ": " << average_miss << "\n"
+               "Максимальное отклонение от аналитического решения для функции " << i << ": " << max_miss << "\n";
     }
+    // if (!std::isnan(info.analitic(0))) {
+    //     double max_miss, average_miss;
+    //     std::tie(max_miss, average_miss) = getAnaliticCompare(Yn, Ya);
+    //     out << "\nСреднее отклонение от аналитического решения: " << average_miss << "\n"
+    //            "Максимальное отклонение от аналитического решения: " << max_miss << "\n";
+    // }
     out << divider;
-    auto func = LeastSquareMethod(X, Yn, 3);
-    out << "Приближающий полином 3й степени: " << LSMToText(func) << "\n";
+    for (uint64_t i = 1; i < Yn.size(); ++i) {
+        auto func = LeastSquareMethod(Yn[0], Yn[i], 3);
+        out << "Приближающий полином 3й степени для функции " << i << ": " << LSMToText(func) << "\n";
+    }
 }
 
 void generateTEX (const ReportInfo &info, std::ostream &out) {
@@ -144,6 +196,7 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
     out << "\\setcounter{secnumdepth}{0}\n"
            "\\setlength{\\cftbeforesecskip}{1mm}\n"
            "\\setlength{\\cftbeforesubsecskip}{1mm}\n"
+           "\\setlength{\\parindent}{0pt}\n"
            "\\renewcommand\\cftsecdotsep{\\cftdot}\n"
            "\\renewcommand\\cftsubsecdotsep{\\cftdot}\n\n";
 
@@ -185,7 +238,22 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
     out << "\\section{Метод решения}\n\n"
            "Метод: " << solveMethodToString(info.method) << "\\\\\n"
            "Порядок точности: " << info.order << "\\\\\n"
-           "Способ: " << info.way << "\n\n";
+           "Способ: " << info.way << "\\\\\n"
+           "Метод итерации: ";
+    switch (info.algo) {
+        case IterationAlgo::EXPLICIT_STEP:
+            out << "явный шаг\n\n";
+            break;
+        case IterationAlgo::SIMPLE_ITERATION:
+            out << "метод простых итераций\n\n";
+            break;
+        case IterationAlgo::ZEIDEL:
+            out << "метод Зейделя\n\n";
+            break;
+        case IterationAlgo::NEWTON:
+            out << "метод Ньютона\n\n";
+            break;
+    }
 
     //Таблица Бутчера
     uint64_t n = info.butcher.size().n, m = info.butcher.size().m;
@@ -213,42 +281,68 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
            "Коэффициент жёсткости задачи: " << info.tough_coeff << "\\\\\n" << "Задача " << (info.tough_coeff >= 99.0 ? "" : "не ") << "жёсткая\n\n";
 
     //Решение задачи
-    auto &X = info.solution.first, &Yn = info.solution.second;
-    auto Ya = getAnaliticSolution(X, info.analitic);
-    bool use_analitic = !std::isnan(info.analitic(X0));
+    const auto &Yn = info.solution;
+    auto Ya = getAnaliticSolution(info.solution[0], info.analitic);
+    //auto &X = info.solution.first, &Yn = info.solution.second;
+    //auto Ya = getAnaliticSolution(X, info.analitic);
+    //bool use_analitic = !std::isnan(info.analitic(X0));
     std::vector<std::vector<double>> table;
-    table.push_back(Yn);
-    if (use_analitic) {
-        table.push_back(Ya);
-    }
+    //table.push_back(Yn);
+    //if (use_analitic) {
+    //    table.push_back(Ya);
+    //}
     out << "\\section{Решение задачи}\n\n"
-           "\\begin{longtable}{|";
-    for (uint64_t i = 0; i < table.size() + 1; ++i) {
-        out << "m{3cm}|";
+           "\\begin{longtable}{||m{3cm}|";
+    for (uint64_t i = 0; i < Ya.size(); ++i) {
+        out << "|m{3cm}|" << "m{3cm}|";
+    }
+    out << "|";
+    for (uint64_t i = Ya.size(); i < Yn.size() - 1; ++i) {
+        out << "m{3cm}||";
     }
     out << "}\n"
            "\\hline\n"
-           "\\cellcolor{lightgray} X & \\cellcolor{lightgray} $Y_{numeric}$ & \\cellcolor{lightgray} $Y_{analitic}$\\\\\n";
-    for (uint64_t i = 0; i < X.size(); ++i) {
-        out << "\\hline\n" << X[i];
-        for (uint64_t j = 0; j < table.size(); ++j) {
-            out << " & " << table[j][i];
+           "\\cellcolor{lightgray} X";
+    for (uint64_t i = 0; i < Ya.size(); ++i) {
+        out << " & \\cellcolor{lightgray} $Y_{numeric" << i + 1 << "}$ & \\cellcolor{lightgray} $Y_{analitic" << i + 1 << "}$";
+    }
+    for (uint64_t i = Ya.size(); i < Yn.size() - 1; ++i) {
+        out << " & \\cellcolor{lightgray} $Y_{numeric" << i + 1 << "}$";
+    }
+    out << "\\\\\n";
+    for (uint64_t i = 0; i < Yn[0].size(); ++i) {
+        out << "\\hline\n" << Yn[0][i];
+        for (uint64_t j = 0; j < Ya.size(); ++j) {
+            out << " & " << Yn[j + 1][i] << " & " << Ya[j][i];
+        }
+        for (uint64_t j = Ya.size(); j < Yn.size() - 1; ++j) {
+            out << " & " << Yn[j + 1][i];
         }
         out << "\\\\\n";
     }
     out << "\\hline\n"
            "\\end{longtable}\n\n";
-    if (use_analitic) {
+    // if (use_analitic) {
+    //     double max_miss, average_miss;
+    //     std::tie(max_miss, average_miss) = getAnaliticCompare(Yn, Ya);
+    //     out << "Среднее отклонение от аналитического решения: " << average_miss << "\n\n";
+    //     out << "Максимальное отклонение от аналитического решения: " << max_miss << "\n\n";
+    // }
+    for (uint64_t i = 0; i < Ya.size(); ++i) {
         double max_miss, average_miss;
-        std::tie(max_miss, average_miss) = getAnaliticCompare(Yn, Ya);
-        out << "Среднее отклонение от аналитического решения: " << average_miss << "\n\n";
-        out << "Максимальное отклонение от аналитического решения: " << max_miss << "\n\n";
+        std::tie(max_miss, average_miss) = getAnaliticCompare(Yn[i + 1], Ya[i]);
+        out << "Среднее отклонение от аналитического решения для функции " << i + 1 << ": " << average_miss << "\n\n"
+               "Максимальное отклонение от аналитического решения для функции " << i + 1 << ": " << max_miss << "\n\n";
     }
 
     //Приближающий полином
     out << "\\section{Приближающий полином}\n\n";
-    auto func = LeastSquareMethod(X, Yn, 3);
-    out << "Приближающий полином 3й степени: $" << LSMToText(func) << "$\n\n";
+    for (uint64_t i = 1; i < Yn.size(); ++i) {
+        auto func = LeastSquareMethod(Yn[0], Yn[i], 3);
+        out << "Приближающий полином 3й степени для функции " << i << ": $" << LSMToText(func) << "$\n\n";
+    }
+    //auto func = LeastSquareMethod(X, Yn, 3);
+    //out << "Приближающий полином 3й степени: $" << LSMToText(func) << "$\n\n";
 
     //График
     std::vector<double> Xpoints;
@@ -273,29 +367,43 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
            "\tymajorgrids=true,\n"
            "\tgrid style=dashed,\n"
            "]\n\n";
-    
-    out << "\\addplot[\n"
-           "\tcolor=blue,\n"
-           "\tmark=square,\n"
-           "\tmark size=0.5pt\n"
-           "]\n"
-           "coordinates {\n";
-    for (uint64_t i = 0; i < X.size(); ++i) {
-        out << "(" << X[i] << "," << Yn[i] << ")";
+    //графики приближённого решения
+    uint64_t count;
+    if (info.multigraph) {
+        count = Yn.size();
+    } else {
+        count = 2;
     }
-    out << "\n"
-           "};\n"
-           "\\addlegendentry{Приближённое решение}\n\n";
-    if (use_analitic) {
+    for (uint64_t i = 1; i < count; ++i) {
+        out << "\\addplot[\n"
+            "\tcolor=blue,\n"
+            "\tmark=square,\n"
+            "\tmark size=0.5pt\n"
+            "]\n"
+            "coordinates {\n";
+        for (uint64_t j = 0; j < Yn[0].size(); ++j) {
+            out << "(" << Yn[0][j] << "," << Yn[i][j] << ")";
+        }
+        out << "\n"
+            "};\n"
+            "\\addlegendentry{Приближённое решение " << i << "}\n\n";
+    }
+    //графики аналитического решения
+    if (info.multigraph) {
+        count = Ya.size();
+    } else {
+        count = std::max(Ya.size(), 0ul);
+    }
+    for (uint64_t i = 0; i < count; ++i) {
         out << "\\addplot[\n"
                "\tdomain=";
         out << X0 << ":" << Xn << ",\n"
                "\tcolor=red,\n"
                "\tsamples=100\n"
                "]{";
-        out << toPgfplotsString(info.analitic.toString(FunctionalTree::Style::DEFAULT));
+        out << toPgfplotsString(info.analitic[i].toString(FunctionalTree::Style::DEFAULT));
         out << "};\n"
-               "\\addlegendentry{Аналитическое решение}\n\n";
+               "\\addlegendentry{Аналитическое решение " << i + 1 << "}\n\n";
     }
 
     out <<  "\\end{axis}\n"
@@ -311,7 +419,8 @@ ReportInfo::ReportInfo () {
     // analitic = [] (double x) -> double {
     //     return x / 0;
     // };
-    analitic = FunctionalTree("x / 0", std::vector<std::string>{"x"});
+    multigraph = false;
+    //analitic.push_back(FunctionalTree("x / 0", std::vector<std::string>{"x"}));
 }
 
 ReportInfo::~ReportInfo () {}

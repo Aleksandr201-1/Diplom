@@ -7,10 +7,14 @@
 #include <chrono>
 #include <ctime>
 //#include <regex>
-#include "../General/General.hpp"
-#include "../General/IterationAlgo.hpp"
-#include "../General/LSM.hpp"
-#include "../General/ButcherTable.hpp"
+#include <General/General.hpp>
+#include <General/IterationAlgo.hpp>
+#include <General/LSM.hpp>
+#include <General/ButcherTable.hpp>
+// #include "../General/General.hpp"
+// #include "../General/IterationAlgo.hpp"
+// #include "../General/LSM.hpp"
+// #include "../General/ButcherTable.hpp"
 
 enum class ReportType {
     TXT,
@@ -29,9 +33,11 @@ struct ReportInfo {
     double h, tough_coeff, approx;
 
     //std::vector<double> X, Ynum;
-    std::pair<std::vector<double>, std::vector<double>> solution;
+    bool multigraph;
+    std::vector<std::vector<double>> solution;
+    //std::pair<std::vector<double>, std::vector<double>> solution;
     //std::function<double (double)> analitic;
-    FunctionalTree analitic;
+    std::vector<FunctionalTree> analitic;
 
     ReportInfo ();
     ~ReportInfo ();

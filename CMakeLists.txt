@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
+#platform choice
 set(WINDOWS 1)
 set(LINUX 2)
 set(DEBUG 1)
@@ -14,9 +15,18 @@ else()
   set(CMAKE_CXX_COMPILER g++)
 endif()
 
+# libraries names
+set(MODULES_INCLUDE_PATH ${CMAKE_BINARY_DIR}/src)
+set(GENERAL_LIB GeneralLIB)
+set(PDF_REPORTER_LIB PDFReporterLIB)
+set(ODU_SOLVER_LIB ODUSolverLIB)
+set(CHEMICAL_GENERATOR_LIB ChemicalGeneratorLIB)
+
+#debugging
 if(${DEBUG} EQUAL 1)
     message(STATUS "Its debugging time!")
-    set(COMPILE_FLAGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result -O3)
+    #set(COMPILE_FLAGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result -O3)
+    set(COMPILE_FLAGS -O3)
 else()
     set(COMPILE_FLAGS -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
 endif()

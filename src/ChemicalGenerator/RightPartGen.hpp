@@ -8,7 +8,11 @@
 #include <type_traits>
 #include <unordered_map>
 #include <algorithm>
-#include "../General/Matrix.hpp"
+#include <iostream>
+#include <General/General.hpp>
+#include <General/Matrix.hpp>
+// #include "../General/General.hpp"
+// #include "../General/Matrix.hpp"
 
 template <typename E>
 constexpr auto to_underlying(E e) noexcept {
@@ -33,6 +37,13 @@ constexpr auto to_underlying(E e) noexcept {
 
 //Matrix<uint64_t> tableOfSubstance(to_underlying(Atom::COUNT_OF_ATOMS), to_underlying(Substance::COUNT_OF_SUBSTANCE));
 
+struct PhiFunction {
+    std::vector<std::vector<double>> phi;
+    std::vector<std::pair<double, double>> T;
+
+    double operator() (double t) const;
+};
+
 class ChemicalSystem;
 
 class ChemicalReaction {
@@ -41,7 +52,6 @@ class ChemicalReaction {
         std::string readSubstance (const std::string &sub, uint64_t &i) const;
         uint64_t readCoeff (const std::string &sub, uint64_t &i) const;
         std::vector<uint64_t> getSubstanceContent (const std::string &sub) const;
-        void initTable ();
         bool checkForCorrect () const;
     public:
         //ChemicalReaction ();
@@ -55,17 +65,19 @@ class ChemicalReaction {
 
         void setReaction (const std::string &str);
 
-        void setInput (const std::vector<std::pair<uint64_t, uint64_t>> &in);
-        void setOutput (const std::vector<std::pair<uint64_t, uint64_t>> &out);
+        void setInput (const std::vector<uint64_t> &in);
+        void setOutput (const std::vector<uint64_t> &out);
         void setParameters (double A, double n, double E);
 
-        const std::vector<std::pair<uint64_t, uint64_t>> &getInput () const;
-        const std::vector<std::pair<uint64_t, uint64_t>> &getOutput () const;
+        const std::vector<uint64_t> &getInput () const;
+        const std::vector<uint64_t> &getOutput () const;
 
         std::tuple<double, double, double> getParameters () const;
 
         ChemicalReaction &operator= (const ChemicalReaction &reaction);
         ChemicalReaction &operator= (ChemicalReaction &&reaction);
+
+        friend std::ostream &operator<< (std::ostream &out, const ChemicalReaction &reaction);
 
         friend ChemicalSystem;
     private:
@@ -73,7 +85,8 @@ class ChemicalReaction {
         //static std::vector<std::string> substances;
         const std::vector<std::string> &atoms;
         const std::vector<std::string> &substances;
-        std::vector<std::pair<uint64_t, uint64_t>> input, output;
+        //std::vector<std::pair<uint64_t, uint64_t>> input, output;
+        std::vector<uint64_t> input, output;
         double A, n, E;
 };
 
@@ -94,7 +107,7 @@ class ChemicalSystem {
 
         void addReaction (const std::string &reaction);
         void addReaction (const ChemicalReaction &reaction);
-        void setPressure (double rho);
+        void setPressure (double P);
         double getPressure () const;
         void setTemperature (double T);
         double getTemperature () const;
@@ -103,7 +116,13 @@ class ChemicalSystem {
 
         void initFromFile (const std::string &filename);
 
+        void printInfo (std::ostream &out) const;
+
+        void getODUSystem () const;
+
         uint64_t getCount () const;
+
+        std::vector<std::function<double(const std::vector<double> &)>> rightPartGen ();
 
         ChemicalReaction operator[] (uint64_t i) const;
         ChemicalReaction &operator[] (uint64_t i);
@@ -112,10 +131,15 @@ class ChemicalSystem {
         std::unordered_map<std::string, std::unordered_map<std::string, uint64_t>> table;
         std::vector<std::string> atoms;
         std::unordered_map<std::string, double> atom_mass;
+        //std::vector<double> atom_mass;
         std::vector<std::string> substances;
         std::unordered_map<std::string, double> substance_mass;
+        //std::vector<double> substance_mass;
+        std::vector<std::pair<double, double>> H0;
+        //std::vector<std::vector<double>> phi;
+        std::vector<PhiFunction> phi;
         std::vector<ChemicalReaction> reactions;
-        double rho, T;
+        double T, P;
 };
 
 double K (double A, double n, double T, double E);

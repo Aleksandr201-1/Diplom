@@ -1,19 +1,20 @@
-add_library(NotToughLIB "")
+add_library(${ODU_SOLVER_LIB} "")
 
-target_sources(NotToughLIB
+target_sources(${ODU_SOLVER_LIB}
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/RungeKutta.cpp
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/RungeKutta.hpp
 )
 
-target_link_libraries(NotToughLIB 
+target_link_libraries(${ODU_SOLVER_LIB} 
     PRIVATE
-        GeneralLIB
+        ${GENERAL_LIB}
 )
 
-target_include_directories(NotToughLIB
+target_include_directories(${ODU_SOLVER_LIB}
     PUBLIC
+        ${MODULES_INCLUDE_PATH}
         ${CMAKE_CURRENT_LIST_DIR}
 )
 

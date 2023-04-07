@@ -1,12 +1,12 @@
 #include <iostream>
 #include <iomanip>
-//#include <io.h>
-//#include <fcntl.h>
 //#include "gnuplot-iostream.h"
-#include "NotTough.hpp"
-//#include "General/LSM.hpp"
-#include "RightPartGen.hpp"
-#include "PDF-reporter/ReportGenerator.hpp"
+// #include "ODUSolver/RungeKutta.hpp"
+// #include "ChemicalGenerator/RightPartGen.hpp"
+// #include "PDFReporter/ReportGenerator.hpp"
+#include <ODUSolver/RungeKutta.hpp>
+#include <ChemicalGenerator/RightPartGen.hpp>
+#include <PDFReporter/ReportGenerator.hpp>
 
 // void plot (const std::vector<std::string> &func, double a, double b) {
 //     static std::vector<std::string> colors = {"red", "green", "blue"};
@@ -70,11 +70,29 @@ void help (const std::string &name) {
                   "\t-a, --approx\t[NUM]\t\tПродолжать процесс итераций в жёстких методах пока не будет достигнута точность [NUM]\n";
 }
 
+//схема CROS
 int main (int argc, char* argv[]) {
-    //ChemicalReaction::setAtomList({"H", "O"});
-    //ChemicalReaction::setSubstanceList({"H2", "O2", "H2O", "OH", "H", "O"});
-    //ChemicalReaction("H + OH => H2O");
     ReportInfo info;
+    ChemicalSystem sys;
+    sys.initFromFile("./test/ChemicTest/bufermm.txt");
+    sys.setPressure(100'000);
+    sys.setTemperature(1000);
+    //sys.setDensity(0.95);
+    sys.addReaction("H2 + O2 => 2OH");
+    sys.setReactionParameters(0, 1.7 * std::pow(10, 7), 0, 24044);
+    sys.addReaction("H + O2 => OH + O");
+    sys.setReactionParameters(1, 1.987 * std::pow(10, 8), 0, 8456);
+    sys.addReaction("H2 + OH => H2O + H");
+    sys.setReactionParameters(2, 1.024 * std::pow(10, 2), 1.6, 1660);
+    sys.addReaction("H2 + O => OH + H");
+    sys.setReactionParameters(3, 5.119 * std::pow(10, -2), 2.67, 3163);
+    sys.addReaction("2OH => H2O + O");
+    sys.setReactionParameters(4, 1.506 * std::pow(10, 3), 1.14, 50);
+    sys.addReaction("H + OH => H2O");
+    sys.setReactionParameters(5, 2.212 * std::pow(10, 16), -2.0, 0);
+    //sys.addReaction("2H => H2");
+    //sys.setReactionParameters(6, 9.791 * std::pow(10, 10), -0.6, 0);
+
     //uint64_t methodPos = 0;
     std::vector<std::string> args(argv, argv + argc);
     for (auto el : args) {
@@ -117,6 +135,8 @@ int main (int argc, char* argv[]) {
                 info.approx = std::stod(args[i + 1]);
                 ++i;
             }
+        } else if (args[i] == "--system" || args[i] == "-s") {
+            info.multigraph = true;
         }
     }
     // info.method = SolveMethod::RUNGE_KUTTA;
@@ -137,11 +157,18 @@ int main (int argc, char* argv[]) {
     Task task;
     FunctionalTree check;
 
-    info.input_task.push_back(readLine());
-    order = getOrder(info.input_task[0]);
-    for (uint64_t i = 0; i < order; ++i) {
-        //system.push_back(readLine());
+    if (info.multigraph) {
+        std::cin >> order;
+        for (uint64_t i = 0; i < order * 2; ++i) {
+            info.input_task.push_back(readLine());
+        }
+    } else {
         info.input_task.push_back(readLine());
+        order = getOrder(info.input_task[0]);
+        for (uint64_t i = 0; i < order; ++i) {
+            //system.push_back(readLine());
+            info.input_task.push_back(readLine());
+        }
     }
 
     std::cout << "Введите размер шага:\n";
@@ -149,11 +176,18 @@ int main (int argc, char* argv[]) {
     std::cout << "Введите границы:\n";
     std::cin >> X0 >> Xn;
     std::cout << "Введите функцию для сравнения:\n";
-    check.reset(readLine(), {"x"});
-    info.task = getTaskInfo(info.input_task, order, X0, Xn);
-    info.analitic = check;
-    std::cout << "analitic: " << info.analitic << "\n";
+    uint64_t countOfAnalitic = info.multigraph ? order : 1;
+    for (uint64_t i = 0; i < countOfAnalitic; ++i) {
+        check.reset(readLine(), {"x"});
+        info.analitic.push_back(check);
+        std::cout << "analitic " << i + 1 << ": " << info.analitic[i] << "\n";
+    }
 
+    if (info.multigraph) {
+        info.task = getSysInfo(info.input_task, order, X0, Xn);
+    } else {
+        info.task = getTaskInfo(info.input_task, order, X0, Xn);
+    }
     // std::vector<std::function<double(const std::vector<double> &)>> sus = {
     //     [&] (const std::vector<double> &args) -> double {
     //         return -10000 * args[1] - 4999 * args[2];
@@ -162,6 +196,39 @@ int main (int argc, char* argv[]) {
     //         return -10001 * args[1] - 5000 * args[2];
     //     }
     // };
+
+    // info.task.odu_system = sys.rightPartGen();
+    // info.task.order = 6;
+    // info.task.X0 = 0;
+    // info.h = 0.01;
+    // info.task.Xn = 3;
+    // info.task.Y = {0.5, 0, 0, 0.5, 0, 0};
+
+    // std::cout << "Chem size: " << info.task.odu_system.size() << "\n";
+    // std::cout << "Chemic func exmpl: " << info.task.odu_system[0]({0, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0, 0}) << "\n";
+    // return 0;
+
+    // double ru = 10;
+    // // auto f1 = [=] (const std::vector<double> &X) -> double {
+    // //     return -(ru + 2)*X[1] + ru*X[2]*X[2];
+    // // };
+    // // auto f2 = [=] (const std::vector<double> &X) -> double {
+    // //     return X[1] - X[2] - X[2]*X[2];
+    // // };
+    // auto f1 = [=] (const std::vector<double> &X) -> double {
+    //     return -(ru + 2)*X[2] + ru*X[1]*X[1];
+    // };
+    // auto f2 = [=] (const std::vector<double> &X) -> double {
+    //     return X[2] - X[1] - X[1]*X[1];
+    // };
+    // info.task.odu_system = {f2, f1};
+    // info.task.order = 2;
+    // info.task.X0 = 0;
+    // info.task.Xn = 3;
+    // info.task.Y = {1, 1};
+    // info.analitic = FunctionalTree("exp(-x)", std::vector<std::string>{"x"});
+    //return 0;
+
     info.tough_coeff = ToughCoeff(info.task);
 
     std::cout << "=====Рунге=====\n";
@@ -169,7 +236,6 @@ int main (int argc, char* argv[]) {
     //info.solution = Falberg(info.task, info.butcher, info.h);
     //info.solution = NonExplZeidel(info.task, info.butcher, info.h);
     info.solution = ODESolve(info.method, info.task, info.butcher, info.h, info.algo, info.approx);
-
     
     std::ofstream file("./report/report.tex");
     //auto &out = std::cout;

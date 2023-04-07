@@ -1,6 +1,6 @@
-add_library(GeneralLIB "")
+add_library(${GENERAL_LIB} "")
 
-target_sources(GeneralLIB
+target_sources(${GENERAL_LIB}
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/FuncMaker.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ButcherTable.cpp
@@ -17,7 +17,7 @@ target_sources(GeneralLIB
         ${CMAKE_CURRENT_LIST_DIR}/General.hpp
 )
 
-target_include_directories(GeneralLIB
+target_include_directories(${GENERAL_LIB}
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )

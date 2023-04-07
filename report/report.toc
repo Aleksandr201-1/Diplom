@@ -4,5 +4,5 @@
 \contentsline {section}{\IeC {\CYRT }\IeC {\cyra }\IeC {\cyrb }\IeC {\cyrl }\IeC {\cyri }\IeC {\cyrc }\IeC {\cyra } \IeC {\CYRB }\IeC {\cyru }\IeC {\cyrt }\IeC {\cyrch }\IeC {\cyre }\IeC {\cyrr }\IeC {\cyra }}{2}%
 \contentsline {section}{\IeC {\CYRZH }\IeC {\cyryo }\IeC {\cyrs }\IeC {\cyrt }\IeC {\cyrk }\IeC {\cyro }\IeC {\cyrs }\IeC {\cyrt }\IeC {\cyrsftsn }}{2}%
 \contentsline {section}{\IeC {\CYRR }\IeC {\cyre }\IeC {\cyrsh }\IeC {\cyre }\IeC {\cyrn }\IeC {\cyri }\IeC {\cyre } \IeC {\cyrz }\IeC {\cyra }\IeC {\cyrd }\IeC {\cyra }\IeC {\cyrch }\IeC {\cyri }}{2}%
-\contentsline {section}{\IeC {\CYRP }\IeC {\cyrr }\IeC {\cyri }\IeC {\cyrb }\IeC {\cyrl }\IeC {\cyri }\IeC {\cyrzh }\IeC {\cyra }\IeC {\cyryu }\IeC {\cyrshch }\IeC {\cyri }\IeC {\cyrishrt } \IeC {\cyrp }\IeC {\cyro }\IeC {\cyrl }\IeC {\cyri }\IeC {\cyrn }\IeC {\cyro }\IeC {\cyrm }}{3}%
-\contentsline {section}{\IeC {\CYRG }\IeC {\cyrr }\IeC {\cyra }\IeC {\cyrf }\IeC {\cyri }\IeC {\cyrk }}{3}%
+\contentsline {section}{\IeC {\CYRP }\IeC {\cyrr }\IeC {\cyri }\IeC {\cyrb }\IeC {\cyrl }\IeC {\cyri }\IeC {\cyrzh }\IeC {\cyra }\IeC {\cyryu }\IeC {\cyrshch }\IeC {\cyri }\IeC {\cyrishrt } \IeC {\cyrp }\IeC {\cyro }\IeC {\cyrl }\IeC {\cyri }\IeC {\cyrn }\IeC {\cyro }\IeC {\cyrm }}{76}%
+\contentsline {section}{\IeC {\CYRG }\IeC {\cyrr }\IeC {\cyra }\IeC {\cyrf }\IeC {\cyri }\IeC {\cyrk }}{76}%
