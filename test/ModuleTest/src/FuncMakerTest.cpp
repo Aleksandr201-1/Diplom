@@ -1,7 +1,8 @@
 #include <iostream>
 #include <ctime>
 #include <chrono>
-#include "../../src/General/FuncMaker.hpp"
+//#include "../../src/General/FuncMaker.hpp"
+#include <General/FuncMaker.hpp>
 
 const uint64_t TEST_SIZE = 1'000'000;
 const uint64_t TIME_TEST_NUM = -1;
