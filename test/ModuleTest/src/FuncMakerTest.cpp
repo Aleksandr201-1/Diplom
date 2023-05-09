@@ -2,6 +2,7 @@
 #include <ctime>
 #include <chrono>
 //#include "../../src/General/FuncMaker.hpp"
+#include <General/General.hpp>
 #include <General/FuncMaker.hpp>
 
 const uint64_t TEST_SIZE = 1'000'000;
@@ -10,32 +11,32 @@ using duration_t = std::chrono::microseconds;
 
 struct TestModule {
     FunctionalTree dFunc;
-    std::function<double (const std::vector<double> &)> sFunc;
+    std::function<float128_t (const std::vector<float128_t> &)> sFunc;
 };
 
 std::vector<TestModule> testInit () {
     return {
         {
             {"x + 2", std::vector<std::string>{"x"}},
-            [] (const std::vector<double> &X) {
+            [] (const std::vector<float128_t> &X) {
                 return X[0] + 2;
             }
         },
         {
             {"sin(cos(x)) + cos(cos(x))", std::vector<std::string>{"x"}},
-            [] (const std::vector<double> &X) {
+            [] (const std::vector<float128_t> &X) {
                 return std::sin(std::cos(X[0])) + std::cos(std::cos(X[0]));
             }
         },
         {
             {"sin(-x) + ln(e^10) + acos(-1)^x", std::vector<std::string>{"x"}},
-            [] (const std::vector<double> &X) {
+            [] (const std::vector<float128_t> &X) {
                 return std::sin(-X[0]) + std::log(std::exp(10)) + std::pow(std::acos(-1), X[0]);
             }
         },
         {
             {"(((((((((((x)))))))))))", std::vector<std::string>{"x"}},
-            [] (const std::vector<double> &X) {
+            [] (const std::vector<float128_t> &X) {
                 return (((((((((((X[0])))))))))));
             }
         }
@@ -50,8 +51,8 @@ int main () {
     std::cout << "=====Correct result testing=====\n";
 
     auto test = testInit();
-    double diff, ans1, ans2;
-    double random;
+    float128_t diff, ans1, ans2;
+    float128_t random;
     uint64_t dTime, sTime;
     uint64_t left, right;
     uint64_t errorSpot = -1;
