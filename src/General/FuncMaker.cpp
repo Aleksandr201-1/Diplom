@@ -2,40 +2,40 @@
 
 //var style
 
-OperationStruct::OperationStruct (const std::vector<std::string> &op_str, const std::function<double (double, double)> &func, uint64_t priority) 
+OperationStruct::OperationStruct (const std::vector<std::string> &op_str, const std::function<float128_t (float128_t, float128_t)> &func, uint64_t priority) 
 : op_str(op_str), func(func), priority(priority) {}
 
 OperationStruct::~OperationStruct () {}
 
 const std::vector<OperationStruct> FunctionalTree::operations = {
-    {{"+"},                        [] (double x, double y) {return x + y;},                                4},
-    {{"-"},                        [] (double x, double y) {return x - y;},                                4},
-    {{"*"},                        [] (double x, double y) {return x * y;},                                3},
-    {{"/"},                        [] (double x, double y) {return x / y;},                                3},
-    {{"%"},                        [] (double x, double y) {return std::fmod(x, y);},                      3},
-    {{"^", "**"},                  [] (double x, double y) {return std::pow(x, y);},                       2},
-    {{"sqrt"},                     [] (double x, double y) {return std::sqrt(x);},                         1},
-    {{"sin"},                      [] (double x, double y) {return std::sin(x);},                          1},
-    //{{"QWERTY"},                   [] (double x, double y) {return std::sin(x) + std::cos(y);},            1},
-    {{"cos"},                      [] (double x, double y) {return std::cos(x);},                          1},
-    {{"tan", "tg"},                [] (double x, double y) {return std::tan(x);},                          1},
-    {{"cot", "ctg"},               [] (double x, double y) {return 1.0 / std::tan(x);},                    1},
-    {{"sinh"},                     [] (double x, double y) {return std::sinh(x);},                         1},
-    {{"cosh"},                     [] (double x, double y) {return std::cosh(x);},                         1},
-    {{"tanh", "tgh"},              [] (double x, double y) {return std::tanh(x);},                         1},
-    {{"coth", "ctgh"},             [] (double x, double y) {return 1.0 / std::tanh(x);},                   1},
-    {{"arcsin", "asin"},           [] (double x, double y) {return std::asin(x);},                         1},
-    {{"arccos", "acos"},           [] (double x, double y) {return std::acos(x);},                         1},
-    {{"arctan", "arctg", "atan"},  [] (double x, double y) {return std::atan(x);},                         1},
-    {{"arccot", "arcctg", "acot"}, [] (double x, double y) {return std::acos(-1.0) / 2.0 - std::atan(x);}, 1},
-    {{"log"},                      [] (double x, double y) {return std::log10(x);},                        1},
-    {{"ln"},                       [] (double x, double y) {return std::log(x);},                          1},
-    {{"exp"},                      [] (double x, double y) {return std::exp(x);},                          1},
-    {{"abs"},                      [] (double x, double y) {return std::abs(x);},                          1},
-    {{"sign"},                     [] (double x, double y) {return x >= 0.0 ? 1 : -1;},                    1}
+    {{"+"},                        [] (float128_t x, float128_t y) {return x + y;},                                4},
+    {{"-"},                        [] (float128_t x, float128_t y) {return x - y;},                                4},
+    {{"*"},                        [] (float128_t x, float128_t y) {return x * y;},                                3},
+    {{"/"},                        [] (float128_t x, float128_t y) {return x / y;},                                3},
+    {{"%"},                        [] (float128_t x, float128_t y) {return std::fmod(x, y);},                      3},
+    {{"^", "**"},                  [] (float128_t x, float128_t y) {return std::pow(x, y);},                       2},
+    {{"sqrt"},                     [] (float128_t x, float128_t y) {return std::sqrt(x);},                         1},
+    {{"sin"},                      [] (float128_t x, float128_t y) {return std::sin(x);},                          1},
+    //{{"QWERTY"},                   [] (float128_t x, float128_t y) {return std::sin(x) + std::cos(y);},            1},
+    {{"cos"},                      [] (float128_t x, float128_t y) {return std::cos(x);},                          1},
+    {{"tan", "tg"},                [] (float128_t x, float128_t y) {return std::tan(x);},                          1},
+    {{"cot", "ctg"},               [] (float128_t x, float128_t y) {return 1.0 / std::tan(x);},                    1},
+    {{"sinh"},                     [] (float128_t x, float128_t y) {return std::sinh(x);},                         1},
+    {{"cosh"},                     [] (float128_t x, float128_t y) {return std::cosh(x);},                         1},
+    {{"tanh", "tgh"},              [] (float128_t x, float128_t y) {return std::tanh(x);},                         1},
+    {{"coth", "ctgh"},             [] (float128_t x, float128_t y) {return 1.0 / std::tanh(x);},                   1},
+    {{"arcsin", "asin"},           [] (float128_t x, float128_t y) {return std::asin(x);},                         1},
+    {{"arccos", "acos"},           [] (float128_t x, float128_t y) {return std::acos(x);},                         1},
+    {{"arctan", "arctg", "atan"},  [] (float128_t x, float128_t y) {return std::atan(x);},                         1},
+    {{"arccot", "arcctg", "acot"}, [] (float128_t x, float128_t y) {return std::acos(-1.0) / 2.0 - std::atan(x);}, 1},
+    {{"log"},                      [] (float128_t x, float128_t y) {return std::log10(x);},                        1},
+    {{"ln"},                       [] (float128_t x, float128_t y) {return std::log(x);},                          1},
+    {{"exp"},                      [] (float128_t x, float128_t y) {return std::exp(x);},                          1},
+    {{"abs"},                      [] (float128_t x, float128_t y) {return std::abs(x);},                          1},
+    {{"sign"},                     [] (float128_t x, float128_t y) {return x >= 0.0 ? 1 : -1;},                    1}
 };
 
-const std::map<std::string, double> FunctionalTree::const_vals = {
+const std::map<std::string, float128_t> FunctionalTree::const_vals = {
     {"pi", std::acos(-1.0)},
     {"e", std::exp(1.0)}
 };
@@ -46,7 +46,7 @@ FunctionalTreeNode::~FunctionalTreeNode () {}
 OperationNode::OperationNode (uint64_t idx) : FunctionalTreeNode(NodeType::OPERATION), idx(idx) {}
 OperationNode::~OperationNode () {}
 
-ValueNode::ValueNode (double val) : FunctionalTreeNode(NodeType::VALUE), val(val) {}
+ValueNode::ValueNode (float128_t val) : FunctionalTreeNode(NodeType::VALUE), val(val) {}
 ValueNode::~ValueNode () {}
 
 VariableNode::VariableNode (uint64_t idx) : FunctionalTreeNode(NodeType::VARIABLE), idx(idx) {}
@@ -118,7 +118,7 @@ std::string FunctionalTree::readWord (const std::string &func, uint64_t &i) cons
     return str;
 }
 
-double FunctionalTree::readNumber (const std::string &func, uint64_t &i) const {
+float128_t FunctionalTree::readNumber (const std::string &func, uint64_t &i) const {
     std::string str;
     while (((func[i] >= '0' && func[i] <= '9') || func[i] == '.') && i < func.size()) {
         str += func[i];
@@ -176,8 +176,8 @@ uint64_t FunctionalTree::getOperation (const std::string &str) const {
     return op;
 }
 
-double FunctionalTree::getConstant (const std::string &str) const {
-    double constant = std::nan("1");
+float128_t FunctionalTree::getConstant (const std::string &str) const {
+    float128_t constant = std::nan("1");
     auto it = const_vals.find(str);
     if (it != const_vals.end()) {
         constant = it->second;
@@ -195,12 +195,12 @@ uint64_t FunctionalTree::getPriority (uint64_t idx) const {
     return operations[idx].priority;
 }
 
-double FunctionalTree::useOperation (uint64_t idx, double x, double y) const {
+float128_t FunctionalTree::useOperation (uint64_t idx, float128_t x, float128_t y) const {
     //uint64_t idx = static_cast<uint64_t>(op);
     return operations[idx].func(x, y);
 }
 
-double FunctionalTree::calcNode (const NodePtr &node, const std::vector<double> &X) const {
+float128_t FunctionalTree::calcNode (const NodePtr &node, const std::vector<float128_t> &X) const {
     if (!node->left.get() && !node->right.get()) {
         if (node->type == NodeType::VALUE) {
             return static_cast<ValueNode *>(node.get())->val;
@@ -215,8 +215,8 @@ double FunctionalTree::calcNode (const NodePtr &node, const std::vector<double> 
     if (!node->left && node->right) {
         return useOperation(operation->idx, calcNode(operation->right, X), 0);
     }
-    double a = calcNode(node->left, X);
-    double b = calcNode(node->right, X);
+    float128_t a = calcNode(node->left, X);
+    float128_t b = calcNode(node->right, X);
     return useOperation(operation->idx, a, b);
 }
 
@@ -253,7 +253,7 @@ FunctionalTree::NodePtr FunctionalTree::buildTree (const std::string &func) {
     std::string tmp;
     uint64_t i = 0;
 
-    double num;
+    float128_t num;
     uint64_t op_idx;
     uint64_t idx;
     NodePtr current, node;
@@ -274,7 +274,7 @@ FunctionalTree::NodePtr FunctionalTree::buildTree (const std::string &func) {
             op_idx = getOperation(tmp);
             //std::cout << "op: " << op_idx << "\n";
             if (op_idx == uint64_t(-1)) {
-                double constant = getConstant(tmp);
+                float128_t constant = getConstant(tmp);
                 if (std::isnan(constant)) {
                     constant = getValue(tmp);
                 }
@@ -615,7 +615,7 @@ void FunctionalTree::reset (const std::string &func, const std::vector<std::stri
     root = buildTree(func);
 }
 
-void FunctionalTree::setValue (const std::string &name, double val) {
+void FunctionalTree::setValue (const std::string &name, float128_t val) {
     for (uint64_t j = 0; j < operations.size(); ++j) {
         auto it = std::find(operations[j].op_str.cbegin(), operations[j].op_str.cend(), name);
         uint64_t idx = std::distance(operations[j].op_str.cbegin(), it);
@@ -636,8 +636,8 @@ void FunctionalTree::setValue (const std::string &name, double val) {
     vals[name] = val;
 }
 
-double FunctionalTree::getValue (const std::string &name) const {
-    double ans = std::nan("1");
+float128_t FunctionalTree::getValue (const std::string &name) const {
+    float128_t ans = std::nan("1");
     auto it = vals.find(name);
     if (it != vals.end()) {
         ans = it->second;
@@ -645,15 +645,15 @@ double FunctionalTree::getValue (const std::string &name) const {
     return ans;
 }
 
-double FunctionalTree::func (double x) const {
+float128_t FunctionalTree::func (float128_t x) const {
     return calcNode(root, {x});
 }
 
-double FunctionalTree::func (const std::vector<double> &X) const {
+float128_t FunctionalTree::func (const std::vector<float128_t> &X) const {
     return calcNode(root, X);
 }
 
-double FunctionalTree::calculate () const {
+float128_t FunctionalTree::calculate () const {
     return calcNode(root, {});
 }
 
@@ -663,7 +663,7 @@ std::vector<std::string> FunctionalTree::getVariableList () const {
 
 std::vector<std::string> FunctionalTree::getValueList () const {
     std::vector<std::string> vals_str;
-    for (auto const &it : vals) {
+    for (const auto &it : vals) {
         vals_str.push_back(it.first);
     }
     return vals_str;
@@ -784,11 +784,11 @@ FunctionalTree &FunctionalTree::operator= (FunctionalTree &&tree) {
     return *this;
 }
 
-double FunctionalTree::operator() (double x) const {
+float128_t FunctionalTree::operator() (float128_t x) const {
     return calcNode(root, {x});
 }
 
-double FunctionalTree::operator() (const std::vector<double> &X) const {
+float128_t FunctionalTree::operator() (const std::vector<float128_t> &X) const {
     return calcNode(root, X);
 }
 

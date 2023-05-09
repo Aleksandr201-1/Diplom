@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include "General.hpp"
 
 // TODO:
 // V исправить унарный оператор
@@ -66,10 +67,10 @@ enum class NodeType {
 
 struct OperationStruct {
     std::vector<std::string> op_str;
-    std::function<double (double, double)> func;
+    std::function<float128_t (float128_t, float128_t)> func;
     uint64_t priority;
 
-    OperationStruct (const std::vector<std::string> &op_str, const std::function<double (double, double)> &func, uint64_t priority);
+    OperationStruct (const std::vector<std::string> &op_str, const std::function<float128_t (float128_t, float128_t)> &func, uint64_t priority);
     ~OperationStruct ();
 };
 
@@ -97,11 +98,11 @@ class OperationNode : public FunctionalTreeNode {
 
 class ValueNode : public FunctionalTreeNode {
     public:
-        ValueNode (double val);
+        ValueNode (float128_t val);
         ~ValueNode ();
         friend FunctionalTree;
     private:
-        double val;
+        float128_t val;
 };
 
 class VariableNode : public FunctionalTreeNode {
@@ -125,21 +126,21 @@ class FunctionalTree {
         //чтение слова
         std::string readWord (const std::string &func, uint64_t &i) const;
         //чтение числа
-        double readNumber (const std::string &func, uint64_t &i) const;
+        float128_t readNumber (const std::string &func, uint64_t &i) const;
         //чтение выражения в скобках
         std::string readInbrace (const std::string &func, uint64_t &i) const;
         //конвертация строки в операцию
         uint64_t getOperation (const std::string &str) const;
         //конвертация строки в числовую константу
-        double getConstant (const std::string &str) const;
+        float128_t getConstant (const std::string &str) const;
         //конвертация строки в индекс перпеменной
         uint64_t getVariable (const std::string &str) const;
         //получение приоритета операции (0 - выполяться сразу, 4 - выполняться в конце)
         uint64_t getPriority (uint64_t op) const;
         // использование операции на 2х переменных
-        double useOperation (uint64_t op, double x, double y) const;
+        float128_t useOperation (uint64_t op, float128_t x, float128_t y) const;
         //вычисление выражение в поддереве node
-        double calcNode (const NodePtr &node, const std::vector<double> &X) const;
+        float128_t calcNode (const NodePtr &node, const std::vector<float128_t> &X) const;
         //добавление узла в дерево
         void addToTree (NodePtr &tree, NodePtr &node);
         //построение дерева по строке
@@ -174,15 +175,15 @@ class FunctionalTree {
         //сброс дерева
         void reset (const std::string &func, const std::vector<std::string> &vars);
         //добавить значение
-        void setValue (const std::string &name, double val);
+        void setValue (const std::string &name, float128_t val);
         //получение значения по имени (если значения не существует, то возвращает nan)
-        double getValue (const std::string &name) const;
+        float128_t getValue (const std::string &name) const;
         //вызов функции для 1 аргумента
-        double func (double x) const;
+        float128_t func (float128_t x) const;
         //вызов функции для произвольного числа аргументов
-        double func (const std::vector<double> &X) const;
+        float128_t func (const std::vector<float128_t> &X) const;
         //посчитать выражение без переменных (если в функции есть переменные, то их значение берётся равным нулю)
-        double calculate () const;
+        float128_t calculate () const;
         //список переменных
         std::vector<std::string> getVariableList () const;
         //список значений
@@ -204,9 +205,9 @@ class FunctionalTree {
         FunctionalTree &operator= (FunctionalTree &&tree);
 
         //оператор функции от 1 переменной
-        double operator() (double x) const;
+        float128_t operator() (float128_t x) const;
         //оператор функции для произвольного числа переменных
-        double operator() (const std::vector<double> &X) const;
+        float128_t operator() (const std::vector<float128_t> &X) const;
 
         //вывод
         friend std::ostream &operator<< (std::ostream &output, const FunctionalTree &tree);
@@ -216,10 +217,10 @@ class FunctionalTree {
         friend std::ofstream &operator<< (std::ofstream &file, const FunctionalTree &tree);
     private:
         static const std::vector<OperationStruct> operations; //список операций
-        static const std::map<std::string, double> const_vals; //список константных значений (pi, e и т.д.)
+        static const std::map<std::string, float128_t> const_vals; //список константных значений (pi, e и т.д.)
         //static const std::vector<ConstantValue> const_val;
         //static const uint64_t VARIABLE_LIMIT = 10;
-        std::map<std::string, double> vals; //список пользовательских значений
+        std::map<std::string, float128_t> vals; //список пользовательских значений
         std::vector<std::string> vars; //список переменных
         //std::vector<int> aa;
         NodePtr root;

@@ -71,8 +71,8 @@ bool QRCheckForEnd (const Matrix<T> &matrix, T approx) {
 }
 
 template <class T>
-std::vector<double> QRFindLambda (const Matrix<T> &matrix, T approx) {
-    std::vector<double> lambda;
+std::vector<T> QRFindLambda (const Matrix<T> &matrix, T approx) {
+    std::vector<T> lambda;
     uint64_t iteration = 0, n = matrix.size().n;
     //std::cout << "Matrix A:\n" << matrix << "\nEpsilon = " << approx << "\n";
     Matrix<T> Q, R, A(matrix);

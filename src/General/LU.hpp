@@ -68,7 +68,7 @@ std::tuple<Matrix<T>, Matrix<T>, Matrix<T>> LU (const Matrix<T> &matrix) {
 }
 
 template <class T>
-std::vector<double> LUsolveSLAE (const Matrix<T> &matrix, const std::vector<T> &ans) {
+std::vector<T> LUsolveSLAE (const Matrix<T> &matrix, const std::vector<T> &ans) {
     uint64_t n = matrix.size().n;
 
     if (!matrix.isSquare() || n != ans.size()) {
@@ -152,6 +152,26 @@ Matrix<T> LUReverseMatrix (const Matrix<T> &matrix) {
 
     Ar = Ur * Lr * P;
     return Ar;
+}
+
+template <class T>
+T LUGetDet (const Matrix<T> &matrix) {
+    T ans = 1;
+    uint64_t n = matrix.size().n;
+
+    if (!matrix.isSquare()) {
+        std::cerr << "Matrix is not square. Stop working.\n";
+        exit(-1);
+    }
+
+    Matrix<T> A(matrix);
+    Matrix<T> L, U, P;
+    std::tie(L, U, P) = LU(A);
+    for (uint64_t i = 0; i < U.size().n; ++i) {
+        ans *= U(i, i);
+    }
+
+    return ans;
 }
 
 #endif

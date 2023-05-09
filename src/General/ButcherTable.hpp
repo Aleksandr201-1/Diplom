@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <map>
+#include "General.hpp"
 #include "Matrix.hpp"
 
 enum class SolveMethod {
@@ -22,6 +23,6 @@ std::string solveMethodToString (SolveMethod method);
 
 SolveMethod stringToSolveMethod (const std::string &str);
 
-Matrix<double> createButcherTable (SolveMethod method, uint64_t order, uint64_t way);
+Matrix<float128_t> createButcherTable (SolveMethod method, uint64_t order, uint64_t way);
 
 #endif

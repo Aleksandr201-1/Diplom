@@ -9,7 +9,8 @@ target_sources(${PDF_REPORTER_LIB}
 
 target_link_libraries(${PDF_REPORTER_LIB} 
     PRIVATE
-        ${GENERAL_LIB}
+        ${KOSHI_SOLVER_LIB}
+        ${CHEMICAL_SOLVER_LIB}
 )
 
 target_include_directories(${PDF_REPORTER_LIB}

@@ -15,7 +15,7 @@ const std::map<std::string, SolveMethod> methods = {
 };
 
 std::string solveMethodToString (SolveMethod method) {
-    auto check = [method] (const auto& pair) -> bool {
+    auto check = [method] (const auto &pair) -> bool {
         return pair.second == method;
     };
     auto result = std::find_if(methods.begin(), methods.end(), check);
@@ -23,31 +23,6 @@ std::string solveMethodToString (SolveMethod method) {
         return result->first;
     }
     return "NotAMethod";
-    // for (auto &it = methods.сbegin(); it != methods.сend(); ++it) {
-
-    // }
-    // switch (method) {
-    //     case SolveMethod::RUNGE_KUTTA:
-    //         return "Runge Kutta";
-    //     case SolveMethod::FALBERG:
-    //         return "Falberg";
-    //     case SolveMethod::CHESKINO:
-    //         return "Cheskino";
-    //     case SolveMethod::MERSON:
-    //         return "Merson";
-    //     case SolveMethod::RADO:
-    //         return "Rado";
-    //     case SolveMethod::GAUSS:
-    //         return "Gauss";
-    //     case SolveMethod::LOBATTO:
-    //         return "Lobatto";
-    //     case SolveMethod::L_STABLE_DIAGONAL:
-    //         return "L Stable Diagonal";
-    //     case SolveMethod::DORMAN_PRINCE:
-    //         return "Dorman Prince";
-    //     default:
-    //         return "Not a method";
-    // }
 }
 
 SolveMethod stringToSolveMethod (const std::string &str) {
@@ -87,8 +62,8 @@ SolveMethod stringToSolveMethod (const std::string &str) {
     //throw std::logic_error("stringToSolveMethod: method \"" + str + "\" doesnt exist");
 }
 
-Matrix<double> createButcherTable (SolveMethod method, uint64_t order, uint64_t way) {
-    Matrix<double> butcher;
+Matrix<float128_t> createButcherTable (SolveMethod method, uint64_t order, uint64_t way) {
+    Matrix<float128_t> butcher;
     std::string filename = "./src/General/Butcher/BT-" + solveMethodToString(method) + "-" + std::to_string(order) + "-" + std::to_string(way) + ".bin";
     //std::cout << filename << "\n";
     //system("ls -l");

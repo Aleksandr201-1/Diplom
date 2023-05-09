@@ -5,13 +5,14 @@
 #include <cstdint>
 #include <functional>
 #include "LU.hpp"
+#include "General.hpp"
 
-std::vector<double> LeastSquareMethod (const std::vector<double> &X, const std::vector<double> &Y, uint64_t n);
+std::vector<float128_t> LeastSquareMethod (const std::vector<float128_t> &X, const std::vector<float128_t> &Y, uint64_t n);
 
-double ErrorSquareSum (const std::vector<double> &X, const std::vector<double> &Y, const std::vector<double> &poly);
+float128_t ErrorSquareSum (const std::vector<float128_t> &X, const std::vector<float128_t> &Y, const std::vector<float128_t> &poly);
 
-double LSMFunc (const std::vector<double> &coeff, double x);
+float128_t LSMFunc (const std::vector<float128_t> &coeff, float128_t x);
 
-std::string LSMToText (const std::vector<double> &poly);
+std::string LSMToText (const std::vector<float128_t> &poly);
 
 #endif
