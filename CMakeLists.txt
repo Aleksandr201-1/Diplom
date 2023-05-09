@@ -18,17 +18,21 @@ endif()
 # libraries names
 set(MODULES_INCLUDE_PATH ${CMAKE_BINARY_DIR}/src)
 set(GENERAL_LIB GeneralLIB)
+set(ODE_GENERAL_LIB ODEGeneralLIB)
+set(KOSHI_SOLVER_LIB KoshiSolverLIB)
+set(CHEMICAL_SOLVER_LIB ChemicalSolverLIB)
 set(PDF_REPORTER_LIB PDFReporterLIB)
-set(ODU_SOLVER_LIB ODUSolverLIB)
-set(CHEMICAL_GENERATOR_LIB ChemicalGeneratorLIB)
+#set(CHEMICAL_GENERATOR_LIB ChemicalGeneratorLIB)
+
+set(COMPILE_WARNINGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
 
 #debugging
 if(${DEBUG} EQUAL 1)
     message(STATUS "Its debugging time!")
     #set(COMPILE_FLAGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result -O3)
-    set(COMPILE_FLAGS -O3)
+    set(COMPILE_FLAGS -O3 ${COMPILE_WARNINGS})
 else()
-    set(COMPILE_FLAGS -Wextra -Wall -Werror -Wno-sign-compare -Wno-unused-result -O3)
+    set(COMPILE_FLAGS -Werror ${COMPILE_WARNINGS} -O3)
 endif()
 
 project(Diplom LANGUAGES CXX)

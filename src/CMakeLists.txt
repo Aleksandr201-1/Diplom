@@ -7,17 +7,15 @@ add_executable(main main.cpp)
 #set(BOOST_LIBS )
 
 add_subdirectory(General)
-add_subdirectory(PDFReporter)
 add_subdirectory(ODUSolver)
-add_subdirectory(ChemicalGenerator)
+add_subdirectory(PDFReporter)
+#add_subdirectory(ChemicalGenerator)
 
 target_link_libraries(main
     PRIVATE
-        ${GENERAL_LIB}
+        ${KOSHI_SOLVER_LIB}
+        ${CHEMICAL_SOLVER_LIB}
         ${PDF_REPORTER_LIB}
-        ${ODU_SOLVER_LIB}
-        ${CHEMICAL_GENERATOR_LIB}
-        #${BOOST_LIBS}
 )
 
 target_include_directories(main

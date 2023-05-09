@@ -1,11 +1,27 @@
 */bin
 */lib
 */CMakeFiles
+*/Makefile
 */CMakeCache.txt
 */cmake_install.cmake
 
 bin
 lib
 CMakeFiles
+Makefile
 CMakeCache.txt
 cmake_install.cmake
+
+*.acn
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.glo
+*.glo-abr
+*.log
+*.toc
+*.xdv
+*.xdy
