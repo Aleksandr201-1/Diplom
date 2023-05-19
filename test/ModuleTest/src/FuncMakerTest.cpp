@@ -7,7 +7,8 @@
 
 const uint64_t TEST_SIZE = 1'000'000;
 const uint64_t TIME_TEST_NUM = -1;
-using duration_t = std::chrono::microseconds;
+//microseconds
+using duration_t = std::chrono::milliseconds;
 
 struct TestModule {
     FunctionalTree dFunc;
@@ -35,9 +36,45 @@ std::vector<TestModule> testInit () {
             }
         },
         {
-            {"(((((((((((x)))))))))))", std::vector<std::string>{"x"}},
+            {"(11 - x^3 * (3*x - 8)) / (12 * (x - 2)^2 * (x - 3))", std::vector<std::string>{"x"}},
             [] (const std::vector<float128_t> &X) {
-                return (((((((((((X[0])))))))))));
+                return (11 - X[0]*X[0]*X[0] * (3*X[0] - 8)) / (12 * (X[0] - 2)*(X[0]-2) * (X[0] - 3));
+            }
+        },
+        {
+            {"x * exp(1 / x)", std::vector<std::string>{"x"}},
+            [] (const std::vector<float128_t> &X) {
+                return X[0] * exp(1.0 / X[0]);
+            }
+        },
+        {
+            {"exp(x*sin(ln(x)) + x)", std::vector<std::string>{"x"}},
+            [] (const std::vector<float128_t> &X) {
+                return std::exp(X[0]*std::sin(std::log(X[0])) + X[0]);
+            }
+        },
+        {
+            {"(1/4)*x^3 - 1/x", std::vector<std::string>{"x"}},
+            [] (const std::vector<float128_t> &X) {
+                return (1.0/4.0)*X[0]*X[0]*X[0] - 1.0/X[0];
+            }
+        },
+        {
+            {"1 + ln(abs(x))", std::vector<std::string>{"x"}},
+            [] (const std::vector<float128_t> &X) {
+                return 1 + std::log(std::abs(X[0]));
+            }
+        },
+        {
+            {"cos(sqrt(4*x)) + sin(sqrt(4*x))", std::vector<std::string>{"x"}},
+            [] (const std::vector<float128_t> &X) {
+                return std::cos(std::sqrt(4*X[0])) + std::sin(std::sqrt(4*X[0]));
+            }
+        },
+        {
+            {"abs(x)^(3/2)", std::vector<std::string>{"x"}},
+            [] (const std::vector<float128_t> &X) {
+                return std::pow(std::abs(X[0]), (3.0/2.0));
             }
         }
     };

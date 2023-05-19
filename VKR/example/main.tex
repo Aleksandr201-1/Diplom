@@ -5,6 +5,7 @@
 \SetLipsumText{fishes} % fishes.ltd.tex
 %\usepackage[table]{xcolor}
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
 
 % Путь к рисункам
 \graphicspath{{inc/Pictures}}
@@ -14,7 +15,7 @@
 \theme{Моделирование систем уравнений химической кинетики на базе схем Рунге-Кутты}
 
 \supervisor{Демидова Ольга Львовна}
-\firstConsultant{Гидаспов Владимир Юрьевич}
+\firstConsultant{-}
 \secondConsultant{-}
 
 \faculty{№ 8 <<Компьютерные науки и прикладная математика>>}
@@ -32,7 +33,8 @@
 \input{contents/glossary}
 \input{contents/terms}
 
-\addbibresource{main.bib}
+%\addbibresource{main.bib}
+\bibliography{main.bib}
 
 % Иллюстрации всегда по центру
 \makeatletter
@@ -54,8 +56,8 @@
     \include{contents/1-introduction} % Введение
 
     \include{contents/2-00-actuality} % Основная часть
-    \include{contents/2-01-programs}
-    \include{contents/2-02-goals}
+    \include{contents/2-01-goals}
+    \include{contents/2-02-programs}
     \include{contents/2-03-methods}
     \include{contents/2-04-realisation}
     \include{contents/2-05-results}

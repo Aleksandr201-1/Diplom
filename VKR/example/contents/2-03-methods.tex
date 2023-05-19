@@ -65,7 +65,7 @@
 Число \ref{eq:tough} называется жёсткостью задачи.
 
 Для жёстких задач число жёсткости должно быть намного больше единицы, однако чёткой границы между жёсткой и нежёсткой задачей нет. Так
-модельные уравнения с числом жёсткости более 100 уже дают небольшие скачки погрешности решения. В задачах химической кинетики число
+модельные уравнения с числом жёсткости более $100$ уже дают небольшие скачки погрешности решения. В задачах химической кинетики число
 жёсткости может быть более $10^6$.
 
 \subsection{Явные схемы для решения ОДУ}
@@ -74,7 +74,7 @@
 одношаговых методов Рунге-Кутты.
 
 В семейство методов Рунге-Кутты входит огромное число схем, как явных, так и неявных. Все эти методы представлены в виде таблиц
-Бутчера.
+Бутчера. Общий вид явных схем представлен на рисунке \ref{fig:Runge}.
 
 Явные методы обладают нижней диагональной формой таблицы Бутчера и позволяют решать задачи обычными маршевыми методами. В связи с тем,
 что явные методы являются условно устойчивыми, работа с ними сильно зависит от размера шага итегрирования и для достижения заданной
@@ -94,10 +94,10 @@
 \begin{figure}
     \includegraphics[width=15cm]{2-03-runge}
     \caption{Общий вид явных схем}
-    \label{fig:runge}
+    \label{fig:Runge}
 \end{figure}
 
-Примеры таблиц Бутчера для явных методов:
+Примеры таблиц Бутчера \ref{tab:RungeKutta4}, \ref{tab:RungeKutta6} для явных методов:
 
 \begin{table}    
     \caption{Таблица Бутчера для метода явного метода Рунге-Кутты 4-го порядка}
@@ -114,7 +114,7 @@
     $0$ & \cellcolor{lightgray} $\frac{1}{6}$ & \cellcolor{lightgray} $\frac{1}{3}$ & \cellcolor{lightgray} $\frac{1}{3}$ & \cellcolor{lightgray} $\frac{1}{6}$\\
     \hline
     \end{tabular}
-    \label{tab:RK4}
+    \label{tab:RungeKutta4}
 \end{table}
 
 \begin{table}    
@@ -136,7 +136,7 @@
     $0$ & \cellcolor{lightgray} $\frac{7}{90}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $-\frac{1}{3}$ & \cellcolor{lightgray} $\frac{7}{15}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $\frac{7}{90}$\\
     \hline
     \end{tabular}
-    \label{tab:RK6}
+    \label{tab:RungeKutta6}
 \end{table}
 
 \subsection{Явные вложенные схемы для решения ОДУ}
@@ -152,7 +152,7 @@
 \begin{figure}
     \includegraphics[width=15cm]{2-03-falberg}
     \caption{Общий вид явных вложенных схем}
-    \label{fig:falberg}
+    \label{fig:Falberg}
 \end{figure}
 
 Примеры таблиц Бутчера для вложенных методов:
@@ -187,16 +187,18 @@
     \hline
     $\frac{4}{5}$ & $\frac{44}{45}$ & $-\frac{56}{15}$ & $\frac{32}{9}$ & $0$ & $0$ & $0$ & $0$\\
     \hline
-    $\frac{8}{9}$ & $\frac{19372}{6561}$ & $-\frac{25360}{2187}$ & $\frac{64448}{6561}$ & $\frac{7}{8}$ & $0$ & $0$ & $0$\\
+    $\frac{8}{9}$ & $\frac{19372}{6561}$ & $-\frac{25360}{2187}$ & $\frac{64448}{6561}$ & $-\frac{212}{729}$ & $0$ & $0$ & $0$\\
     \hline
-    $1$ & $-\frac{4}{7}$ & $\frac{12}{7}$ & $-\frac{2}{7}$ & $-1$ & $7$ & $0$ & $0$\\
+    $1$ & $\frac{9017}{3168}$ & $-\frac{355}{33}$ & $\frac{46732}{5247}$ & $\frac{49}{176}$ & $-\frac{5103}{18656}$ & $0$ & $0$\\
     \hline
-    $0$ & \cellcolor{lightgray} $\frac{7}{90}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $-\frac{1}{3}$ & \cellcolor{lightgray} $\frac{7}{15}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $\frac{7}{90}$ & \cellcolor{lightgray} $0$\\
+    $1$ & $\frac{35}{384}$ & $0$ & $\frac{500}{1113}$ & $\frac{125}{192}$ & $-\frac{2187}{6784}$ & $\frac{11}{84}$ & $0$\\
     \hline
-    $0$ & \cellcolor{lightgray} $\frac{7}{90}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $-\frac{1}{3}$ & \cellcolor{lightgray} $\frac{7}{15}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $\frac{7}{90}$ & \cellcolor{lightgray} $0$\\
+    $0$ & \cellcolor{lightgray} $\frac{35}{384}$ & \cellcolor{lightgray} $0$ & \cellcolor{lightgray} $\frac{500}{1113}$ & \cellcolor{lightgray} $\frac{125}{192}$ & \cellcolor{lightgray} $-\frac{2187}{6784}$ & \cellcolor{lightgray} $\frac{11}{84}$ & \cellcolor{lightgray} $0$\\
+    \hline
+    $0$ & \cellcolor{lightgray} $\frac{5179}{57600}$ & \cellcolor{lightgray} $0$ & \cellcolor{lightgray} $\frac{7571}{16695}$ & \cellcolor{lightgray} $\frac{393}{640}$ & \cellcolor{lightgray} $-\frac{92097}{339200}$ & \cellcolor{lightgray} $\frac{187}{2100}$ & \cellcolor{lightgray} $\frac{1}{40}$\\
     \hline
     \end{tabular}
-    \label{tab:DP4}
+    \label{tab:DormanPrince4}
 \end{table}
 
 \subsection{Неявные схемы для решения ОДУ}
@@ -205,70 +207,60 @@
 методы и принуждает решать систему алгебраических уравнений на каждом шаге интегрирования, что вызывет определённые сложности у
 разработчиков.
 
-%(примеры таблиц для двух неявных 4 и 6)
-%(формулы в общем виде)
-%(ссылки)
-
 \begin{figure}
     \includegraphics[width=15cm]{2-03-gauss}
     \caption{Общий вид неявных схем}
-    \label{fig:gauss}
+    \label{fig:Gauss}
 \end{figure}
 
 Примеры таблиц Бутчера для неявных методов:
 
 \begin{table}    
     \caption{Таблица Бутчера для метода неявного метода Гаусса 4-го порядка}
-    \begin{tabular}{|c|c|c|c|c|}
+    \begin{tabular}{|c|c|c|}
     \hline
-    $0$ & $0$ & $0$ & $0$ & $0$\\
+    $\frac{1}{2} - \frac{\sqrt{3}}{6}$ & $\frac{1}{4}$ & $\frac{1}{4} - \frac{\sqrt{3}}{6}$\\
     \hline
-    $\frac{1}{2}$ & $\frac{1}{2}$ & $0$ & $0$ & $0$\\
+    $\frac{1}{2} + \frac{\sqrt{3}}{6}$ & $\frac{1}{4} + \frac{\sqrt{3}}{6}$ & $\frac{1}{4}$\\
     \hline
-    $\frac{1}{2}$ & $0$ & $\frac{1}{2}$ & $0$ & $0$\\
-    \hline
-    $1$ & $0$ & $0$ & $1$ & $0$\\
-    \hline
-    $0$ & \cellcolor{lightgray} $\frac{1}{6}$ & \cellcolor{lightgray} $\frac{1}{3}$ & \cellcolor{lightgray} $\frac{1}{3}$ & \cellcolor{lightgray} $\frac{1}{6}$\\
+    $0$ & \cellcolor{lightgray} $\frac{1}{2}$ & \cellcolor{lightgray} $\frac{1}{2}$\\
     \hline
     \end{tabular}
-    \label{tab:RK4}
+    \label{tab:Gauss4}
 \end{table}
 
 \begin{table}    
     \caption{Таблица Бутчера для метода неявного метода Гаусса 6-го порядка}
-    \begin{tabular}{|c|c|c|c|c|c|c|}
+    \begin{tabular}{|c|c|c|c|}
     \hline
-    $0$ & $0$ & $0$ & $0$ & $0$ & $0$ & $0$\\
+    $\frac{1}{2} - \frac{\sqrt{15}}{10}$ & $\frac{5}{36}$ & $\frac{2}{9} - \frac{\sqrt{15}}{15}$ & $\frac{5}{36} - \frac{\sqrt{15}}{30}$\\
     \hline
-    $\frac{1}{4}$ & $\frac{1}{4}$ & $0$ & $0$ & $0$ & $0$ & $0$\\
+    $\frac{1}{2}$ & $\frac{5}{36} + \frac{\sqrt{15}}{24}$ & $\frac{2}{9}$ & $\frac{5}{36} - \frac{\sqrt{15}}{24}$\\
     \hline
-    $\frac{1}{2}$ & $\frac{1}{2}$ & $0$ & $0$ & $0$ & $0$ & $0$\\
+    $\frac{1}{2} + \frac{\sqrt{15}}{10}$ & $\frac{5}{36} + \frac{\sqrt{15}}{30}$ & $\frac{2}{9} + \frac{\sqrt{15}}{15}$ & $\frac{5}{36}$\\
     \hline
-    $\frac{1}{2}$ & $\frac{1}{7}$ & $\frac{2}{7}$ & $\frac{1}{14}$ & $0$ & $0$ & $0$\\
-    \hline
-    $\frac{3}{4}$ & $\frac{3}{8}$ & $0$ & $-\frac{1}{2}$ & $\frac{7}{8}$ & $0$ & $0$\\
-    \hline
-    $1$ & $-\frac{4}{7}$ & $\frac{12}{7}$ & $-\frac{2}{7}$ & $-1$ & $7$ & $0$\\
-    \hline
-    $0$ & \cellcolor{lightgray} $\frac{7}{90}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $-\frac{1}{3}$ & \cellcolor{lightgray} $\frac{7}{15}$ & \cellcolor{lightgray} $\frac{16}{45}$ & \cellcolor{lightgray} $\frac{7}{90}$\\
+    $0$ & \cellcolor{lightgray} $\frac{5}{18}$ & \cellcolor{lightgray} $\frac{4}{9}$ & \cellcolor{lightgray} $\frac{5}{18}$\\
     \hline
     \end{tabular}
-    \label{tab:RK6}
+    \label{tab:Gauss6}
 \end{table}
 
 Помимо перечисленных групп методов, существуют так же диагональные неявные методы, неявные вложенные, неявные методы без одной строки
-или столбца
+или столбца, но все они являются подгруппами неявных методов и используют тот же вид общей схемы.
 
+Преимущество явных методов заключается в производительности, так как им не нужно решать на каждом шаге системы алгебраических
+уравнений. Отсюда следует, что использование явных методов даёт больший выигрыш по времени, чем использование более производительного
+оборудования и распараллеливания. Главным преимуществом неявных методов является наличие устойчивости (А-устойчивости, L-устойчивости и
+так далее), в результате чего полученное ими решение является гарантированно устойчивым, в отличие от явных.
 
+\subsection{Устойчивость}
 
-Диагональные неявные схемы (для сложных неработают)
+Текст
 
-Методы без одной строки или без одного столбца
-
-Диагональные вложенные
-
-УСТОЙЧИВОСТЬ
+Однако некоторые СДУ, описывающие химические процессы можно решить и явными методами с требуемой точностью, потому что свойства А и
+L-устойчивости являются
+лишь достаточным, но не необходимым условием эффективности решения, поэтому нельзя использовать только те или иные методы. Выбрать
+оптимальный метод можно путём целевого тестирования.
 
 
 %Цитирование источника 4 \cite{Wikipedia4} \cite{cite_1_2} \cite{cite_1_15} \cite{cite_1_16}.

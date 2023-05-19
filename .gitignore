@@ -12,6 +12,8 @@ Makefile
 CMakeCache.txt
 cmake_install.cmake
 
+GagarinReadings
+
 *.acn
 *.aux
 *.bbl

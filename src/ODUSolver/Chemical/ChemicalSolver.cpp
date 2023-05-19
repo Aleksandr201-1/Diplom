@@ -86,7 +86,7 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     control.push_back(Y[0]);
 
     U = getU(Ui, Y, T);
-    std::cout << "U: " << U << "\n";
+    //std::cout << "U: " << U << "\n";
 
     // for (uint64_t j = 1; j < task.Y.size() - 2; ++j) {
     //     rho += task.Y[j];
@@ -119,8 +119,8 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     Ytough.insert(Ytough.begin(), X0);
     Ytough.insert(Ytough.end(), updateRho(Yi, P, R, T, 0));
     Ytough.insert(Ytough.end(), T);
-    printVector(Ytough);
-    tough = ToughCoeff(func, Ytough);
+    //printVector(Ytough);
+    //tough = ToughCoeff(func, Ytough);
     //exit(0);
 
     //пока не достигли конца интегрирования
@@ -203,7 +203,7 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     }
     T = Yi.back().back();
     U = getU(Ui, Y, T);
-    std::cout << "U end: " << U << "\n";
-    std::cout << "Tough coeff = " << tough << "\n";
+    //std::cout << "U end: " << U << "\n";
+    //std::cout << "Tough coeff = " << tough << "\n";
     return Yi;
 }
