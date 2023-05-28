@@ -1,28 +1,17 @@
 #include "Task.hpp"
 
-const std::map<std::string, TaskType> types = {
-    {"Koshi", TaskType::KOSHI},
-    {"KoshiSystem", TaskType::KOSHI_SYSTEM},
-    {"Chemical", TaskType::CHEMICAL}
+const std::map<TaskType, std::string> task_types = {
+    {TaskType::KOSHI, "Koshi"},
+    {TaskType::KOSHI_SYSTEM, "KoshiSystem"},
+    {TaskType::CHEMICAL, "Chemical"}
 };
 
 std::string taskTypeToString (TaskType type) {
-    auto check = [type] (const auto &pair) -> bool {
-        return pair.second == type;
-    };
-    auto result = std::find_if(types.begin(), types.end(), check);
-    if (result != types.end()) {
-        return result->first;
-    }
-    return "NotAType";
+    return enumToString(type, task_types);
 }
 
-TaskType stringToTaskType (const std::string &type) {
-    auto it = types.find(type);
-    if (it != types.end()) {
-        return it->second;
-    }
-    return TaskType::NOT_A_TYPE;
+TaskType stringToTaskType (const std::string &str) {
+    return stringToEnum(str, task_types);
 }
 
 Task::Task () {}

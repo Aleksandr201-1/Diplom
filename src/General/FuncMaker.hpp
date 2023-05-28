@@ -114,6 +114,15 @@ class VariableNode : public FunctionalTreeNode {
         uint64_t idx;
 };
 
+// class FunctionNode : public FunctionalTreeNode {
+//     public:
+//         FunctionNode (uint64_t idx);
+//         ~FunctionNode ();
+//         friend FunctionalTree;
+//     private:
+//         uint64_t idx;
+// };
+
 //класс для представления строки в функцию
 class FunctionalTree {
     private:

@@ -355,6 +355,8 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
     }
 
     //График
+    //std::setprecision(4);
+    out.precision(12);
     std::vector<std::string> atoms = {"H", "O"};
     //std::string axis = "loglogaxis";
     std::string axis = "axis";
@@ -510,23 +512,27 @@ void generateTEX (const ReportInfo &info, std::ostream &out) {
             }
     }
 
-    //контроль мольно-массовых концентраций
-    float128_t begin = 0, end = 0;
-    for (uint64_t j = 1; j < Yn.size(); ++j) {
-        begin += Yn[j].front();
-        end += Yn[j].back();
-    }
-    out << "Сумма мольно-массовых концентраций в начале: " << begin << "\n\n";
-    out << "Сумма мольно-массовых концентраций в конце: " << end << "\n\n";
+    if (info.type == TaskType::CHEMICAL) {
+        //контроль мольно-массовых концентраций
+        float128_t begin = 0, end = 0;
+        for (uint64_t j = 1; j < Yn.size() - 2; ++j) {
+            begin += Yn[j].front();
+            end += Yn[j].back();
+        }
+        //out << "Сумма мольно-массовых концентраций в начале: " << begin << "\n\n";
+        //out << "Сумма мольно-массовых концентраций в конце: " << end << "\n\n";
 
-    //контроль мольно-массовых концентраций
-    begin = 0, end = 0;
-    for (uint64_t j = 1; j < Yn.size(); ++j) {
-        //begin += Yn[j].front() * info.table.find(atoms[1])->second.find(info.graph_info[j - 1].second)->second;
-        //end += Yn[j].back() * info.table.find(atoms[1])->second.find(info.graph_info[j - 1].second)->second;
+        //контроль мольно-массовых концентраций
+        begin = 0, end = 0;
+        for (uint64_t j = 1; j < Yn.size() - 2; ++j) {
+            for (uint64_t k = 0; k < atoms.size(); ++k) {
+                begin += Yn[j].front() * info.table.find(atoms[k])->second.find(info.graph_info[j - 1].second)->second;
+                end += Yn[j].back() * info.table.find(atoms[k])->second.find(info.graph_info[j - 1].second)->second;
+            }
+        }
+        out << "Сумма мольно-массовых концентраций в начале: " << begin << "\n\n";
+        out << "Сумма мольно-массовых концентраций в конце: " << end << "\n\n";
     }
-    out << "Сумма мольно-массовых концентраций в начале: " << begin << "\n\n";
-    out << "Сумма мольно-массовых концентраций в конце: " << end << "\n\n";
 
     //конец документа
     out << "\\end{document}";

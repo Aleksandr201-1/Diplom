@@ -15,6 +15,6 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
                                                      float128_t h,
                                                      IterationAlgo iter_alg,
                                                      float128_t approx,
-                                                     bool Tconst);
+                                                     ReactionType type);
 
 #endif

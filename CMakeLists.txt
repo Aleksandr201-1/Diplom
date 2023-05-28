@@ -22,6 +22,7 @@ set(ODE_GENERAL_LIB ODEGeneralLIB)
 set(KOSHI_SOLVER_LIB KoshiSolverLIB)
 set(CHEMICAL_SOLVER_LIB ChemicalSolverLIB)
 set(PDF_REPORTER_LIB PDFReporterLIB)
+set(INPUT_LIB InputLIB)
 #set(CHEMICAL_GENERATOR_LIB ChemicalGeneratorLIB)
 
 set(COMPILE_WARNINGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result)

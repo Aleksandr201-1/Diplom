@@ -658,30 +658,25 @@ void ChemicalSystem::rightPartGen () {
         }
         //std::cout << "SUM: " << (GFunc[0](T) - 2*GFunc[1](T) + GFunc[3](T)) / (R * T) << "\n";
         Kleft = std::exp(-Kleft) * Kright;
-        std::cout << "K right: " << Kright << "\n";
-        std::cout << "K left: " << Kleft << "\n";
+        //std::cout << "K right: " << Kright << "\n";
+        //std::cout << "K left: " << Kleft << "\n";
         //exit(0);
+        //args = t, gamma_1, gamma_2, ..., gamma_n, rho, T
         auto Fin = [=] (const std::vector<float128_t> &args) -> float128_t {
-            float128_t rho = args[args.size() - 2];
+            float128_t Rho = args[args.size() - 2];
             float128_t Temp = args[args.size() - 1];
             float128_t ans = K(A, n, Temp, E);
             float128_t tmp;
+            //std::cout << "Kin: " << ans << "\n";
             auto input = system[i].getInput();
             auto input_add = system[i].getInputAdditive();
             for (uint64_t j = 0; j < in.size(); ++j) {
-                //for (uint64_t k = 0; k < in[j].second; ++k) {
-                    tmp = std::pow(args[j + 1] * rho, input[j]);
-                    //std::cout << "pow(" << args[j + 1] * rho << ", " << in[j] << ") = " << tmp << "\n";
-                    if (tmp != 0.0) {
-                        ans *= tmp;
-                    }
-                    //ans *= std::pow(args[j + 1] * rho, in[j]);
-                //}
+                tmp = std::pow(args[j + 1] * Rho, input[j]);
+                // if (tmp != 0.0) {
+                //     ans *= tmp;
+                // }
+                ans *= tmp;
             }
-            //for (uint64_t k = 0; k < args.size(); ++k) {
-            //    std::cout << args[k] << " ";
-            //}
-            //std::cout << "\n";
             for (uint64_t j = 0; j < input_add.size(); ++j) {
                 tmp = 0;
                 auto coeff = additive_configs.find(additives[input_add[j]])->second;
@@ -689,8 +684,9 @@ void ChemicalSystem::rightPartGen () {
                     //std::cout << k << ": " << coeff[k] << " * " << args[k + 1] << "\n"; 
                     tmp += coeff[k] * args[k + 1];
                 }
+                //std::cout << "in M: " << tmp * Rho << "\n";
                 //std::cout << "sum = " << tmp << "\n";
-                ans *= tmp * rho;
+                ans *= tmp * Rho;
                 //exit(0);
             }
             //exit(0);
@@ -698,7 +694,7 @@ void ChemicalSystem::rightPartGen () {
         };
 
         auto Fout = [=] (const std::vector<float128_t> &args) -> float128_t {
-            float128_t rho = args[args.size() - 2];
+            float128_t Rho = args[args.size() - 2];
             float128_t Temp = args[args.size() - 1];
             float128_t ans = 0;
             auto input = system[i].getInput();
@@ -707,14 +703,16 @@ void ChemicalSystem::rightPartGen () {
                 ans += (int64_t)(input[j] - output[j]) * (GFunc[j](Temp) / (R * Temp) + std::log(R * Temp / P0));
             }
             ans = std::exp(-ans) * K(A, n, T, E);
+            //std::cout << "Kout: " << ans << "\n";
             float128_t tmp;
             auto output_add = system[i].getOutputAdditive();
             for (uint64_t j = 0; j < output.size(); ++j) {
                 //for (uint64_t k = 0; k < out[j].second; ++k) {
-                    tmp = std::pow(args[j + 1] * rho, output[j]);
-                    if (tmp != 0.0) {
-                        ans *= tmp;
-                    }
+                    tmp = std::pow(args[j + 1] * Rho, output[j]);
+                    // if (tmp != 0.0) {
+                    //     ans *= tmp;
+                    // }
+                    ans *= tmp;
                     //ans *= std::pow(args[j + 1] * rho, out[j]);
                 //}
             }
@@ -724,7 +722,8 @@ void ChemicalSystem::rightPartGen () {
                 for (uint64_t k = 0; k < coeff.size(); ++k) {
                     tmp += coeff[k] * args[k + 1];
                 }
-                ans *= tmp * rho;
+                //std::cout << "out M: " << tmp * Rho << "\n";
+                ans *= tmp * Rho;
             }
             return ans;
         };
@@ -737,12 +736,13 @@ void ChemicalSystem::rightPartGen () {
     for (uint64_t i = 0; i < system.substances.size(); ++i) {
         auto Wsub = [=] (const std::vector<float128_t> &args) -> float128_t {
             float128_t ans = 0;
-            float128_t rho = args[args.size() - 2];
+            float128_t Rho = args[args.size() - 2];
             // for (uint64_t j = 1; j < args.size(); ++j) {
             //     rho += args[j];
             // }
             // rho = P / (R * T * rho);
             //std::cout << "www\n";
+            //std::cout << "REACTION " << i + 1 << "\n";
             for (uint64_t j = 0; j < Wright.size(); ++j) {
                 auto in = system[j].getInput();
                 auto out = system[j].getOutput();
@@ -754,13 +754,18 @@ void ChemicalSystem::rightPartGen () {
                 auto input_add = system[j].getInputAdditive();
                 auto output_add = system[j].getOutputAdditive();
                 for (uint64_t k = 0; k < input_add.size(); ++k) {
+                    //std::cout << "got M in reaction " << j + 1 << "to work\n";
                     ans += additive_configs[additives[output_add[k]]][i] * right;
                     ans -= additive_configs[additives[input_add[k]]][i]  * right;
                     ans += additive_configs[additives[input_add[k]]][i]  * left;
                     ans -= additive_configs[additives[output_add[k]]][i] * left;
                 }
             }
-            return ans / rho;
+            //37 000
+            //
+            //std::cout << "W" << i << ": " << ans / Rho << "\n";
+            //exit(0);
+            return ans / Rho;
         };
         ode_system.push_back(Wsub);
     }

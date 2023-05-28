@@ -4,6 +4,7 @@
 #include <map>
 #include <algorithm>
 #include <General/General.hpp>
+#include <General/Enum.hpp>
 
 const uint64_t MIN_H_SIZE = 100;
 const uint64_t MAX_H_SIZE = 10;
@@ -12,12 +13,12 @@ enum class TaskType {
     KOSHI,
     KOSHI_SYSTEM,
     CHEMICAL,
-    NOT_A_TYPE
+    ERROR
 };
 
 std::string taskTypeToString (TaskType type);
 
-TaskType stringToTaskType (const std::string &type);
+TaskType stringToTaskType (const std::string &str);
 
 class Task {
     public:

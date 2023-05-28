@@ -2,24 +2,11 @@
 #include <iomanip>
 #include <ODUSolver/Koshi/KoshiSolver.hpp>
 #include <ODUSolver/Chemical/ChemicalSolver.hpp>
-//#include <ChemicalGenerator/RightPartGen.hpp>
 #include <PDFReporter/ReportGenerator.hpp>
+#include <Input/InputHandle.hpp>
 #include <chrono>
 
 using duration_t = std::chrono::milliseconds;
-
-void help (const std::string &name) {
-    std:: cout << "Usage: " << name << " [KEYS] [OPTIONS]\n"
-                  "\t-m, --method\t[METHOD]\tРешать задачу методом [METHOD]\n"
-                  "\t\tПоддерживаемые методы:\n\t\tRunge-Kutta, Cheskino, Dorman-Prince, Falberg, Gauss, Lobatto, L Stable Diagonal, Merson, Rado\n"
-                  "\t-o, --order\t[ORDER]\t\tРешать задачу методом [METHOD] с порядком точности [ORDER]\n"
-                  "\t-w, --way\t[WAY]\t\tРешать задачу методом [METHOD] с порядком точности [ORDER] и способом реализации [WAY]\n"
-                  "\t-i, --iter\t[ALGORYTHM]\tИспользовать алгоритм [ALGORYTHM] для решения системы уравнений в жёстких методах\n"
-                  "\t\tПоддерживаемые алгоритмы:\n\t\tSI, Zeidel, Newton\n"
-                  "\t-a, --approx\t[NUM]\t\tПродолжать процесс итераций в жёстких методах пока не будет достигнута точность [NUM]\n"
-                  "\t-tt, --task_type\t[TYPE]\t\tРешать задачу заданного типа\n"
-                  "\t\tПоддерживаемые типы задач:\n\t\tKoshi, KoshiSystem, Chemical\n";
-}
 
 void printTable1 (const std::vector<std::vector<float128_t>> &Y, std::ostream &out) {
     for (uint64_t i = 0; i < Y[0].size(); ++i) {
@@ -35,69 +22,13 @@ int main (int argc, char* argv[]) {
     std::chrono::time_point <std::chrono::system_clock> startT, endT;
     uint64_t time = 0;
     ReportInfo info;
-
-    // ChemicalSystem sys;
-    // sys.initFromFile("./test/ChemicTest/bufermm.txt");
-    // sys.setPressure(101'325);
-    // sys.setTemperature(2300);
-    // sys.addAdditive("M", {1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
-    // //sys.setDensity(0.95);
-    // sys.addReaction("H2 + O2 => 2OH", 1.7 * std::pow(10, 7), 0, 24044);
-    // sys.addReaction("H + O2 => OH + O", 1.987 * std::pow(10, 8), 0, 8456);
-    // sys.addReaction("H2 + OH => H2O + H", 1.024 * std::pow(10, 2), 1.6, 1660);
-    // sys.addReaction("H2 + O => OH + H", 5.119 * std::pow(10, -2), 2.67, 3163);
-    // sys.addReaction("2OH => H2O + O", 1.506 * std::pow(10, 3), 1.14, 50);
-    // sys.addReaction("H + OH + M => H2O + M", 2.212 * std::pow(10, 10), -2.0, 0);
-    // sys.addReaction("2H + M => H2 + M", 9.791 * std::pow(10, 7), -0.6, 0);
-    // sys.setConcentrations({0.5, 0.0, 0.0, 0.5, 0.0, 0.0});
+    std::string fileInput = "";
 
     std::vector<std::string> args(argv, argv + argc);
-    for (auto el : args) {
-        std::cout << el << "\n";
-    }
-    for (uint64_t i = 1; i < args.size(); ++i) {
-        if (args[i] == "--help" || args[i] == "-h") {
-            help(args[0]);
-            exit(0);
-        } else if (args[i] == "--method" || args[i] == "-m") {
-            if (args.size() > i + 1) {
-                info.method = stringToSolveMethod(args[i + 1]);
-                ++i;
-            }
-        } else if (args[i] == "--order" || args[i] == "-o") {
-            if (args.size() > i + 1) {
-                info.order = std::stoull(args[i + 1]);
-                ++i;
-            }
-        } else if (args[i] == "--way" || args[i] == "-w") {
-            if (args.size() > i + 1) {
-                info.way = std::stoull(args[i + 1]);
-                ++i;
-            }
-        } else if (args[i] == "--iter" || args[i] == "-i") {
-            if (args.size() > i + 1) {
-                if (args[i + 1] == "Newton") {
-                    info.algo = IterationAlgo::NEWTON;
-                } else if (args[i + 1] == "Zeidel") {
-                    info.algo = IterationAlgo::ZEIDEL;
-                } else if (args[i + 1] == "SI") {
-                    info.algo = IterationAlgo::SIMPLE_ITERATION;
-                }
-                ++i;
-            }
-        } else if (args[i] == "--approx" || args[i] == "-a") {
-            if (args.size() > i + 1) {
-                info.approx = std::stod(args[i + 1]);
-                ++i;
-            }
-        } else if (args[i] == "--task_type" || args[i] == "-tt") {
-            if (args.size() > i + 1) {
-                info.type = stringToTaskType(args[i + 1]);
-                ++i;
-            }
-            //info.multigraph = true;
-        }
-    }
+    // for (auto el : args) {
+    //     std::cout << el << "\n";
+    // }
+    argsHandler(args, info);
     info.butcher = createButcherTable(info.method, info.order, info.way);
 
     std::cout << "Введите задачу ";
@@ -220,21 +151,29 @@ int main (int argc, char* argv[]) {
         "orange"
     };
 
-    //std::vector<std::string> substances = sys.getSubstanceList();
+    std::vector<std::string> substances = sys.getSubstanceList();
     // info.task.odu_system = sys.rightPartGen();
     // info.task.order = info.task.odu_system.size();
     // info.task.X0 = 0;
     // info.task.Xn = 2e-6;
     // info.h = (info.task.Xn - info.task.X0) / 50;
     // info.task.Y = sys.getY0();
-    // info.table = sys.getTable();
     // printVector(info.task.Y);
-
-    //for (uint64_t i = 0; i < info.task.order; ++i) {
-        //info.graph_info.push_back({colors[i], substances[i]});
-    //}
-    for (uint64_t i = 0; i < info.task->getODE().size(); ++i) {
-        info.graph_info.push_back({colors[i], std::to_string(i + 1)});
+    switch (info.type) {
+        case TaskType::CHEMICAL:
+            for (uint64_t i = 0; i < substances.size(); ++i) {
+                info.graph_info.push_back({colors[i], substances[i]});
+            }
+            info.table = sys.getTable();
+            break;
+        case TaskType::KOSHI:
+        case TaskType::KOSHI_SYSTEM:
+            for (uint64_t i = 0; i < order; ++i) {
+                info.graph_info.push_back({colors[i], std::to_string(i + 1)});
+            }
+            break;
+        default:
+            break;
     }
 
     //info.tough_coeff = ToughCoeff(info.task);
@@ -250,9 +189,11 @@ int main (int argc, char* argv[]) {
             break;
         case TaskType::CHEMICAL:
             //info.solution = KoshiSolver(info.method, *static_cast<KoshiTask*>(info.task), info.butcher, info.h, info.algo, info.approx);
-            info.solution = ChemicalSolver(info.method, *static_cast<ChemicalSystem*>(info.task), info.butcher, info.h, info.algo, info.approx, false);
+            info.solution = ChemicalSolver(info.method, *static_cast<ChemicalSystem*>(info.task), info.butcher, info.h, info.algo, info.approx, ReactionType::ISOTERM_CONST_P);
             //info.solution = NonExpl(*static_cast<ChemicalSystem*>(info.task), info.butcher, info.h, info.algo, info.approx);
             break;
+        default:
+            exit(1);
     }
     //info.solution = KoshiSolver(info.method, *static_cast<KoshiTask*>(&info.task), info.butcher, info.h, info.algo, info.approx);
     endT = std::chrono::system_clock::now();

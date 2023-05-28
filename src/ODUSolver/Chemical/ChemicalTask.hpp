@@ -14,6 +14,13 @@
 #include <General/Matrix.hpp>
 #include <ODUSolver/Task.hpp>
 
+enum class ReactionType {
+    ISOTERM_CONST_RHO,
+    ADIABAT_CONST_RHO,
+    ISOTERM_CONST_P,
+    ADIABAT_CONST_P
+};
+
 struct PhiFunction {
     std::vector<std::vector<float128_t>> phi;
     std::vector<std::pair<float128_t, float128_t>> T;

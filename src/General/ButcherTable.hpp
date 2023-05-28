@@ -5,8 +5,10 @@
 #include <map>
 #include "General.hpp"
 #include "Matrix.hpp"
+#include "Enum.hpp"
 
 enum class SolveMethod {
+    //using enum UsableList;
     RUNGE_KUTTA,
     FALBERG,
     CHESKINO,
@@ -16,7 +18,7 @@ enum class SolveMethod {
     LOBATTO,
     L_STABLE_DIAGONAL,
     DORMAN_PRINCE,
-    NOT_A_METHOD
+    ERROR
 };
 
 std::string solveMethodToString (SolveMethod method);

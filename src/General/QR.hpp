@@ -16,19 +16,12 @@ T getMainEl (const Matrix<T> &matrix, uint64_t i) {
 
 template <class T>
 std::tuple<Matrix<T>, Matrix<T>> QR (const Matrix<T> &matrix) {
-    //std::cout << "====CREATING QR DECOMPOSITION===\n";
-    //std::cout << "Matrix A:\n" << matrix << "\n";
     uint64_t n = matrix.size().n;
     Matrix<T> Q(n), R(matrix), v(n, 1);
-    //std::cout << "------------\n";
-    //std::cout << "Step 0:\nA(0) = A\n";
     auto pred = [] (T el) -> bool {
         return el == T(0);
     };
     for (uint64_t i = 0; i < n - 1; ++i) {
-        //std::cout << "------------\n";
-        //std::cout << "Step " << i + 1 << ":\n";
-
         for (uint64_t j = 0; j < i; ++j) {
             v(j, 0) = 0;
         }
@@ -42,11 +35,8 @@ std::tuple<Matrix<T>, Matrix<T>> QR (const Matrix<T> &matrix) {
             continue;
         }
 
-        //std::cout << "H = E - 2 * (v * vT / vT * v)\n";
         Matrix<T> H = Matrix<T>(n) - 2 * ((v * v.transp()) / (v.transp() * v)(0, 0));
-        //std::cout << "Matrix H(" << i << "):\n" << H << "\n";
         R = H * R;
-        //std::cout << "Matrix A(" << i << "):\n" << R << "\n";
         Q = Q * H;
     }
     for (uint64_t i = 0; i < n; ++i) {
@@ -54,10 +44,6 @@ std::tuple<Matrix<T>, Matrix<T>> QR (const Matrix<T> &matrix) {
             R(i, j) = T(0);
         }
     }
-    //R(1, 0) = R(2, 0) = R(2, 1) = T(0);
-    //std::cout << "==============DONE==============\n";
-    //std::cout << "QR: " << Q * R << "\nQ: " << Q << "\nR: " << R << "\n";
-    //exit(1);
     return std::make_tuple(Q, R);
 }
 

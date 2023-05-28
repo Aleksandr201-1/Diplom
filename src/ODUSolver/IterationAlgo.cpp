@@ -1,5 +1,20 @@
 #include "IterationAlgo.hpp"
 
+const std::map<IterationAlgo, std::string> iteration_algos = {
+    {IterationAlgo::NEWTON, "Newton"},
+    {IterationAlgo::ZEIDEL, "Zeidel"},
+    {IterationAlgo::SIMPLE_ITERATION, "SI"},
+    {IterationAlgo::EXPLICIT_STEP, "Explicit"}
+};
+
+std::string IterationAlgoToString (IterationAlgo algo) {
+    return enumToString(algo, iteration_algos);
+}
+
+IterationAlgo stringToIterationAlgo (const std::string &str) {
+    return stringToEnum(str, iteration_algos);
+}
+
 float128_t norma (const std::vector<float128_t> &a, const std::vector<float128_t> &b) {
     uint64_t size = std::min(a.size(), b.size());
     float128_t ans = 0;
@@ -220,7 +235,9 @@ std::vector<std::vector<float128_t>> IterationStep (const std::vector<std::vecto
             return SimpleIteration(X, Yi, idx, f, butcher, h, approx, algo);
         case IterationAlgo::NEWTON:
             return NewtonIteration(X, Yi, idx, f, butcher, h, approx);
-        default:
+        case IterationAlgo::EXPLICIT_STEP:
             return ExplicitStep(X, Yi, idx, f, butcher, h);
+        default:
+            return {};
     }
 }

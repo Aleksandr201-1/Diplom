@@ -3,7 +3,10 @@
 
 #include <vector>
 #include <functional>
+#include <map>
+#include <algorithm>
 #include <General/General.hpp>
+#include <General/Enum.hpp>
 #include <General/Matrix.hpp>
 #include <General/LU.hpp>
 
@@ -11,8 +14,13 @@ enum class IterationAlgo {
     NEWTON,
     ZEIDEL,
     SIMPLE_ITERATION,
-    EXPLICIT_STEP
+    EXPLICIT_STEP,
+    ERROR
 };
+
+std::string IterationAlgoToString (IterationAlgo algo);
+
+IterationAlgo stringToIterationAlgo (const std::string &str);
 
 float128_t norma (const std::vector<float128_t> &a, const std::vector<float128_t> &b);
 

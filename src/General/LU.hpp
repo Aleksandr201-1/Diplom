@@ -37,33 +37,22 @@ Matrix<T> createP (const Matrix<T> &matrix) {
 
 template <class T>
 std::tuple<Matrix<T>, Matrix<T>, Matrix<T>> LU (const Matrix<T> &matrix) {
-    //std::cout << "====CREATING LU DECOMPOSITION===\n";
-    //if (!matrix.isSquare() || (isEqual(matrix.det(), T(0)) && !matrix.isDiagonal())) {
-    //    return std::make_tuple(Matrix<T>(0), Matrix<T>(0), Matrix<T>(0));
-    //}
     uint64_t n = matrix.size().n;
     Matrix<T> L(n), U(matrix), P(n);
-    //std::cout << "A = LU\nL = E\nU = A\n\nMatrix L:\n" << L << "\nMatrix U:\n" << U << "\n";
     P = createP(matrix);
     U = P * U;
     for(uint64_t k = 1; k < n; ++k) {
-        //std::cout << "------------\n";
-        //std::cout << "Step " << k << ":\n";
         for(uint64_t i = k - 1; i < n; ++i) {
             for(uint64_t j = i; j < n; ++j) {
                 L(j, i) = U(j, i) / U(i, i);
-                //std::cout << "L(" << j << ", " << i << ") = U(" << j << ", " << i << ") / U(" << i << ", " << i << ") = " << L(j, i) << "\n";
             }
         }
         for(uint64_t i = k; i < n; ++i) {
             for(uint64_t j = k - 1; j < n; ++j) {
                 U(i, j) = U(i, j) - L(i, k - 1) * U(k - 1, j);
-                //std::cout << "U(" << i << ", " << j << ") = U(" << i << ", " << j << ") - L(" << i << ", " << k - 1 << ") * U(" << k - 1 << ", " << j << ")" << " = " << U(i, j) << "\n";
             }
         }
-        //std::cout << "Current L:\n" << L << "\nCurrent U:\n" << U << "\n";
     }
-    //std::cout << "==============DONE==============\n";
     return std::make_tuple(L, U, P);
 }
 

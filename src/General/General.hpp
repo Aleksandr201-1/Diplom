@@ -20,6 +20,4 @@ bool isEqual(float128_t x, float128_t y);
 
 std::string toString (float128_t val, uint64_t precision);
 
-std::string readLine ();
-
 #endif

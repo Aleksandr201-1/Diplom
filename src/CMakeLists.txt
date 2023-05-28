@@ -9,6 +9,7 @@ add_executable(main main.cpp)
 add_subdirectory(General)
 add_subdirectory(ODUSolver)
 add_subdirectory(PDFReporter)
+add_subdirectory(Input)
 #add_subdirectory(ChemicalGenerator)
 
 target_link_libraries(main
@@ -16,6 +17,7 @@ target_link_libraries(main
         ${KOSHI_SOLVER_LIB}
         ${CHEMICAL_SOLVER_LIB}
         ${PDF_REPORTER_LIB}
+        ${INPUT_LIB}
 )
 
 target_include_directories(main

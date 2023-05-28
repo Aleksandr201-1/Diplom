@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2023.4.22)  21 MAY 2023 19:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2023.4.22)  28 MAY 2023 16:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -978,20 +978,40 @@ Underfull \hbox (badness 10000) in paragraph at lines 47--49
 
  []
 
-[2] [3] (report/report.aux)
+
+Overfull \hbox (1.57709pt too wide) in paragraph at lines 87--88
+[]\T2A/cmr/m/n/14.4 Приближающий по-ли-ном 3й сте-пе-ни для функ-ции 8: $\OT1/c
+mr/m/n/14.4 2300\OML/cmm/m/it/14.4 :\OT1/cmr/m/n/14.4 000000 \OMS/cmsy/m/n/14.4
+ ^^@ \OT1/cmr/m/n/14.4 0\OML/cmm/m/it/14.4 :\OT1/cmr/m/n/14.4 00\OML/cmm/m/it/1
+4.4 x[] \OT1/cmr/m/n/14.4 + 0\OML/cmm/m/it/14.4 :\OT1/cmr/m/n/14.4 06\OML/cmm/m
+/it/14.4 x[] \OMS/cmsy/m/n/14.4 ^^@
+ []
+
+
+Package pgfplots Warning: Axis range for axis y is approximately empty; enlargi
+ng it (it is [0.090114201:0.090114201]) on input line 186.
+
+ [warning /pgfplots/warning/approx empty range enlarged]
+[2]
+
+Package pgfplots Warning: Axis range for axis y is approximately empty; enlargi
+ng it (it is [2300.0000000:2300.0000000]) on input line 210.
+
+ [warning /pgfplots/warning/approx empty range enlarged]
+[3] [4] (report/report.aux)
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.28pt have occurred.
 
  ) 
 Here is how much of TeX's memory you used:
- 27220 strings out of 482584
- 664316 string characters out of 5956256
- 1704806 words of memory out of 5000000
- 41843 multiletter control sequences out of 15000+600000
+ 26080 strings out of 482584
+ 640185 string characters out of 5956256
+ 1137738 words of memory out of 5000000
+ 40703 multiletter control sequences out of 15000+600000
  541663 words of font info for 44 fonts, out of 8000000 for 9000
  475 hyphenation exceptions out of 8191
- 73i,17n,127p,46029b,2148s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 73i,17n,127p,4832b,2149s stack positions out of 5000i,500n,10000p,200000b,80000s
  </home/sad_alex/.texlive2019/texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1728.60
 0pk> </home/sad_alex/.texlive2019/texmf-var/fonts/pk/ljfour/lh/lh-t2a/larm1440.
 600pk> </home/sad_alex/.texlive2019/texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx144
@@ -1002,10 +1022,10 @@ arm2488.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmm
 i12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/
 share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on report/report.pdf (3 pages, 155305 bytes).
+Output written on report/report.pdf (4 pages, 126045 bytes).
 PDF statistics:
- 241 PDF objects out of 1000 (max. 8388607)
- 47 compressed objects within 1 object stream
+ 245 PDF objects out of 1000 (max. 8388607)
+ 49 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
