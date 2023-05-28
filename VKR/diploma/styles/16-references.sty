@@ -17,9 +17,6 @@
 ]{biblatex}
 
 \defbibheading{bibliography}[СПИСОК~ИСПОЛЬЗОВАННЫХ~ИСТОЧНИКОВ]{\structure{#1}}
-\addto{\captionsrussian}{%
-    \renewcommand{\contentsname}{СОДЕРЖАНИЕ}
-}
 
 % Каждый пункт должен начинаться с абзацного отступа, продолжения на новых строках -- без
 \setlength{\bibhang}{0pt}
@@ -36,6 +33,10 @@
         \printfield{labelprefix}%
         \printfield{labelnumber}}%
         \addspace}
+
+% Никакого курсива в авторе и моноширинного шрифта в ссылках
+\renewcommand*{\mkbibhdnamefamily}[1]{#1}
+\DeclareFieldFormat{url}{\renewcommand\UrlFont{\rmfamily}URL\addcolon\space\url{#1}}
 
 % Формат даты обращения -- (дата обращения dd.mm.yyyy)
 \DeclareFieldFormat{urldate}{(дата обращения #1)}
