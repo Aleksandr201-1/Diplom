@@ -27,7 +27,7 @@ std::vector<std::function<float128_t (float128_t)>> generateUi (const std::vecto
     std::vector<std::function<float128_t (float128_t)>> Ui;
     for (uint64_t j = 0; j < GFunc.size(); ++j) {
         auto u = [=] (float128_t T) -> float128_t {
-            return GFunc[j](T) - T * derivative(GFunc[j], T, 0.0001, DiffConfig::POINTS4_ORDER1_WAY1) - R * T;
+            return GFunc[j](T) - T * derivative(GFunc[j], T, 0.01, DiffConfig::POINTS3_ORDER1_WAY1) - R * T;
         };
         Ui.push_back(u);
     }
@@ -72,7 +72,7 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     float128_t tough = 0;
     uint64_t orderOfTask = func.size() + 2, orderOfApprox = butcher.size().m - 1;
 
-    std::vector<std::vector<float128_t>> Yi(orderOfTask + 1); //t W1 W2 W3 ... Wn rho T (n = orderOfTask)
+    std::vector<std::vector<float128_t>> Yi(orderOfTask + 1); //t W1 W2 W3 ... Wn-2 rho T (n = orderOfTask)
     std::vector<float128_t> control;
 
     //инициализация начальных условий
@@ -106,7 +106,7 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
                 }
             );
             break;
-        case ReactionType::ADIABAT_CONST_RHO: //адиабатическая реакция с постоянной плотностью
+        case ReactionType::ADIABAT_CONST_RHO: //адиабатическая реакция с постоянной плотностью (не работает)
             func.push_back(
                 [=] (const std::vector<float128_t> &X) -> float128_t {
                     return 0;
@@ -115,12 +115,14 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
             func.push_back(
                 [=] (const std::vector<float128_t> &X) -> float128_t {
                     float128_t ans = 0, cV = 0;
-                    for (uint64_t i = 0; i < orderOfTask - 2; ++i) {
+                    //std::cout << X[X.size() - 1] << "fuck\n";
+                    //exit(0);
+                    for (uint64_t i = 0; i < Ui.size(); ++i) {
                         ans += func[i](X) * Ui[i](X[X.size() - 1]);
-                        cV += X[i + 1] * derivative(Ui[i], X[X.size() - 1], 0.0001, DiffConfig::POINTS4_ORDER1_WAY2);
+                        cV += X[i + 1] * derivative(Ui[i], X[X.size() - 1], 0.01, DiffConfig::POINTS3_ORDER1_WAY1);
                     }
                     ans /= X[X.size() - 2] * cV;
-                    return ans;
+                    return -ans;
                     // auto f = [=] (const std::vector<float128_t> &X) -> float128_t {
                     //     return std::abs(getU(Ui, X, X.back()) - U);
                     // };

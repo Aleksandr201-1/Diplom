@@ -1,10 +1,32 @@
 #include "Differentiation.hpp"
 
+// Векторы коэффициентов для вычисления производных по разным формулам
 const std::map<DiffConfig, std::vector<float128_t>> diff_coeffs = {
-    {DiffConfig::POINTS2_ORDER1_WAY1, {-1, 0, 1, 2, 1}},               // 2 points, 1 diff order, 1 way of realisation
-    {DiffConfig::POINTS3_ORDER1_WAY1, {0, 0, -3, 4, -1, 2, 1}},        // 3 points, 1 diff order, 1 way of realisation
-    {DiffConfig::POINTS4_ORDER1_WAY1, {0, 1, -8, 0, 8, -1, 0, 12, 1}}, // 4 points, 1 diff order, 1 way of realisation
-    {DiffConfig::POINTS4_ORDER1_WAY2, {0, 0, 0, -11, 18, -9, 2, 6, 1}} // 4 points, 1 diff order, 2 way of realisation
+    {DiffConfig::POINTS2_ORDER1_WAY3, {-1, 1, 0, 1, 1}},                          // 2 точки, 1 порядок производной, 1й способ реализации
+    {DiffConfig::POINTS2_ORDER1_WAY3, {0, -1, 1, 1, 1}},                          // 2 точки, 1 порядок производной, 2й способ реализации
+    {DiffConfig::POINTS2_ORDER1_WAY3, {-1, 0, 1, 2, 1}},                          // 2 точки, 1 порядок производной, 3й способ реализации
+
+    {DiffConfig::POINTS3_ORDER1_WAY1, {0, 0, -3, 4, -1, 2, 1}},                   // 3 точки, 1 порядок производной, 1й способ реализации
+    {DiffConfig::POINTS3_ORDER1_WAY2, {1, -4, 3, 0, 0, 2, 1}},                    // 3 точки, 1 порядок производной, 2й способ реализации
+    {DiffConfig::POINTS3_ORDER2_WAY1, {0, 0, 1, -2, 1, 1, 2}},                    // 3 точки, 2 порядок производной, 1й способ реализации
+    {DiffConfig::POINTS3_ORDER2_WAY2, {1, -2, 1, 0, 0, 1, 2}},                    // 3 точки, 2 порядок производной, 2й способ реализации
+    {DiffConfig::POINTS3_ORDER2_WAY3, {0, 1, -2, 1, 0, 1, 2}},                    // 3 точки, 2 порядок производной, 3й способ реализации
+
+    {DiffConfig::POINTS4_ORDER1_WAY1, {0, 0, -2, -3, 6, -1, 0, 6, 1}},            // 4 точки, 1 порядок производной, 1й способ реализации
+    {DiffConfig::POINTS4_ORDER1_WAY2, {0, 1, -6, 3, 2, 0, 0, 6, 1}},              // 4 точки, 1 порядок производной, 2й способ реализации
+    {DiffConfig::POINTS4_ORDER1_WAY3, {0, 0, 0, -11, 18, -9, 2, 6, 1}},           // 4 точки, 1 порядок производной, 3й способ реализации
+    {DiffConfig::POINTS4_ORDER1_WAY4, {-2, 9, -18, 11, 0, 0, 0, 6, 1}},           // 4 точки, 1 порядок производной, 4й способ реализации
+    {DiffConfig::POINTS4_ORDER1_WAY5, {0, 1, -8, 0, 8, -1, 0, 12, 1}},            // 4 точки, 1 порядок производной, 5й способ реализации
+    {DiffConfig::POINTS4_ORDER2_WAY1, {0, 0, 0, 2, -5, 4, -1, 1, 2}},             // 4 точки, 1 порядок производной, 5й способ реализации
+    {DiffConfig::POINTS4_ORDER2_WAY2, {-1, 4, -5, 2, 0, 0, 0, 1, 2}},             // 4 точки, 1 порядок производной, 5й способ реализации
+    {DiffConfig::POINTS4_ORDER3_WAY1, {0, -1, 2, 0, -2, 1, 0, 2, 3}},             // 4 точки, 1 порядок производной, 5й способ реализации
+
+    {DiffConfig::POINTS5_ORDER1_WAY1, {0, 0, 0, 0, -25, 48, -36, 16, -3, 12, 1}}, // 5 точек, 1 порядок производной, 1й способ реализации
+    {DiffConfig::POINTS5_ORDER1_WAY2, {3, -16, 36, -48, 25, 0, 0, 0, 0, 12, 1}},  // 5 точек, 1 порядок производной, 2й способ реализации
+    {DiffConfig::POINTS5_ORDER2_WAY1, {0, 0, -1, 16, -30, 16, -1, 0, 0, 12, 2}},  // 5 точек, 2 порядок производной, 1й способ реализации
+    {DiffConfig::POINTS5_ORDER3_WAY1, {-3, 14, -24, 18, -5, 0, 0, 0, 0, 2, 3}},   // 5 точек, 3 порядок производной, 1й способ реализации
+    {DiffConfig::POINTS5_ORDER3_WAY2, {0, 0, 0, 0, 5, -18, 24, -14, 3, 2, 3}},    // 5 точек, 3 порядок производной, 2й способ реализации
+    {DiffConfig::POINTS5_ORDER4_WAY1, {0, 0, 1, -4, 6, -4, 1, 0, 0, 1, 4}}        // 5 точек, 4 порядок производной, 1й способ реализации
 };
 
 float128_t derivative (const std::function<float128_t(std::vector<float128_t> &)> &f,
@@ -12,33 +34,34 @@ float128_t derivative (const std::function<float128_t(std::vector<float128_t> &)
                        float128_t h,
                        uint64_t idx,
                        DiffConfig diff) {
-    std::vector<float128_t> args(X);
-    float128_t ans = 0;
-    const auto &coeffs = diff_coeffs.find(diff)->second;
-    uint64_t size = coeffs.size();
-    uint64_t points = (size - 1) / 2;
-    args[idx] -= points * h;
-    for (uint64_t i = 0; i < size - 2; ++i) {
-        args[idx] += h;
-        ans += coeffs[i] * f(args);
+    std::vector<float128_t> args(X); // Создаем копию вектора X, чтобы не менять оригинал
+    float128_t ans = 0; // Значение производной, которое будем вычислять
+    const auto &coeffs = diff_coeffs.find(diff)->second; // Вектор коэффициентов, который соответствует заданной конфигурации
+    uint64_t size = coeffs.size(); // Размер вектора коэффициентов
+    uint64_t points = (size - 1) / 2; // Количество точек на сетке, которые будут использоваться при вычислении производной
+    args[idx] -= points * h; // Смещаем точку, в которой производится дифференцирование, на нужное количество шагов
+    for (uint64_t i = 0; i < size - 2; ++i) { // Проходим по всей сетке и вычисляем производную как сумму взвешенных значений функции f на каждой точке
+        args[idx] += h; // Сдвигаем точку на один шаг
+        ans += coeffs[i] * f(args); // Добавляем вклад очередной точки в значение производной
     }
-    ans /= std::pow(h, coeffs[size - 1]) * coeffs[size - 2];
-    return ans;
+    ans /= std::pow(h, coeffs[size - 1]) * coeffs[size - 2]; // После цикла делим на коэффициенты нормализации, чтобы получить фактическое значение производной
+    return ans; // Возвращаем значение производной
 }
 
 float128_t derivative (const std::function<float128_t(float128_t)> &f,
                        float128_t x,
                        float128_t h,
                        DiffConfig diff) {
-    float128_t ans = 0;
-    const auto &coeffs = diff_coeffs.find(diff)->second;
-    uint64_t size = coeffs.size();
-    uint64_t points = (size - 1) / 2;
-    x -= points * h;
-    for (uint64_t i = 0; i < size - 2; ++i) {
-        x += h;
-        ans += coeffs[i] * f(x);
+    float128_t arg = x; // Создаем копию переменной x
+    float128_t ans = 0; // Значение производной, которое будем вычислять
+    const auto &coeffs = diff_coeffs.find(diff)->second; // Вектор коэффициентов, который соответствует заданной конфигурации
+    uint64_t size = coeffs.size(); // Размер вектора коэффициентов
+    uint64_t points = (size - 1) / 2; // Количество точек на сетке, которые будут использоваться при вычислении производной
+    arg -= points * h; // Смещаем точку, в которой производится дифференцирование, на нужное количество шагов
+    for (uint64_t i = 0; i < size - 2; ++i) { // Проходим по всей сетке и вычисляем производную как сумму взвешенных значений функции f на каждой точке
+        arg += h; // Сдвигаем точку на один шаг
+        ans += coeffs[i] * f(arg); // Добавляем вклад очередной точки в значение производной
     }
-    ans /= std::pow(h, coeffs[size - 1]) * coeffs[size - 2];
-    return ans;
+    ans /= std::pow(h, coeffs[size - 1]) * coeffs[size - 2]; // После цикла делим на коэффициенты нормализации (шаг), чтобы получить фактическое значение производной
+    return ans; // Возвращаем значение производной
 }

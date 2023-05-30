@@ -1,30 +1,82 @@
+/**
+    * @file Differentiation.hpp
+    * 
+    * Определяет функцию `derivative` для нахождения производной функции в точке.
+**/
+
 #ifndef DIFFERENTIATION_HPP
 #define DIFFERENTIATION_HPP
 
 #include <map>
 #include "General.hpp"
 
+/**
+    * @enum DiffConfig
+    * 
+    * @brief Перечисление для различных конфигураций вычисления производной.
+    *
+    * @details
+    * Конфигурации вычисления производной содержат информацию о количестве точек, порядок производной и способ её реализации.
+**/
 enum class DiffConfig {
-    POINTS2_ORDER1_WAY1,
-    POINTS3_ORDER1_WAY1,
-    POINTS4_ORDER1_WAY1,
-    POINTS4_ORDER1_WAY2
+    // 2 точки
+    POINTS2_ORDER1_WAY1, // 1й порядок производной по 2 точкам
+    POINTS2_ORDER1_WAY2, // 1й порядок производной по 2 точкам
+    POINTS2_ORDER1_WAY3, // 1й порядок производной по 2 точкам
+
+    // 3 точки
+    POINTS3_ORDER1_WAY1, // 1й порядок производной по 3 точкам
+    POINTS3_ORDER1_WAY2, // 1й порядок производной по 3 точкам
+    POINTS3_ORDER2_WAY1, // 2й порядок производной по 3 точкам
+    POINTS3_ORDER2_WAY2, // 2й порядок производной по 3 точкам
+    POINTS3_ORDER2_WAY3, // 2й порядок производной по 3 точкам
+
+    // 4 точки
+    POINTS4_ORDER1_WAY1, // 1й порядок производной по 4 точкам
+    POINTS4_ORDER1_WAY2, // 1й порядок производной по 4 точкам
+    POINTS4_ORDER1_WAY3, // 1й порядок производной по 4 точкам
+    POINTS4_ORDER1_WAY4, // 1й порядок производной по 4 точкам
+    POINTS4_ORDER1_WAY5, // 1й порядок производной по 4 точкам
+    POINTS4_ORDER2_WAY1, // 2й порядок производной по 4 точкам
+    POINTS4_ORDER2_WAY2, // 2й порядок производной по 4 точкам
+    POINTS4_ORDER3_WAY1, // 3й порядок производной по 4 точкам
+
+    // 5 точек
+    POINTS5_ORDER1_WAY1, // 1й порядок производной по 5 точкам
+    POINTS5_ORDER1_WAY2, // 1й порядок производной по 5 точкам
+    POINTS5_ORDER2_WAY1, // 2й порядок производной по 5 точкам
+    POINTS5_ORDER3_WAY1, // 3й порядок производной по 5 точкам
+    POINTS5_ORDER3_WAY2, // 3й порядок производной по 5 точкам
+    POINTS5_ORDER4_WAY1  // 4й порядок производной по 5 точкам
 };
 
-// float128_t derivative1point2 (const std::function<float128_t(std::vector<float128_t> &)> &f, const std::vector<float128_t> &X, float128_t h, uint64_t idx);
-
-// float128_t derivative1point3 (const std::function<float128_t(std::vector<float128_t> &)> &f, const std::vector<float128_t> &X, float128_t h, uint64_t idx);
-
-// float128_t derivative1point4 (const std::function<float128_t(std::vector<float128_t> &)> &f, const std::vector<float128_t> &X, float128_t h, uint64_t idx);
-
-// float128_t derivative1point5 (const std::function<float128_t(std::vector<float128_t> &)> &f, const std::vector<float128_t> &X, float128_t h, uint64_t idx);
-
+/**
+    * Функция derivative - вычисляет производную многомерной функции в заданной точке.
+    *
+    * @param f ссылка на объект std::function, представляющий вычисляемую функцию. Она должна принимать вектор значений типаfloat128_t и возвращать значение типа float128_t.
+    * @param X константная ссылка на вектор значений типа float128_t, содержащий координаты точки, для которой нужно вычислить производную.
+    * @param h шаг дифференцирования.
+    * @param idx индекс элемента вектора X, по которому будет браться производная.
+    * @param diff константная ссылка на перечисление DiffConfig, представляющее выбранную конфигурацию для метода численного дифференцирования.
+    *
+    * @return Значение производной в указанной точке.
+**/
 float128_t derivative (const std::function<float128_t(std::vector<float128_t> &)> &f,
                        const std::vector<float128_t> &X,
                        float128_t h,
                        uint64_t idx,
                        DiffConfig diff);
 
+/**
+    * Функция derivative - вычисляет производную скалярной функции в заданной точке.
+    *
+    * @param f ссылка на объект std::function, представляющий вычисляемую функцию. Она должна принимать значение типа float128_t и возвращать значение типа float128_t.
+    * @param x значение типа float128_t, на котором нужно вычислить производную.
+    * @param h шаг дифференцирования.
+    * @param diff константная ссылка на перечисление DiffConfig, представляющее выбранную конфигурацию для метода численного дифференцирования.
+    *
+    * @return Значение производной в указанной точке.
+**/
 float128_t derivative (const std::function<float128_t(float128_t)> &f,
                        float128_t x,
                        float128_t h,

@@ -88,6 +88,39 @@ void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t ord
     this->Xn = Xn;
 }
 
+void KoshiTask::setTaskInfo(const std::string &ode, uint64_t order, const std::vector<float128_t> &Y0, float128_t X0, float128_t Xn) {
+    uint64_t idx = 0, size = 0;
+    std::string tmp = "y";
+    std::vector<std::string> args; //x y y' y'' ...
+    args.push_back("x");
+    for (uint64_t i = 0; i <= order; ++i) {
+        args.push_back(tmp);
+        tmp += "'";
+    }
+    for (uint64_t i = 0; i < order - 1; ++i) {
+        auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+            return args[i + 2];
+        };
+        ode_system.push_back(func);
+    }
+    idx = ode.find('=');
+    size = ode.size();
+    // FunctionalTree y_order1(system[0].substr(0, idx), args), y_order2(system[0].substr(idx + 1, size - idx), args);
+    // FunctionalTree coeff = y_order1.getCoeff(order + 1);
+    // auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+    //     return (y_order2(args) - y_order1(args)) / coeff(args);
+    // };
+    FunctionalTree y_order2(ode.substr(idx + 1, size - idx), args);
+    //FunctionalTree coeff = y_order1.getCoeff(order + 1);
+    auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+        return y_order2(args);
+    };
+    ode_system.push_back(func);
+    Y = Y0;
+    this->X0 = X0;
+    this->Xn = Xn;
+}
+
 void KoshiTask::setSystemInfo(const std::vector<std::string> &system, uint64_t order, float128_t X0, float128_t Xn) {
     uint64_t idx = 0, size = 0;
     std::vector<std::string> args; //x y y' y'' ...

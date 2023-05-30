@@ -17,10 +17,12 @@ void help (const std::string &name) {
 std::string readLine (std::istream &input) {
     std::string str;
     while (str.empty()) {
+        //std::cout << "1\n";
         std::getline(input, str);
         if (!str.empty() && str[0] == '#') {
             str = "";
         }
+        //std::cout << str << "\n";
     }
     return str;
 }

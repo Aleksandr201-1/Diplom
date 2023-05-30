@@ -1,3 +1,9 @@
+/**
+    * @file FunctionalTree.hpp
+    * 
+    * Определяет класс `FunctionalTree` для хранения и вычисления аналитических функций.
+**/
+
 #ifndef FUNCTIONAL_TREE_HPP
 #define FUNCTIONAL_TREE_HPP
 
@@ -23,7 +29,7 @@
 // V изменить формат добавления новых функций и их аналогов
 // - добавить поддержку функций от 2х и более переменных
 // - добавить вложенные функции
-// - добавить вложенные переменные
+// V добавить вложенные переменные
 
 //PRIORITY
 //val, ()       0
@@ -31,45 +37,41 @@
 //sin, cos, ... 2
 //*, /, %       3
 //+, -          4
+
+
+/**
+    * @enum NodeType
+    * 
+    * @brief Перечисление типов узлов дерева функции.
+    *
+    * @details Определяет три типа узлов в дереве функции: операцию, значение и переменную.
+**/
 enum class NodeType {
-    OPERATION,
-    VALUE,
-    VARIABLE
+    OPERATION, /**Операция.*/
+    VALUE, /**Значение.*/
+    VARIABLE /**Переменная.*/
 };
 
-// enum class Operation {
-//     PLUS,   // +
-//     MINUS,  // -
-//     MUL,    // *
-//     DIV,    // /
-//     MOD,    // %
-//     POW,    // ^, **
-//     SQRT,   // sqrt
-//     SIN,    // sin
-//     COS,    // cos
-//     TAN,    // tg
-//     CTG,    // ctg
-//     SINH,   // sinh
-//     COSH,   // cosh
-//     TANH,   // tanh
-//     CTH,    // cth
-//     ASIN,   // arcsin
-//     ACOS,   // arccos
-//     ATAN,   // arctg
-//     ACOT,   // arcctg
-//     LOG,    // log_10
-//     LN,     // log_e, ln
-//     EXP,    // exp
-//     ABS,    // abs, ||
-//     SIGN,   // sign
-//     NOT_AN_OPERATION
-// };
-
+/**
+    * @struct OperationStruct
+    * 
+    * @brief Структура для хранения информации об операции.
+    *
+    * @details Структура включает в себя список строковых представлений операции (например, "+"), функцию для выполнения операции
+    * и приоритет операции.
+ */
 struct OperationStruct {
-    std::vector<std::string> op_str;
-    std::function<float128_t (float128_t, float128_t)> func;
-    uint64_t priority;
+    std::vector<std::string> op_str; /**Список строковых представлений операции. */
+    std::function<float128_t (float128_t, float128_t)> func; /**Функция для выполнения операции. */
+    uint64_t priority; /**Приоритет операции. */
 
+    /**
+        * Создает новый объект структуры `OperationStruct`.
+        * 
+        * @param op_str Список строковых представлений операции.
+        * @param func Функция для выполнения операции.
+        * @param priority Приоритет операции.
+     */
     OperationStruct (const std::vector<std::string> &op_str, const std::function<float128_t (float128_t, float128_t)> &func, uint64_t priority);
     ~OperationStruct ();
 };
@@ -123,7 +125,28 @@ class VariableNode : public FunctionalTreeNode {
 //         uint64_t idx;
 // };
 
-//класс для представления строки в функцию
+/**
+    * @class FunctionalTree
+    * 
+    * @brief Класс для представления математических функций в виде бинарных деревьев.
+    *
+    * @details
+    * Этот класс может использоваться для представления математических функций в виде бинарных деревьев.
+    * Дерево строится из строкового представления функции, которое может содержать переменные,
+    * константы и основные арифметические операции, такие как сложение, вычитание, умножение,
+    * деление и возведение в степень. После построения дерева его можно вычислить для определенных значений переменных
+    * или констант, а также вывести в различных форматах.
+    * 
+    * Использование:
+    * @code{.cpp}
+    * // список переменных
+    * std::vector<std::string> args = {"x", "y"};
+    * // инициализация объекта FunctionalTree
+    * FunctionalTree func("x^2 + 2*x*y + y^2", args);
+    * 
+    * std::cout << "func(3, 4) = " << func({3.0, 4.0}) << '\n';
+    * @endcode 
+**/
 class FunctionalTree {
     private:
         using NodePtr = std::unique_ptr<FunctionalTreeNode>;

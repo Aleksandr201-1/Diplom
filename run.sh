@@ -22,5 +22,5 @@ TEST_NUM=1
 #--track-origins=yes
 #valgrind ./bin/main -m $METHOD -o $ORDER -w $WAY -i $ITERATION -a $APPROX -tt Koshi < test/ODUTest/Order$TASK_ORDER/test$TEST_NUM.txt
 #valgrind ./bin/main -m $METHOD -o $ORDER -w $WAY -i $ITERATION -a $APPROX -tt KoshiSystem < test/ODUTest/Systems/test$TEST_NUM.txt
-./bin/main -m $METHOD -o $ORDER -w $WAY -i $ITERATION -a $APPROX -tt Chemical < test/ChemicTest/test$TEST_NUM.txt
+./bin/main -m $METHOD -o $ORDER -w $WAY -i $ITERATION -a $APPROX -tt Chemical -f ./test/ChemicTest/test$TEST_NUM.txt
 pdflatex --output-directory=report report/report.tex
