@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QGraphicsItem>
 //#include <qcustomplot.h>
 //#include <GUI/QCustomPlot.hpp>
 //#include <qwt_plot_curve.h>

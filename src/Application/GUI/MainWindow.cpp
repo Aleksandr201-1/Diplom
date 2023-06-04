@@ -68,12 +68,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->stackedWidget->setCurrentWidget(ui->taskPage);
     QGraphicsScene *scene = new QGraphicsScene(ui->graphicsView);
-
-    QPen pen(Qt::green);//Просто выбираем цвет для карандашика
-    //scene->addLine(0,90,180,90,pen);//x
-    //scene->addLine(90,0,90,180,pen);//y
     ui->graphicsView->setScene(scene);
-    ui->graphicsView->scale(5.0,5.0);
+    ui->graphicsView->setMinimumWidth(554);
+    ui->graphicsView->setMinimumHeight(554);
+    scene->clear();
+
+    QPen pen(Qt::black, 1);
+    float128_t height = ui->graphicsView->height(), width = ui->graphicsView->width();
+    std::cout << "init width: " << width << " " << height << "\n";
+    scene->addLine(0, height / 2, width, height / 2, pen);
+    scene->addLine(width / 2, 0, width / 2, height, pen);
+    //ui->graphicsView->scale(50.0,50.0);
 
     ui->solutionMethodBox->clear();
     for (auto &el : strToExplicitSolve) {
@@ -127,6 +132,10 @@ MainWindow::MainWindow(QWidget *parent)
     std::string reactionStr = ui->reactInputLineEdit->text().toStdString() + "<==>" + ui->reactOutputLineEdit->text().toStdString();
     float128_t A = ui->ASpinBox->value() , n = ui->nSpinBox->value(), E = ui->ESpinBox->value();
     chemSys.addReaction(reactionStr, A, n, E);
+    chemSys.addReaction("H + O2 <==> OH + O", 1.987 * std::pow(10, 8), 0, 8456);
+    chemSys.addReaction("H2 + OH <==> H2O + H", 1.024 * std::pow(10, 2), 1.6, 1660);
+    chemSys.addReaction("H2 + O <==> OH + H", 5.119 * std::pow(10, -2), 2.67, 3163);
+    chemSys.addReaction("2OH <==> H2O + O", 1.506 * std::pow(10, 3), 1.14, 50);
 
     //ui->reactionListWidget->item(0)->setText(QString::fromStdString("qefaef\n"));
     //ui->reactionListWidget->item(0)->setData(9);
@@ -138,12 +147,17 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-
 void MainWindow::on_solutionChoiceButton_clicked() {
     ui->stackedWidget->setCurrentWidget(ui->solutionPage);
 }
 
 void MainWindow::on_backToTaskInputButton_clicked() {
+    ui->tableWidget->setRowCount(0);
+    ui->graphicsView->scene()->clear();
+    QPen pen(Qt::black, 1);
+    float128_t height = ui->graphicsView->height(), width = ui->graphicsView->width();
+    ui->graphicsView->scene()->addLine(0, height / 2, width, height / 2, pen);
+    ui->graphicsView->scene()->addLine(width / 2, 0, width / 2, height, pen);
     switch(taskType) {
         case TaskType::KOSHI:
             ui->stackedWidget->setCurrentWidget(ui->KoshiPage);
@@ -174,24 +188,10 @@ void MainWindow::on_calcButton_clicked() {
     SolveStruct solveStruct;
     std::string analiticLine;
     std::chrono::time_point <std::chrono::system_clock> startT, endT;
-    
-    // std::cout << "Its calculating time\n";
-    // std::cout << "task: " << ui->inputLineEdit->text().toStdString() << "\n";
-    // std::cout << "analitic: " << ui->analiticLineEdit->text().toStdString() << "\n";
-    // std::cout << "borders: " << ui->borderASpinBox->value() << " " << ui->borderBSpinBox->value() << "\n";
-    // std::cout << "step: " << ui->hStepBox->value() << "\n";
-    // std::cout << "first init: " << ui->stepBoxY0->value() << " " << ui->stepBoxY1->value() << "\n";
-    // std::cout << "solve method: " << ui->solutionMethodBox->currentText().toStdString() << "\n";
-    // std::cout << "iteration method: " << ui->iterMethodBox->currentText().toStdString() << "\n";
+    std::vector<std::vector<float128_t>> solution;
+    ReactionType reactionType = static_cast<ReactionType>(ui->reactionTypeBox->currentIndex());
 
     iteration = strToIteration.find(ui->iterMethodBox->currentText())->second;
-    X0 = ui->borderASpinBox->value();
-    Xn = ui->borderBSpinBox->value();
-    h = ui->hStepBox->value();
-    approx = ui->approxSpinBox->value();
-    analiticLine = ui->analiticLineEdit->text().toStdString();
-    Ykoshi = {ui->stepBoxY0->value(), ui->stepBoxY1->value()};
-
     if (ui->explicitButton->isChecked()) {
         //std::cout << "explicit\n";
         solveStruct = strToExplicitSolve.find(ui->solutionMethodBox->currentText())->second;
@@ -207,22 +207,103 @@ void MainWindow::on_calcButton_clicked() {
     way = solveStruct.way;
     butcher = createButcherTable(method, order, way);
 
-    std::cout << "getting task\n";
-    koshi.setTaskInfo(ui->inputLineEdit->text().toStdString(), getOrder(ui->orderLineEdit->text().toStdString()), Ykoshi, X0, Xn);
-    std::cout << "solving\n";
-    startT = std::chrono::system_clock::now();
-    auto solution = KoshiSolver(method, koshi, butcher, h, iteration, approx);
-    endT = std::chrono::system_clock::now();
-    chemSys.printInfo(std::cout);
+    switch(taskType) {
+        case TaskType::KOSHI:
+            X0 = ui->borderASpinBox->value();
+            Xn = ui->borderBSpinBox->value();
+            h = ui->hStepBox->value();
+            approx = ui->approxSpinBox->value();
+            analiticLine = ui->analiticLineEdit->text().toStdString();
+            Ykoshi = {ui->stepBoxY0->value(), ui->stepBoxY1->value()};
+            koshi.setTaskInfo(ui->inputLineEdit->text().toStdString(), getOrder(ui->orderLineEdit->text().toStdString()), Ykoshi, X0, Xn);
+
+            startT = std::chrono::system_clock::now();
+            solution = KoshiSolver(method, koshi, butcher, h, iteration, approx);
+            endT = std::chrono::system_clock::now();
+            break;
+        case TaskType::KOSHI_SYSTEM:
+            break;
+        case TaskType::CHEMICAL:
+            h = 1e-8;
+            chemSys.setTemperature(ui->TSpinBox->value());
+            chemSys.setPressure(ui->PSpinBox->value());
+            chemSys.setConcentrations(Y0[toUnderlying(TaskType::CHEMICAL)]);
+            chemSys.rightPartGen();
+            chemSys.printInfo(std::cout);
+            startT = std::chrono::system_clock::now();
+            solution = ChemicalSolver(method, chemSys, butcher, h, iteration, approx, ReactionType::ADIABAT_CONST_RHO); //reactionType
+            endT = std::chrono::system_clock::now();
+            break;
+        default:
+            break;
+    }
+
+    uint64_t graphCount = 0;
+
+    std::vector<QColor> colors = {
+        Qt::red,
+        Qt::blue,
+        Qt::black,
+        Qt::magenta,
+        Qt::green,
+        Qt::yellow
+    };
+
+    switch(taskType) {
+        case TaskType::KOSHI:
+            graphCount = 1;
+            break;
+        case TaskType::KOSHI_SYSTEM:
+            graphCount = solution.size() - 1;
+            break;
+        case TaskType::CHEMICAL:
+            graphCount = solution.size() - 3;
+            break;
+        default:
+            break;
+    }
+
+    //chemSys.printInfo(std::cout);
     std::cout << "=====Конец расчёта=====\n";
     time += std::chrono::duration_cast<duration_t>(endT - startT).count();
     std::cout << "Time: " << time << "\n";
 
     QGraphicsScene *scene = ui->graphicsView->scene();
     scene->clear();
-    for(uint64_t i = 0; i < solution[0].size(); ++i) {
-        scene->addEllipse(solution[0][i], solution[1][i], 1, 1);
+    //QGraphicsItem *item = new QGraphicsItem();
+    //scene->add
+    //
+    QPen pen(Qt::black, 1);
+    float128_t height = ui->graphicsView->height(), width = ui->graphicsView->width();
+    scene->addLine(0, height / 2, width, height / 2, pen);
+    scene->addLine(width / 2, 0, width / 2, height, pen);
+    // pen.setColor(Qt::red);
+
+    float128_t minX = INFINITY, maxX = -INFINITY, minY = INFINITY, maxY = -INFINITY;
+    float128_t scaleX = 0, scaleY = 0;
+    for (uint64_t i = 0; i < solution[0].size(); ++i) {
+        minX = std::min(minX, solution[0][i]);
+        maxX = std::max(maxX, solution[0][i]);
+        for (uint64_t j = 1; j < graphCount + 1; ++j) {
+            minY = std::min(minY, solution[j][i]);
+            maxY = std::max(maxY, solution[j][i]);
+        }
     }
+    scaleX = width / std::abs(maxX - minX);
+    scaleY = height / std::abs(maxY - minY);
+    std::cout << "scale: " << scaleX << " " << scaleY << "\n" << height << " " << width << " " << std::abs(maxY - minY) << "\n"; 
+
+    // switch(taskType) {
+    //     case TaskType::KOSHI:
+    //         break;
+    //     case TaskType::KOSHI_SYSTEM:
+    //         break;
+    //     case TaskType::CHEMICAL:
+    //         break;
+    //     default:
+    //         break;
+    // }
+
     uint64_t idx = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(idx);
     //ui->tableWidget->setItem(idx, 0, new QTableWidgetItem(QString::number(idx + 1)));
@@ -237,33 +318,37 @@ void MainWindow::on_calcButton_clicked() {
         std::tie(max_miss, average_miss) = getAnaliticCompare(solution[1], analitic[0]);
         ui->tableWidget->setItem(idx, 4, new QTableWidgetItem(QString::fromStdString(std::to_string(average_miss))));
         ui->tableWidget->setItem(idx, 5, new QTableWidgetItem(QString::fromStdString(std::to_string(max_miss))));
+        pen.setColor(Qt::green);
+        for(uint64_t i = 1; i < analitic[0].size(); ++i) {
+            float128_t x1 = solution[0][i - 1] * scaleX + width / 2;
+            float128_t y1 = height - (analitic[0][i - 1] * scaleY + height / 2);
+            float128_t x2 = solution[0][i] * scaleX + width / 2;
+            float128_t y2 = height - (analitic[0][i] * scaleY + height / 2);
+            scene->addLine(x1, y1, x2, y2, pen);
+        }
     } else {
         ui->tableWidget->setItem(idx, 4, new QTableWidgetItem("-"));
         ui->tableWidget->setItem(idx, 5, new QTableWidgetItem("-"));
     }
     ui->tableWidget->setItem(idx, 6, new QTableWidgetItem(QString::fromStdString(std::to_string(approx))));
 
-    std::cout << solution.back().back() << "\n";
-    //std::cout << koshi. << "\n";
-    //таблица с аналитическим решением
-    //метод, время (мс), количестов шагов, средняя погрешность, максимальная погрешность, используемая точность
-    //таблица без аналитического решения
-    //метод, время (мс), количестов шагов, используемая точность
+    for (uint64_t i = 1; i < graphCount + 1; ++i) {
+        pen.setColor(colors[i - 1]);
+        for(uint64_t j = 1; j < solution[0].size(); ++j) {
+            scene->addEllipse(solution[0][j] * scaleX + width / 2, height - (solution[i][j] * scaleY + height / 2), 2, 2, pen);
+        }
+    }
 }
 
 void MainWindow::on_toKoshiTask_clicked() {
     taskType = TaskType::KOSHI;
     //ui->tableWidget->clear();
-    ui->tableWidget->setRowCount(0);
-    ui->graphicsView->scene()->clear();
     ui->stackedWidget->setCurrentWidget(ui->KoshiPage);
 }
 
 void MainWindow::on_toChemicalTask_clicked() {
     taskType = TaskType::CHEMICAL;
     //ui->tableWidget->clear();
-    ui->tableWidget->setRowCount(0);
-    ui->graphicsView->scene()->clear();
     ui->stackedWidget->setCurrentWidget(ui->ChemicPage);
 }
 

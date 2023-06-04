@@ -674,6 +674,8 @@ std::tuple<std::vector<float128_t>, std::vector<float128_t>> readInfo (const std
 }
 
 void ChemicalSystem::rightPartGen () {
+    ode_system.clear();
+    Y.clear();
     //std::vector<std::function<float128_t(const std::vector<float128_t> &)>> rightPart;
     float128_t A, n, E;
     const ChemicalSystem &system = *this;

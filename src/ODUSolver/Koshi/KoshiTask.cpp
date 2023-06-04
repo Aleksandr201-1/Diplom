@@ -44,6 +44,8 @@ KoshiTask::KoshiTask () : X0(0), Xn(0) {}
 KoshiTask::~KoshiTask () {}
 
 void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t order, float128_t X0, float128_t Xn) {
+    ode_system.clear();
+    Y.clear();
     uint64_t idx = 0, size = 0;
     std::string tmp = "y";
     std::vector<std::string> args; //x y y' y'' ...
@@ -89,6 +91,8 @@ void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t ord
 }
 
 void KoshiTask::setTaskInfo(const std::string &ode, uint64_t order, const std::vector<float128_t> &Y0, float128_t X0, float128_t Xn) {
+    ode_system.clear();
+    Y.clear();
     uint64_t idx = 0, size = 0;
     std::string tmp = "y";
     std::vector<std::string> args; //x y y' y'' ...
@@ -122,6 +126,8 @@ void KoshiTask::setTaskInfo(const std::string &ode, uint64_t order, const std::v
 }
 
 void KoshiTask::setSystemInfo(const std::vector<std::string> &system, uint64_t order, float128_t X0, float128_t Xn) {
+    ode_system.clear();
+    Y.clear();
     uint64_t idx = 0, size = 0;
     std::vector<std::string> args; //x y y' y'' ...
     args.push_back("x");

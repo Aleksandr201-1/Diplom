@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="KoshiPage">
      <widget class="QFrame" name="stepAndBorders">
@@ -1524,7 +1524,7 @@
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
              <property name="decimals">
-              <number>3</number>
+              <number>5</number>
              </property>
              <property name="minimum">
               <double>0.000000000000000</double>
@@ -1533,7 +1533,7 @@
               <double>10000000000000000.000000000000000</double>
              </property>
              <property name="singleStep">
-              <double>0.001000000000000</double>
+              <double>0.000001000000000</double>
              </property>
              <property name="value">
               <double>17000000.000000000000000</double>
@@ -1584,7 +1584,7 @@
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
              <property name="decimals">
-              <number>3</number>
+              <number>5</number>
              </property>
              <property name="minimum">
               <double>-10.000000000000000</double>
@@ -1593,7 +1593,7 @@
               <double>10.000000000000000</double>
              </property>
              <property name="singleStep">
-              <double>0.001000000000000</double>
+              <double>0.000001000000000</double>
              </property>
              <property name="value">
               <double>0.000000000000000</double>
@@ -1644,7 +1644,7 @@
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
              <property name="decimals">
-              <number>3</number>
+              <number>5</number>
              </property>
              <property name="minimum">
               <double>0.000000000000000</double>
@@ -1653,7 +1653,7 @@
               <double>100000.000000000000000</double>
              </property>
              <property name="singleStep">
-              <double>0.001000000000000</double>
+              <double>0.000001000000000</double>
              </property>
              <property name="value">
               <double>24044.000000000000000</double>
@@ -1780,7 +1780,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="stepBoxY0_6">
+              <widget class="QDoubleSpinBox" name="PSpinBox">
                <property name="font">
                 <font>
                  <pointsize>14</pointsize>

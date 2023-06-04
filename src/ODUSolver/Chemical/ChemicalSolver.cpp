@@ -119,18 +119,19 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     auto func = task.getODE();
     auto GFunc = task.getGFunc();
     auto PhiFunc = task.getPhiFunc();
-    for (uint64_t i = 0; i < PhiFunc.size(); ++i) {
-        std::cout << i << "\n";
-        std::cout << "Phi(" << T << ") = " << PhiFunc[i](T) << "\n";
-        std::cout << "Phi'(" << T << ") = " << PhiFunc[i].der1(T) << "\n";
-        std::cout << "Phi''(" << T << ") = " << PhiFunc[i].der2(T) << "\n\n";
+    // for (uint64_t i = 0; i < PhiFunc.size(); ++i) {
+    //     std::cout << i << "\n";
+    //     std::cout << "Phi(" << T << ") = " << PhiFunc[i](T) << "\n";
+    //     std::cout << "Phi'(" << T << ") = " << PhiFunc[i].der1(T) << "\n";
+    //     std::cout << "Phi''(" << T << ") = " << PhiFunc[i].der2(T) << "\n\n";
 
-        std::cout << "Phi(" << T << ") = " << PhiFunc[i](T) << "\n";
-        std::cout << "Numeric Phi'(" << T << ") = " << derivative( PhiFunc[i], T, 0.00001, DiffConfig::POINTS5_ORDER1_WAY1) << "\n";
-        std::cout << "Numeric Phi''(" << T << ") = " << derivative( PhiFunc[i], T, 0.00001, DiffConfig::POINTS5_ORDER2_WAY1) << "\n\n";
-    }
+    //     std::cout << "Phi(" << T << ") = " << PhiFunc[i](T) << "\n";
+    //     std::cout << "Numeric Phi'(" << T << ") = " << derivative( PhiFunc[i], T, 0.00001, DiffConfig::POINTS5_ORDER1_WAY1) << "\n";
+    //     std::cout << "Numeric Phi''(" << T << ") = " << derivative( PhiFunc[i], T, 0.00001, DiffConfig::POINTS5_ORDER2_WAY1) << "\n\n";
+    // }
     //exit(0);
     auto Y = task.getY0();
+    printVector(Y);
     auto Ui = generateUi(GFunc, PhiFunc, R);
     float128_t tough = 0;
     uint64_t orderOfTask = func.size()+0, orderOfApprox = butcher.size().m - 1;
