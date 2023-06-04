@@ -13,6 +13,10 @@
 #include <General/LSM.hpp>
 #include <General/ButcherTable.hpp>
 
+std::vector<std::vector<float128_t>> getAnaliticSolution (const std::vector<float128_t> &X, const std::vector<FunctionalTree> &func);
+
+std::tuple<float128_t, float128_t> getAnaliticCompare (const std::vector<float128_t> &Yn, const std::vector<float128_t> &Ya);
+
 enum class ReportType {
     TXT,
     TEX,

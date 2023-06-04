@@ -61,6 +61,7 @@ endif()
 target_link_libraries(ODUSolverGUI
     PRIVATE
         ${QT_LIBS}
+        ${PDF_REPORTER_LIB}
         ${KOSHI_SOLVER_LIB}
         ${CHEMICAL_SOLVER_LIB}
         #QCustomPlot

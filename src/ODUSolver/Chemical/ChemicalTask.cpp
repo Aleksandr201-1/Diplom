@@ -10,6 +10,26 @@ float128_t PhiFunction::operator() (float128_t t) const {
     return 0;
 }
 
+float128_t PhiFunction::der1 (float128_t t) const {
+    for (uint64_t i = 0; i < T.size(); ++i) {
+        if (t >= T[i].first && t < T[i].second) {
+            t = t / 10000;
+            return (phi[i][1] / t - 2*phi[i][2]*std::pow(t, -3) - phi[i][3]*std::pow(t, -2) + phi[i][4] + 2*phi[i][5]*t + 3*phi[i][6]*std::pow(t, 2)) / 10000;
+        }
+    }
+    return 0;
+}
+
+float128_t PhiFunction::der2 (float128_t t) const {
+    for (uint64_t i = 0; i < T.size(); ++i) {
+        if (t >= T[i].first && t < T[i].second) {
+            t = t / 10000;
+            return (-phi[i][1] / (t*t) + 6*phi[i][2]*std::pow(t, -4) + 2*phi[i][3]*std::pow(t, -3) + 2*phi[i][5] + 6*phi[i][6]*t) / 100000000;
+        }
+    }
+    return 0;
+}
+
 std::string ChemicalReaction::readSubstance (const std::string &sub, uint64_t &i) const {
     std::string ans;
     while (i < sub.size() && sub[i] != '+') {
@@ -361,12 +381,20 @@ std::vector<std::string> ChemicalSystem::getAtomList () const {
     return atoms;
 }
 
+const std::unordered_map<std::string, float128_t> &ChemicalSystem::getAtomMasses () const {
+    return atom_mass;
+}
+
 void ChemicalSystem::setSubstanceList (const std::vector<std::string> &list) {
     substances = list;
 }
 
 std::vector<std::string> ChemicalSystem::getSubstanceList () const {
     return substances;
+}
+
+const std::unordered_map<std::string, float128_t> &ChemicalSystem::getSubstanceMasses () const {
+    return substance_mass;
 }
 
 void ChemicalSystem::addReaction (const std::string &reaction, float128_t A, float128_t n, float128_t E) {
@@ -377,6 +405,24 @@ void ChemicalSystem::addReaction (const std::string &reaction, float128_t A, flo
 
 void ChemicalSystem::addReaction (const ChemicalReaction &reaction) {
     reactions.push_back(reaction);
+}
+
+void ChemicalSystem::changeReaction (uint64_t i, const std::string &reaction, float128_t A, float128_t n, float128_t E) {
+    ChemicalReaction react(reaction, atoms, substances, additives, table);
+    react.setParameters(A, n, E);
+    reactions[i] = react;
+}
+
+void ChemicalSystem::changeReaction (uint64_t i, const ChemicalReaction &reaction) {
+    reactions[i] = reaction;
+}
+
+void ChemicalSystem::deleteReaction (uint64_t i) {
+    reactions.erase(reactions.begin() + i);
+}
+
+void ChemicalSystem::clearReactions () {
+    reactions.clear();
 }
 
 void ChemicalSystem::addAdditive (const std::string &name, const std::vector<float128_t> &additive) {
@@ -434,6 +480,10 @@ std::vector<float128_t> ChemicalSystem::getY0 () const {
 
 const std::vector<std::function<float128_t (float128_t)>> &ChemicalSystem::getGFunc () const {
     return GFunc;
+}
+
+const std::vector<PhiFunction> &ChemicalSystem::getPhiFunc () const {
+    return phi;
 }
 
 void ChemicalSystem::initFromFile (const std::string &filename) {
@@ -751,15 +801,15 @@ void ChemicalSystem::rightPartGen () {
                 ans -= in[i]  * right;
                 ans += in[i]  * left;
                 ans -= out[i] * left;
-                auto input_add = system[j].getInputAdditive();
-                auto output_add = system[j].getOutputAdditive();
-                for (uint64_t k = 0; k < input_add.size(); ++k) {
+                //auto input_add = system[j].getInputAdditive();
+                //auto output_add = system[j].getOutputAdditive();
+                //for (uint64_t k = 0; k < input_add.size(); ++k) {
                     //std::cout << "got M in reaction " << j + 1 << "to work\n";
-                    ans += additive_configs[additives[output_add[k]]][i] * right;
-                    ans -= additive_configs[additives[input_add[k]]][i]  * right;
-                    ans += additive_configs[additives[input_add[k]]][i]  * left;
-                    ans -= additive_configs[additives[output_add[k]]][i] * left;
-                }
+                    // ans += additive_configs[additives[output_add[k]]][i] * right;
+                    // ans -= additive_configs[additives[input_add[k]]][i]  * right;
+                    // ans += additive_configs[additives[input_add[k]]][i]  * left;
+                    // ans -= additive_configs[additives[output_add[k]]][i] * left;
+                //}
             }
             //37 000
             //

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <type_traits>
 
 /**
  * Преобразует элемент перечисления в строковое представление.
@@ -43,5 +44,18 @@ T stringToEnum (const std::string &str, const std::map<T, std::string> &map) {
     // если соответствующая запись не найдена, возвращаем значение типа T по умолчанию
     return T::ERROR;
 }
+
+/**
+ * Преобразует элемент перечисления в число.
+ *
+ * @param enumEl Элемент перечисления, который нужно преобразовать в число.
+ * 
+ * @return Числовое представление заданного элемента перечисления.
+**/
+template <class T>
+constexpr auto toUnderlying(T enumEl) noexcept {
+    return static_cast<std::underlying_type_t<T>>(enumEl);
+}
+
 
 #endif

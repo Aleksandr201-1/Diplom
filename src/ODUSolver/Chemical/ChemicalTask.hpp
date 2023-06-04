@@ -26,6 +26,10 @@ struct PhiFunction {
     std::vector<std::pair<float128_t, float128_t>> T;
 
     float128_t operator() (float128_t t) const;
+
+    float128_t der1 (float128_t t) const;
+
+    float128_t der2 (float128_t t) const;
 };
 
 class ChemicalSystem;
@@ -94,11 +98,18 @@ class ChemicalSystem : public Task {
 
         void setAtomList (const std::vector<std::string> &list);
         std::vector<std::string> getAtomList () const;
+        const std::unordered_map<std::string, float128_t> &getAtomMasses () const;
         void setSubstanceList (const std::vector<std::string> &list);
         std::vector<std::string> getSubstanceList () const;
+        const std::unordered_map<std::string, float128_t> &getSubstanceMasses () const;
 
         void addReaction (const std::string &reaction, float128_t A, float128_t n, float128_t E);
         void addReaction (const ChemicalReaction &reaction);
+        void changeReaction (uint64_t i, const std::string &reaction, float128_t A, float128_t n, float128_t E);
+        void changeReaction (uint64_t i, const ChemicalReaction &reaction);
+        void deleteReaction (uint64_t i);
+        void clearReactions ();
+
         void addAdditive (const std::string &name, const std::vector<float128_t> &additive);
         void setPressure (float128_t P);
         float128_t getPressure () const;
@@ -110,6 +121,7 @@ class ChemicalSystem : public Task {
         void setConcentrations (const std::vector<float128_t> &conc);
         std::vector<float128_t> getY0 () const;
         const std::vector<std::function<float128_t (float128_t)>> &getGFunc () const;
+        const std::vector<PhiFunction> &getPhiFunc () const;
 
 
         void initFromFile (const std::string &filename);
