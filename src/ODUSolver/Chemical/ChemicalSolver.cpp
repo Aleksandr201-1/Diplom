@@ -1,5 +1,21 @@
 #include "ChemicalSolver.hpp"
 
+std::vector<std::vector<float128_t>> drop (const std::vector<std::vector<float128_t>> &vv) {
+    uint64_t dropSize = 100;
+    std::vector<std::vector<float128_t>> ans(vv.size());
+    for (uint64_t i = 0; i < vv[0].size(); ++i) {
+        if (i % dropSize == 0) {
+            for (uint64_t j = 0; j < vv.size(); ++j) {
+                ans[j].push_back(vv[j][i]);
+            }
+        }
+    }
+    for (uint64_t j = 0; j < vv.size(); ++j) {
+        ans[j].push_back(vv[j].back());
+    }
+    return ans;
+}
+
 float128_t NewtonFind (const std::function<float128_t (float128_t)> &f, float128_t x, float128_t approx) {
     uint64_t count = 1;
     float128_t x2 = x - f(x) / derivative(f, x, 0.0001, DiffConfig::POINTS2_ORDER1_WAY1);
@@ -131,12 +147,14 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     // }
     //exit(0);
     auto Y = task.getY0();
+    //Y = {0.688402337883, 10.28972285, 22.0855861377, 8.537531053, 2.9605809371, 9.34790964455};
+    //T = 3400;
     printVector(Y);
     auto Ui = generateUi(GFunc, PhiFunc, R);
     float128_t tough = 0;
-    uint64_t orderOfTask = func.size()+0, orderOfApprox = butcher.size().m - 1;
+    uint64_t orderOfTask = func.size()+2, orderOfApprox = butcher.size().m - 1;
 
-    std::vector<std::vector<float128_t>> Yi(orderOfTask + 3); //t W1 W2 W3 ... Wn-2 rho T (n = orderOfTask)
+    std::vector<std::vector<float128_t>> Yi(orderOfTask + 1); //t W1 W2 W3 ... Wn-2 rho T (n = orderOfTask)
     std::vector<float128_t> control;
 
     //инициализация начальных условий
@@ -155,6 +173,16 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     U = getU(Ui, Y, T);
 
     std::cout << "U: " << U << "\n";
+    uint64_t stepNum = 1;
+
+    std::vector<std::function<float128_t (const std::vector<float128_t> &)>> nu;
+    for (uint64_t i = 0; i < Ui.size(); ++i) {
+        auto nui = [=] (const std::vector<float128_t> &X) -> float128_t {
+            float128_t Temp = X[X.size() - 1], Rho = X[X.size() - 2];
+            return R * Temp * std::log((Rho * R * Temp * X[i + 1]) / P) + GFunc[i](Temp);
+        };
+        nu.push_back(nui);
+    }
 
     //выбор типа реакции
     switch(type) {
@@ -171,31 +199,37 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
             );
             break;
         case ReactionType::ADIABAT_CONST_RHO: //адиабатическая реакция с постоянной плотностью (не работает)
-            // func.push_back(
-            //     [=] (const std::vector<float128_t> &X) -> float128_t {
-            //         return 0;
-            //     }
-            // );
-            // func.push_back(
-            //     [=] (const std::vector<float128_t> &X) -> float128_t {
-            //         float128_t ans = 0, cV = 0, currTemp = X[X.size() - 1];
-            //         //std::cout << X[X.size() - 1] << "fuck\n";
-            //         //exit(0);
-            //         for (uint64_t i = 0; i < Ui.size(); ++i) {
-            //             ans += func[i](X) * Ui[i](currTemp);
-            //             //return GFunc[j](T) + T * (PhiFunc[j](T) + T*PhiFunc[j].der1(T)) - R * T;
-            //             //cV += X[i + 1] * derivative(Ui[i], X[X.size() - 1], 0.00001, DiffConfig::POINTS5_ORDER1_WAY1);
-            //             cV += X[i + 1] * (currTemp * (2*PhiFunc[i].der1(currTemp) + currTemp*PhiFunc[i].der2(currTemp)) - R);
-            //         }
-            //         ans /= X[X.size() - 2] * cV;
-            //         return -ans;
-            //         // auto f = [=] (const std::vector<float128_t> &X) -> float128_t {
-            //         //     return std::abs(getU(Ui, X, X.back()) - U);
-            //         // };
-            //         // return derivative(f, X, 0.0001, X.size() - 1, DiffConfig::POINTS4_ORDER1_WAY2);
-            //         //return NewtonFind(f, X.back(), 0.0001);
-            //     }
-            // );
+            func.push_back(
+                [=] (const std::vector<float128_t> &X) -> float128_t {
+                    return 0;
+                }
+            );
+            func.push_back(
+                [=] (const std::vector<float128_t> &X) -> float128_t {
+                    static uint64_t idx = 0;
+                    float128_t ans = 0, cV = 0, cp = 0, currTemp = X[X.size() - 1];
+                    //std::cout << X[X.size() - 1] << "fuck\n";
+                    //exit(0);
+                    for (uint64_t i = 0; i < Ui.size(); ++i) {
+                        ans += func[i](X) * Ui[i](currTemp);
+                        //return GFunc[j](T) + T * (PhiFunc[j](T) + T*PhiFunc[j].der1(T)) - R * T;
+                        //cV += X[i + 1] * derivative(Ui[i], X[X.size() - 1], 0.00001, DiffConfig::POINTS5_ORDER1_WAY1);
+                        cV += X[i + 1] * (currTemp * (2*PhiFunc[i].der1(currTemp) + currTemp*PhiFunc[i].der2(currTemp)) - R);
+                        cp += R * X[i + 1];
+                    }
+                    if (idx % 100 == 0) {
+                        std::cout << "cp/cv = " << (cp + cV) / cV << '\n';
+                    }
+                    ans /= cV;
+                    ++idx;
+                    return -ans;
+                    // auto f = [=] (const std::vector<float128_t> &X) -> float128_t {
+                    //     return std::abs(getU(Ui, X, X.back()) - U);
+                    // };
+                    // return derivative(f, X, 0.0001, X.size() - 1, DiffConfig::POINTS4_ORDER1_WAY2);
+                    //return NewtonFind(f, X.back(), 0.0001);
+                }
+            );
             break;
         case ReactionType::ISOTERM_CONST_P: //изотермическая реакция с постоянным давлением
             func.push_back(
@@ -206,7 +240,7 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
                         div += X[i + 1];
                     }
                     //return 0;
-                    return ans / div;
+                    return (-ans / div) * X[X.size() - 2];
                 }
             );
             func.push_back(
@@ -254,7 +288,6 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
     //M1 M2 M3 M4 V
     std::vector<std::vector<float128_t>> K(orderOfTask, std::vector<float128_t>(orderOfApprox, 0));
 
-    uint64_t stepNum = 1;
     bool expl;
     switch (method) {
         case SolveMethod::RUNGE_KUTTA:
@@ -320,14 +353,14 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
                 //std::cout << "delta: " << delta << "\n";
                 Yi[j + 1][stepNum] = Yi[j + 1][stepNum - 1] + delta;
             }
-            if (type != ReactionType::ADIABAT_CONST_RHO) {
-                Yi[Yi.size() - 2][stepNum] = updateRho(Yi, P, R, T, stepNum);
-                Yi[Yi.size() - 1][stepNum] = Yi[Yi.size() - 1][stepNum - 1];
-            } else {
-                //float128_t tmp = Yi[orderOfTask + 2].back();
-                Yi[Yi.size() - 2][stepNum] = Yi[Yi.size() - 2][stepNum - 1];
-                Yi[Yi.size() - 1][stepNum] = updateT(Yi, Ui, U, stepNum);
-            }
+            // if (type != ReactionType::ADIABAT_CONST_RHO) {
+            //     Yi[Yi.size() - 2][stepNum] = updateRho(Yi, P, R, T, stepNum);
+            //     Yi[Yi.size() - 1][stepNum] = Yi[Yi.size() - 1][stepNum - 1];
+            // } else {
+            //     //float128_t tmp = Yi[orderOfTask + 2].back();
+            //     Yi[Yi.size() - 2][stepNum] = Yi[Yi.size() - 2][stepNum - 1];
+            //     Yi[Yi.size() - 1][stepNum] = updateT(Yi, Ui, U, stepNum);
+            // }
             //newT = Yi[Yi.size() - 1][stepNum];
             // if (Tconst) {
             //     Yi[orderOfTask + 1].push_back(updateRho(Yi, P, R, T, stepNum));
@@ -377,13 +410,26 @@ std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
                 break;
             }
         }
-        if (stop || stepNum > 2000) {
+        if (stepNum > 200) {
             break;
         }
         ++stepNum;
     }
     for (uint64_t i = 0; i < Y.size(); ++i) {
         Y[i] = Yi[i].back();
+    }
+    std::cout << "\n";
+    for (uint64_t i = 0; i < task.getCount(); ++i) {
+        float128_t qin = 0, qout = 0;
+        auto gammaIn = task[i].getInput();
+        auto gammaOut = task[i].getOutput();
+        for (uint64_t j = 0; j < func.size() - 2; ++j) {
+            qin += nu[j](Y) * gammaIn[j];
+            qout += nu[j](Y) * gammaOut[j];
+            //qin += func[j](Y) * gammaIn[j];
+            //qout += func[j](Y) * gammaOut[j];
+        }
+        std::cout << "In: " << qin << "\nOut: " << qout << "\n";
     }
     T = Yi.back().back();
     U = getU(Ui, Y, T);

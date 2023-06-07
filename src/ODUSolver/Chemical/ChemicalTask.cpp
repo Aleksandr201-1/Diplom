@@ -607,7 +607,7 @@ void ChemicalSystem::printInfo (std::ostream &out) const {
             Kleft += (int64_t)(input[j] - output[j]) * (GFunc[j](T) / (R * T) + std::log(R * T / P));
         }
         std::string tmp;
-        Kleft = std::exp(Kleft) * Kright;
+        Kleft = std::exp(-Kleft) * Kright;
         out << i + 1 << ") " << reactions[i] << "\n";
         out << std::left;
         tmp = "\tA = " + std::to_string(A);
@@ -718,7 +718,7 @@ void ChemicalSystem::rightPartGen () {
             float128_t Rho = args[args.size() - 2];
             float128_t Temp = args[args.size() - 1];
             float128_t ans = K(A, n, Temp, E);
-            float128_t tmp;
+            float128_t tmp = 0;
             //std::cout << "Kin: " << ans << "\n";
             auto input = system[i].getInput();
             auto input_add = system[i].getInputAdditive();
@@ -754,9 +754,9 @@ void ChemicalSystem::rightPartGen () {
             for (uint64_t j = 0; j < in.size(); ++j) {
                 ans += (int64_t)(input[j] - output[j]) * (GFunc[j](Temp) / (R * Temp) + std::log(R * Temp / P0));
             }
-            ans = std::exp(-ans) * K(A, n, T, E);
+            ans = std::exp(-ans) * K(A, n, Temp, E);
             //std::cout << "Kout: " << ans << "\n";
-            float128_t tmp;
+            float128_t tmp = 0;
             auto output_add = system[i].getOutputAdditive();
             for (uint64_t j = 0; j < output.size(); ++j) {
                 //for (uint64_t k = 0; k < out[j].second; ++k) {
@@ -803,15 +803,15 @@ void ChemicalSystem::rightPartGen () {
                 ans -= in[i]  * right;
                 ans += in[i]  * left;
                 ans -= out[i] * left;
-                //auto input_add = system[j].getInputAdditive();
-                //auto output_add = system[j].getOutputAdditive();
-                //for (uint64_t k = 0; k < input_add.size(); ++k) {
-                    //std::cout << "got M in reaction " << j + 1 << "to work\n";
-                    // ans += additive_configs[additives[output_add[k]]][i] * right;
-                    // ans -= additive_configs[additives[input_add[k]]][i]  * right;
-                    // ans += additive_configs[additives[input_add[k]]][i]  * left;
-                    // ans -= additive_configs[additives[output_add[k]]][i] * left;
-                //}
+                // auto input_add = system[j].getInputAdditive();
+                // auto output_add = system[j].getOutputAdditive();
+                // for (uint64_t k = 0; k < input_add.size(); ++k) {
+                //     //std::cout << "got M in reaction " << j + 1 << "to work\n";
+                //     ans += additive_configs[additives[output_add[k]]][i] * right;
+                //     ans -= additive_configs[additives[input_add[k]]][i]  * right;
+                //     ans += additive_configs[additives[input_add[k]]][i]  * left;
+                //     ans -= additive_configs[additives[output_add[k]]][i] * left;
+                // }
             }
             //37 000
             //

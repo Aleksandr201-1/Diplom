@@ -132,10 +132,10 @@ MainWindow::MainWindow(QWidget *parent)
     std::string reactionStr = ui->reactInputLineEdit->text().toStdString() + "<==>" + ui->reactOutputLineEdit->text().toStdString();
     float128_t A = ui->ASpinBox->value() , n = ui->nSpinBox->value(), E = ui->ESpinBox->value();
     chemSys.addReaction(reactionStr, A, n, E);
-    chemSys.addReaction("H + O2 <==> OH + O", 1.987 * std::pow(10, 8), 0, 8456);
-    chemSys.addReaction("H2 + OH <==> H2O + H", 1.024 * std::pow(10, 2), 1.6, 1660);
-    chemSys.addReaction("H2 + O <==> OH + H", 5.119 * std::pow(10, -2), 2.67, 3163);
-    chemSys.addReaction("2OH <==> H2O + O", 1.506 * std::pow(10, 3), 1.14, 50);
+    // chemSys.addReaction("H + O2 <==> OH + O", 1.987 * std::pow(10, 8), 0, 8456);
+    // chemSys.addReaction("H2 + OH <==> H2O + H", 1.024 * std::pow(10, 2), 1.6, 1660);
+    // chemSys.addReaction("H2 + O <==> OH + H", 5.119 * std::pow(10, -2), 2.67, 3163);
+    // chemSys.addReaction("2OH <==> H2O + O", 1.506 * std::pow(10, 3), 1.14, 50);
 
     //ui->reactionListWidget->item(0)->setText(QString::fromStdString("qefaef\n"));
     //ui->reactionListWidget->item(0)->setData(9);
