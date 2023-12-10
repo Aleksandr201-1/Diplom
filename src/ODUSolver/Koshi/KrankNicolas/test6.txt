@@ -1,0 +1,8 @@
+ut = uxx + cos(x) * (cos(t) + sin(t))
+u(0) = sin(t)
+ux(1.57) = 0 - sin(t)
+u(0) = 0
+
+0.01 0.1
+
+sin(t) * cos(x)

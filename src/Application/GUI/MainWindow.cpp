@@ -38,14 +38,14 @@ const std::map<QString, SolveStruct> strToImplicitSolve = {
     {"Лобатто 6 порядка, 2й способ", {SolveMethod::LOBATTO, 6, 2}},
     {"Лобатто 6 порядка, 3й способ", {SolveMethod::LOBATTO, 6, 3}},
     {"Лобатто 6 порядка, 4й способ", {SolveMethod::LOBATTO, 6, 4}},
-    {"Гаусс 2 порядка, 1й способ", {SolveMethod::GAUSS, 2, 1}},
-    {"Гаусс 4 порядка, 1й способ", {SolveMethod::GAUSS, 4, 1}},
-    {"Гаусс 6 порядка, 1й способ", {SolveMethod::GAUSS, 6, 1}},
+    {"Гаусс 2 порядка, 1й способ",        {SolveMethod::GAUSS, 2, 1}},
+    {"Гаусс 4 порядка, 1й способ",        {SolveMethod::GAUSS, 4, 1}},
+    {"Гаусс 6 порядка, 1й способ",        {SolveMethod::GAUSS, 6, 1}},
     {"Л-стабильный 3 порядка, 1й способ", {SolveMethod::L_STABLE_DIAGONAL, 3, 1}},
     {"Л-стабильный 4 порядка, 1й способ", {SolveMethod::L_STABLE_DIAGONAL, 4, 1}},
-    {"Радо 1 порядка, 1й способ", {SolveMethod::RADO, 1, 1}},
-    {"Радо 3 порядка, 1й способ", {SolveMethod::RADO, 3, 1}},
-    {"Радо 5 порядка, 1й способ", {SolveMethod::RADO, 5, 1}}
+    {"Радо 1 порядка, 1й способ",         {SolveMethod::RADO, 1, 1}},
+    {"Радо 3 порядка, 1й способ",         {SolveMethod::RADO, 3, 1}},
+    {"Радо 5 порядка, 1й способ",         {SolveMethod::RADO, 5, 1}}
 };
 
 const std::map<QString, IterationAlgo> strToIteration = {

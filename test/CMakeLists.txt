@@ -38,5 +38,6 @@ build_module_tester(FuncMakerTest FuncMakerTest.cpp ${GENERAL_LIB})
 build_module_tester(Calculator FuncMakerCalculator.cpp ${GENERAL_LIB})
 build_module_tester(ChemicalGeneratorTest ChemicalGeneratorTest.cpp ${CHEMICAL_SOLVER_LIB})
 build_module_tester(DifferentiationTest DifferentiationTest.cpp ${GENERAL_LIB})
+build_module_tester(FMTest FMTest.cpp ${GENERAL_LIB})
 
 add_definitions(${COMPILE_FLAGS})

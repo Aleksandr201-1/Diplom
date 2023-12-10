@@ -118,7 +118,7 @@ int main () {
 
         if (errorSpot != -1) {
             random = errorSpot * 1.0;
-            std::cout << "Not OK\n";
+            std::cout << "\x1b[31mNot OK\x1b[0m\n";
             std::cout << "\tTotal diff: " << diff << "\n";
             std::cout << "\tAt the point: " << random << "\n";
             std::cout << "\tResult at " << random << "\n";
@@ -131,7 +131,7 @@ int main () {
             std::cout << "\t\tTree(" << random << ") = " << test[i].dFunc({random}) << "\n";
             std::cout << "\t\tFunc(" << random << ") = " << test[i].sFunc({random}) << "\n";
         } else {
-            std::cout << "OK\n";
+            std::cout << "\x1b[32mOK\x1b[0m\n";
         }
     }
     std::cout << "=====Time testing=====\n";
@@ -144,7 +144,7 @@ int main () {
         right = TIME_TEST_NUM;
     }
     for (uint64_t i = left; i < right; ++i) {
-        std::cout << "Using test №" << i + 1 << "\n";
+        std::cout << "Using test " << i + 1 << "\n";
         dTime = sTime = 0;
 
         startT = std::chrono::system_clock::now();
