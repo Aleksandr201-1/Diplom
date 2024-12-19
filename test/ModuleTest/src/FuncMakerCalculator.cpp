@@ -1,5 +1,5 @@
 #include <iostream>
-#include <General/FuncMaker.hpp>
+#include <Math/FuncMaker.hpp>
 
 int main () {
     std::string line;

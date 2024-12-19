@@ -22,7 +22,7 @@ int main () {
 
     sys.printInfo(std::cout);
 
-    sys.setConcentrations({0.5, 0.0, 0.0, 0.5, 0.0, 0.0});
+    sys.setConcentrations({0.5, 0.0, 0.0, 0.5, 0.0, 0.0}, ConcentrationMode::PERCENT);
     sys.rightPartGen();
     std::cout << "Testing: right part generation\n";
     auto rightPart = sys.getODE();

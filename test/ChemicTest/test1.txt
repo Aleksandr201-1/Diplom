@@ -1,6 +1,6 @@
-./test/ChemicTest/bufermm.txt
+./../../test/ChemicTest/bufermm.txt
 
-2300.0
+950.0
 101325.0
 
 1
@@ -30,6 +30,13 @@ H + OH + M <==> H2O + M
 2H + M <==> H2 + M
 9.791e+007 -0.6 0
 
+percent
+
+AdiabatConstRho
+#AdiabatConstP
+#IsotermConstRho
+#IsotermConstP
+
 2
 
 H2 = 0.5
@@ -39,4 +46,6 @@ O2 = 0.5
 #OH = 0.1
 #H2O = 0.1
 
-1e-8
+1e-8 1e-8 2e-4
+
+1
