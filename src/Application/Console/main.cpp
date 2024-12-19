@@ -8,7 +8,7 @@
 
 using duration_t = std::chrono::milliseconds;
 
-void printTable1 (const std::vector<std::vector<float128_t>> &Y, std::ostream &out) {
+void printTable1 (const std::vector<std::vector<double>> &Y, std::ostream &out) {
     for (uint64_t i = 0; i < Y[0].size(); ++i) {
         for (uint64_t j = 0; j < Y.size(); ++j) {
             out << Y[j][i] << "\t";
@@ -24,9 +24,6 @@ int main (int argc, char* argv[]) {
     std::stringstream str_buf;
 
     std::vector<std::string> args(argv, argv + argc);
-    // for (auto el : args) {
-    //     std::cout << el << "\n";
-    // }
     argsHandler(args, info);
     info.butcher = createButcherTable(info.method, info.order, info.way);
 
@@ -52,9 +49,8 @@ int main (int argc, char* argv[]) {
     if (info.type == TaskType::KOSHI) {
         std::cout << "(Коши):\n";
         std::vector<std::string> system;
-        //KoshiTask koshi;
-        float128_t X0, Xn;
-        FunctionalTree check;
+        double X0, Xn;
+        FuncMaker check;
         info.input_task.push_back(readLine(in));
         order = getOrder(info.input_task[0]);
         std::cout << "Порядок: " << order << "\n";
@@ -62,7 +58,7 @@ int main (int argc, char* argv[]) {
             info.input_task.push_back(readLine(in));
         }
         std::cout << "Введите размер шага:\n";
-        in >> info.h;
+        in >> info.h_min;
         std::cout << "Введите границы интегрирования:\n";
         in >> X0 >> Xn;
         std::cout << "Введите функцию для сравнения:\n";
@@ -73,15 +69,15 @@ int main (int argc, char* argv[]) {
     } else if (info.type == TaskType::KOSHI_SYSTEM) {
         std::cout << "(Систему Коши):\n";
         std::vector<std::string> system;
-        float128_t X0, Xn;
-        FunctionalTree check;
+        double X0, Xn;
+        FuncMaker check;
         in >> order;
         std::cout << "order: " << order << "\n";
         for (uint64_t i = 0; i < order * 2; ++i) {
             info.input_task.push_back(readLine(in));
         }
         std::cout << "Введите размер шага:\n";
-        in >> info.h;
+        in >> info.h_min;
         std::cout << "Введите границы интегрирования:\n";
         in >> X0 >> Xn;
         std::cout << "Введите функции для сравнения:\n";
@@ -94,7 +90,7 @@ int main (int argc, char* argv[]) {
     } else if (info.type == TaskType::CHEMICAL) {
         std::cout << "(Химической кинетики):\n";
         std::string filename, additive;
-        float128_t T, P;
+        double T, P;
         uint64_t additiveCount;
         std::cout << "Введите название файла с данными о веществах:\n";
         in >> filename;
@@ -107,7 +103,7 @@ int main (int argc, char* argv[]) {
         sys.setTemperature(T);
         sys.setPressure(P);
         for (uint64_t i = 0; i < additiveCount; ++i) {
-            std::vector<float128_t> add(sys.getSubstanceList().size());
+            std::vector<double> add(sys.getSubstanceList().size());
             in >> additive;
             for (uint64_t j = 0; j < add.size(); ++j) {
                 in >> add[j];
@@ -119,19 +115,22 @@ int main (int argc, char* argv[]) {
         std::cout << "Введите количество реакций и реакции:\n";
         in >> order;
         for (uint64_t i = 0; i < order; ++i) {
-            float128_t A, n, E;
+            double A, n, E;
             std::string reaction = readLine(in);
             //std::getline(in, reaction);
             in >> A >> n >> E;
             sys.addReaction(reaction, A, n, E);
         }
+        std::cout << "Введите режим ввода концентраций:\n";
+        std::string mode;
+        in >> mode;
 
         std::cout << "Введите количество начальных концентраций и концентрации:\n";
         in >> additiveCount;
         auto substances = sys.getSubstanceList();
-        std::vector<float128_t> initGamma(substances.size(), 0);
+        std::vector<double> initGamma(substances.size(), 0);
         for (uint64_t i = 0; i < additiveCount; ++i) {
-            float128_t concentration;
+            double concentration;
             std::string sub, tmp;
             in >> sub >> tmp >> concentration;
             auto it = std::find(substances.cbegin(), substances.cend(), sub);
@@ -143,9 +142,12 @@ int main (int argc, char* argv[]) {
             initGamma[idx] = concentration;
         }
         std::cout << "Введите начальный размер шага:\n";
-        in >> info.h;
-        sys.setConcentrations(initGamma);
-        //sys.setConcentrations({0, 0, 0, 0, 0, 0});
+        in >> info.h_min >> info.h_max >> info.h_last;
+        if (mode == "percent") {
+            sys.setConcentrations(initGamma, ConcentrationMode::PERCENT);
+        } else if (mode == "molar") {
+            sys.setConcentrations(initGamma, ConcentrationMode::MOLAR_MASS);
+        }
         sys.rightPartGen();
         std::cout << "info:\n";
         sys.printInfo(std::cout);
@@ -159,21 +161,18 @@ int main (int argc, char* argv[]) {
     std::vector<std::string> colors = {
         "blue",
         "purple",
-        //"red",
+        "red",
         "black",
         "magenta",
         "green",
-        "orange"
+        "orange",
+        "cyan",
+        "pink",
+        "yellow",
+        "blue"
     };
 
     std::vector<std::string> substances = sys.getSubstanceList();
-    // info.task.odu_system = sys.rightPartGen();
-    // info.task.order = info.task.odu_system.size();
-    // info.task.X0 = 0;
-    // info.task.Xn = 2e-6;
-    // info.h = (info.task.Xn - info.task.X0) / 50;
-    // info.task.Y = sys.getY0();
-    // printVector(info.task.Y);
     switch (info.type) {
         case TaskType::CHEMICAL:
             for (uint64_t i = 0; i < substances.size(); ++i) {
@@ -199,18 +198,14 @@ int main (int argc, char* argv[]) {
     switch (info.type) {
         case TaskType::KOSHI:
         case TaskType::KOSHI_SYSTEM:
-            info.solution = KoshiSolver(info.method, *static_cast<KoshiTask*>(info.task), info.butcher, info.h, info.algo, info.approx);
-            //info.solution = RungeKutta(koshi, info.butcher, info.h);
+            info.solution = KoshiSolver(info.method, *static_cast<KoshiTask*>(info.task), info.butcher, info.h_min, info.algo, info.approx);
             break;
         case TaskType::CHEMICAL:
-            //info.solution = KoshiSolver(info.method, *static_cast<KoshiTask*>(info.task), info.butcher, info.h, info.algo, info.approx);
-            info.solution = ChemicalSolver(info.method, *static_cast<ChemicalSystem*>(info.task), info.butcher, info.h, info.algo, info.approx, ReactionType::ADIABAT_CONST_RHO);
-            //info.solution = NonExpl(*static_cast<ChemicalSystem*>(info.task), info.butcher, info.h, info.algo, info.approx);
+            info.solution = ChemicalSolver(info.method, *static_cast<ChemicalSystem*>(info.task), info.butcher, info.h_min, info.h_max, info.h_last, info.algo, info.approx, ReactionType::ADIABAT_CONST_RHO);
             break;
         default:
             exit(1);
     }
-    //info.solution = KoshiSolver(info.method, *static_cast<KoshiTask*>(&info.task), info.butcher, info.h, info.algo, info.approx);
     endT = std::chrono::system_clock::now();
     std::cout << "=====Конец расчёта=====\n";
     time += std::chrono::duration_cast<duration_t>(endT - startT).count();

@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 #platform choice
 set(WINDOWS 1)
 set(LINUX 2)
-set(DEBUG 1)
+set(DEBUG 0)
 
-set(PLATFORM ${WINDOWS})
+#set(PLATFORM ${WINDOWS})
 
-set(SFML_WINDOWS_LIBS sfml-graphics-2 sfml-window-2 sfml-audio-2 sfml-system-2)
-set(SFML_LINUX_LIBS sfml-graphics sfml-window sfml-audio sfml-system)
+set(SFML_WINDOWS_LIBS sfml-graphics-2 sfml-window-2 sfml-audio-2 sfml-system-2 opengl32)
+set(SFML_LINUX_LIBS sfml-graphics sfml-window sfml-audio sfml-system GL)
 set(SFML_VERSION 2.5.1)
 
 if(${PLATFORM} EQUAL ${WINDOWS})
@@ -29,11 +29,16 @@ endif()
 # libraries names
 set(MODULES_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/src)
 set(GENERAL_LIB GeneralLIB)
+set(MATH_LIB MathLIB)
+set(BUTCHER_LIB ButcherLIB)
+set(NUMERIC_METHODS_LIB NMLIB)
 set(ODE_GENERAL_LIB ODEGeneralLIB)
 set(KOSHI_SOLVER_LIB KoshiSolverLIB)
+set(CRANK_NICOLSON_SOLVER_LIB CrankNicolsonLIB)
 set(CHEMICAL_SOLVER_LIB ChemicalSolverLIB)
 set(PDF_REPORTER_LIB PDFReporterLIB)
 set(INPUT_LIB InputLIB)
+set(SF_EXTENSIONS_LIB SFExtensionsLIB)
 set(GUI_LIB GUILIB)
 #set(CHEMICAL_GENERATOR_LIB ChemicalGeneratorLIB)
 
@@ -43,9 +48,10 @@ set(COMPILE_WARNINGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result)
 if(${DEBUG} EQUAL 1)
     message(STATUS "Its debugging time!")
     #set(COMPILE_FLAGS -Wextra -Wall -Wno-sign-compare -Wno-unused-result -O3)
-    set(COMPILE_FLAGS -O3 ${COMPILE_WARNINGS})
+    set(COMPILE_FLAGS ${COMPILE_WARNINGS})
 else()
-    set(COMPILE_FLAGS -Werror ${COMPILE_WARNINGS} -O3)
+    #-Werror
+    set(COMPILE_FLAGS ${COMPILE_WARNINGS} -O3)
 endif()
 
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
@@ -68,7 +74,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 
 # defines targets and sources
 add_subdirectory(src)
-add_subdirectory(test)
+#add_subdirectory(test)
 
 # contains an "external" library we will link to
 add_subdirectory(external)

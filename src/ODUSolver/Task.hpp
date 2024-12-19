@@ -3,7 +3,9 @@
 
 #include <map>
 #include <algorithm>
-#include <General/General.hpp>
+#include <vector>
+#include <initializer_list>
+#include <functional>
 #include <General/Enum.hpp>
 
 const uint64_t MIN_H_SIZE = 100;
@@ -24,11 +26,11 @@ class Task {
     public:
         Task ();
         virtual ~Task ();
-        const std::vector<std::function<float128_t(const std::vector<float128_t> &)>> &getODE () const;
-        const std::vector<float128_t> &getY0 () const;
+        const std::vector<std::function<double(const std::vector<double> &)>> &getODE () const;
+        const std::vector<double> &getY0 () const;
     protected:
-        std::vector<std::function<float128_t(const std::vector<float128_t> &)>> ode_system;
-        std::vector<float128_t> Y;
+        std::vector<std::function<double(const std::vector<double> &)>> ode_system;
+        std::vector<double> Y;
 };
 
 #endif

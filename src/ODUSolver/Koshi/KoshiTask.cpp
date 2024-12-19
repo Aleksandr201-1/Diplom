@@ -1,7 +1,7 @@
 #include "KoshiTask.hpp"
 
-float128_t stringFix (const std::string &str) {
-    float128_t val = 0;
+double stringFix (const std::string &str) {
+    double val = 0;
     std::string ans = "";
     for (uint64_t i = 0; i < str.size(); ++i) {
         if (str[i] == 'y') {
@@ -15,7 +15,7 @@ float128_t stringFix (const std::string &str) {
                 valStr += str[i];
                 ++i;
             }
-            val = FunctionalTree(valStr).calculate();
+            val = FuncMaker(valStr).calculate();
         } else {
             ans += str[i];
         }
@@ -43,7 +43,7 @@ KoshiTask::KoshiTask () : X0(0), Xn(0) {}
 
 KoshiTask::~KoshiTask () {}
 
-void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t order, float128_t X0, float128_t Xn) {
+void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn) {
     ode_system.clear();
     Y.clear();
     uint64_t idx = 0, size = 0;
@@ -55,7 +55,7 @@ void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t ord
         tmp += "'";
     }
     for (uint64_t i = 0; i < order - 1; ++i) {
-        auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+        auto func = [=] (const std::vector<double> &args) -> double {
             return args[i + 2];
         };
         ode_system.push_back(func);
@@ -63,14 +63,14 @@ void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t ord
 
     idx = system[0].find('=');
     size = system[0].size();
-    // FunctionalTree y_order1(system[0].substr(0, idx), args), y_order2(system[0].substr(idx + 1, size - idx), args);
-    // FunctionalTree coeff = y_order1.getCoeff(order + 1);
-    // auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+    // FuncMaker y_order1(system[0].substr(0, idx), args), y_order2(system[0].substr(idx + 1, size - idx), args);
+    // FuncMaker coeff = y_order1.getCoeff(order + 1);
+    // auto func = [=] (const std::vector<double> &args) -> double {
     //     return (y_order2(args) - y_order1(args)) / coeff(args);
     // };
-    FunctionalTree y_order2(system[0].substr(idx + 1, size - idx), args);
-    //FunctionalTree coeff = y_order1.getCoeff(order + 1);
-    auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+    FuncMaker y_order2(system[0].substr(idx + 1, size - idx), args);
+    //FuncMaker coeff = y_order1.getCoeff(order + 1);
+    auto func = [=] (const std::vector<double> &args) -> double {
         return y_order2(args);
     };
     ode_system.push_back(func);
@@ -83,14 +83,14 @@ void KoshiTask::setTaskInfo(const std::vector<std::string> &system, uint64_t ord
         if (this->X0 != X0) {
             throw std::logic_error("getSysInfo: y(X0) != X0");
         }
-        //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
-        Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+        //task.a = FuncMaker(system[i].substr(idx + 1, size - idx), {}).func(0);
+        Y.push_back(FuncMaker(system[i].substr(idx + 1, size - idx)).calculate());
     }
     this->X0 = X0;
     this->Xn = Xn;
 }
 
-void KoshiTask::setTaskInfo(const std::string &ode, uint64_t order, const std::vector<float128_t> &Y0, float128_t X0, float128_t Xn) {
+void KoshiTask::setTaskInfo(const std::string &ode, uint64_t order, const std::vector<double> &Y0, double X0, double Xn) {
     ode_system.clear();
     Y.clear();
     uint64_t idx = 0, size = 0;
@@ -102,21 +102,21 @@ void KoshiTask::setTaskInfo(const std::string &ode, uint64_t order, const std::v
         tmp += "'";
     }
     for (uint64_t i = 0; i < order - 1; ++i) {
-        auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+        auto func = [=] (const std::vector<double> &args) -> double {
             return args[i + 2];
         };
         ode_system.push_back(func);
     }
     idx = ode.find('=');
     size = ode.size();
-    // FunctionalTree y_order1(system[0].substr(0, idx), args), y_order2(system[0].substr(idx + 1, size - idx), args);
-    // FunctionalTree coeff = y_order1.getCoeff(order + 1);
-    // auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+    // FuncMaker y_order1(system[0].substr(0, idx), args), y_order2(system[0].substr(idx + 1, size - idx), args);
+    // FuncMaker coeff = y_order1.getCoeff(order + 1);
+    // auto func = [=] (const std::vector<double> &args) -> double {
     //     return (y_order2(args) - y_order1(args)) / coeff(args);
     // };
-    FunctionalTree y_order2(ode.substr(idx + 1, size - idx), args);
-    //FunctionalTree coeff = y_order1.getCoeff(order + 1);
-    auto func = [=] (const std::vector<float128_t> &args) -> float128_t {
+    FuncMaker y_order2(ode.substr(idx + 1, size - idx), args);
+    //FuncMaker coeff = y_order1.getCoeff(order + 1);
+    auto func = [=] (const std::vector<double> &args) -> double {
         return y_order2(args);
     };
     ode_system.push_back(func);
@@ -125,7 +125,7 @@ void KoshiTask::setTaskInfo(const std::string &ode, uint64_t order, const std::v
     this->Xn = Xn;
 }
 
-void KoshiTask::setSystemInfo(const std::vector<std::string> &system, uint64_t order, float128_t X0, float128_t Xn) {
+void KoshiTask::setSystemInfo(const std::vector<std::string> &system, uint64_t order, double X0, double Xn) {
     ode_system.clear();
     Y.clear();
     uint64_t idx = 0, size = 0;
@@ -140,7 +140,7 @@ void KoshiTask::setSystemInfo(const std::vector<std::string> &system, uint64_t o
     for (uint64_t i = 0; i < order; ++i) {
         idx = system[i].find('=');
         size = system[i].size();
-        FunctionalTree y_n(system[i].substr(idx + 1, size - idx), args);
+        FuncMaker y_n(system[i].substr(idx + 1, size - idx), args);
         ode_system.push_back(y_n);
     }
 
@@ -152,14 +152,14 @@ void KoshiTask::setSystemInfo(const std::vector<std::string> &system, uint64_t o
         if (this->X0 != X0) {
             throw std::logic_error("getSysInfo: y(X0) != X0");
         }
-        //task.a = FunctionalTree(system[i].substr(idx + 1, size - idx), {}).func(0);
-        Y.push_back(FunctionalTree(system[i].substr(idx + 1, size - idx), std::vector<std::string>()).calculate());
+        //task.a = FuncMaker(system[i].substr(idx + 1, size - idx), {}).func(0);
+        Y.push_back(FuncMaker(system[i].substr(idx + 1, size - idx)).calculate());
     }
     this->X0 = X0;
     this->Xn = Xn;
     //std::cout << "size: " << ode_system.size() << "\n";
 }
 
-std::tuple<float128_t, float128_t> KoshiTask::getBorders () const {
+std::tuple<double, double> KoshiTask::getBorders () const {
     return std::make_tuple(X0, Xn);
 }

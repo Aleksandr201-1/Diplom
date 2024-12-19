@@ -77,7 +77,7 @@ private:
     ChemicalSystem chemSys;
     KoshiTask koshi;
     //std::vector<ChemicalReaction> reactions;
-    std::vector<std::vector<float128_t>> Y0;
+    std::vector<std::vector<double>> Y0;
     QGraphicsEffect *scene;
     std::vector<QString> explicitMethods, implicitMethods, embeededMethods, iterationMethods;
     Ui::MainWindow *ui;

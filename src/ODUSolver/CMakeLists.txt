@@ -1,6 +1,7 @@
 add_library(${ODE_GENERAL_LIB} "")
 
 add_subdirectory(Koshi)
+add_subdirectory(CrankNicolson)
 add_subdirectory(Chemical)
 
 target_sources(${ODE_GENERAL_LIB}
@@ -21,6 +22,8 @@ target_sources(${ODE_GENERAL_LIB}
 target_link_libraries(${ODE_GENERAL_LIB} 
     PRIVATE
         ${GENERAL_LIB}
+        ${NUMERIC_METHODS_LIB}
+        ${MATH_LIB}
 )
 
 target_include_directories(${ODE_GENERAL_LIB}

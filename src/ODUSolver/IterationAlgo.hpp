@@ -5,10 +5,10 @@
 #include <functional>
 #include <map>
 #include <algorithm>
-#include <General/General.hpp>
+#include <cmath>
 #include <General/Enum.hpp>
-#include <General/Matrix.hpp>
-#include <General/LU.hpp>
+#include <Math/Matrix.hpp>
+#include <NumericMethods/LU.hpp>
 
 enum class IterationAlgo {
     NEWTON,
@@ -22,39 +22,39 @@ std::string IterationAlgoToString (IterationAlgo algo);
 
 IterationAlgo stringToIterationAlgo (const std::string &str);
 
-float128_t norma (const std::vector<float128_t> &a, const std::vector<float128_t> &b);
+double norma (const std::vector<double> &a, const std::vector<double> &b);
 
-std::vector<std::vector<float128_t>> ExplicitStep (const std::vector<std::vector<float128_t>> &K,
-                                                   const std::vector<std::vector<float128_t>> &Yi,
+std::vector<std::vector<double>> ExplicitStep (const std::vector<std::vector<double>> &K,
+                                                   const std::vector<std::vector<double>> &Yi,
                                                    uint64_t idx,
-                                                   const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f,
-                                                   const Matrix<float128_t> &butcher,
-                                                   float128_t h);
+                                                   const std::vector<std::function<double (const std::vector<double> &)>> &f,
+                                                   const Matrix<double> &butcher,
+                                                   double h);
 
-std::vector<std::vector<float128_t>> SimpleIteration (const std::vector<std::vector<float128_t>> &K,
-                                                      const std::vector<std::vector<float128_t>> &Yi,
+std::vector<std::vector<double>> SimpleIteration (const std::vector<std::vector<double>> &K,
+                                                      const std::vector<std::vector<double>> &Yi,
                                                       uint64_t idx,
-                                                      const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f,
-                                                      const Matrix<float128_t> &butcher,
-                                                      float128_t h,
-                                                      float128_t approx,
+                                                      const std::vector<std::function<double (const std::vector<double> &)>> &f,
+                                                      const Matrix<double> &butcher,
+                                                      double h,
+                                                      double approx,
                                                       IterationAlgo algo);
 
-std::vector<std::vector<float128_t>> NewtonIteration (const std::vector<std::vector<float128_t>> &K,
-                                                      const std::vector<std::vector<float128_t>> &Yi,
+std::vector<std::vector<double>> NewtonIteration (const std::vector<std::vector<double>> &K,
+                                                      const std::vector<std::vector<double>> &Yi,
                                                       uint64_t idx,
-                                                      const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f,
-                                                      const Matrix<float128_t> &butcher,
-                                                      float128_t h,
-                                                      float128_t approx);
+                                                      const std::vector<std::function<double (const std::vector<double> &)>> &f,
+                                                      const Matrix<double> &butcher,
+                                                      double h,
+                                                      double approx);
 
-std::vector<std::vector<float128_t>> IterationStep (const std::vector<std::vector<float128_t>> &K,
-                                                    const std::vector<std::vector<float128_t>> &Yi,
+std::vector<std::vector<double>> IterationStep (const std::vector<std::vector<double>> &K,
+                                                    const std::vector<std::vector<double>> &Yi,
                                                     uint64_t idx,
-                                                    const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f,
-                                                    const Matrix<float128_t> &butcher,
-                                                    float128_t h,
-                                                    float128_t approx,
+                                                    const std::vector<std::function<double (const std::vector<double> &)>> &f,
+                                                    const Matrix<double> &butcher,
+                                                    double h,
+                                                    double approx,
                                                     IterationAlgo algo);
 
 #endif

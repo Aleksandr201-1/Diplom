@@ -11,6 +11,8 @@ target_link_libraries(${PDF_REPORTER_LIB}
     PRIVATE
         ${KOSHI_SOLVER_LIB}
         ${CHEMICAL_SOLVER_LIB}
+        ${BUTCHER_LIB}
+        ${NUMERIC_METHODS_LIB}
 )
 
 target_include_directories(${PDF_REPORTER_LIB}

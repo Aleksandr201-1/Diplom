@@ -18,10 +18,10 @@ Task::Task () {}
 
 Task::~Task () {}
 
-const std::vector<std::function<float128_t(const std::vector<float128_t> &)>> &Task::getODE () const {
+const std::vector<std::function<double(const std::vector<double> &)>> &Task::getODE () const {
     return ode_system;
 }
 
-const std::vector<float128_t> &Task::getY0 () const {
+const std::vector<double> &Task::getY0 () const {
     return Y;
 }

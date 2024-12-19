@@ -10,66 +10,6 @@
 #include <GUI/Table.hpp>
 #include <GUI/ScrollingWindow.hpp>
 #include <GUI/Spacer.hpp>
-#include <ODUSolver/Koshi/KoshiSolver.hpp>
-#include <ODUSolver/Chemical/ChemicalSolver.hpp>
-#include <PDFReporter/ReportGenerator.hpp>
-#include <General/ButcherTable.hpp>
-
-struct SolveStruct {
-    SolveMethod method;
-    uint64_t order, way;
-};
-
-const std::map<sf::String, SolveStruct> strToExplicitSolve = {
-    {L"Рунге-Кутта 3 порядка, 1й способ", {SolveMethod::RUNGE_KUTTA, 3, 1}},
-    {L"Рунге-Кутта 3 порядка, 2й способ", {SolveMethod::RUNGE_KUTTA, 3, 2}},
-    {L"Рунге-Кутта 3 порядка, 3й способ", {SolveMethod::RUNGE_KUTTA, 3, 3}},
-    {L"Рунге-Кутта 3 порядка, 4й способ", {SolveMethod::RUNGE_KUTTA, 3, 4}},
-    {L"Рунге-Кутта 4 порядка, 1й способ (классический)", {SolveMethod::RUNGE_KUTTA, 4, 1}},
-    {L"Рунге-Кутта 4 порядка, 2й способ", {SolveMethod::RUNGE_KUTTA, 4, 2}},
-    {L"Рунге-Кутта 4 порядка, 3й способ", {SolveMethod::RUNGE_KUTTA, 4, 3}},
-    {L"Рунге-Кутта 4 порядка, 4й способ", {SolveMethod::RUNGE_KUTTA, 4, 4}},
-    {L"Рунге-Кутта 6 порядка, 1й способ", {SolveMethod::RUNGE_KUTTA, 6, 1}},
-    {L"Рунге-Кутта 6 порядка, 2й способ", {SolveMethod::RUNGE_KUTTA, 6, 2}}
-};
-const std::map<sf::String, SolveStruct> strToEmbeededSolve = {
-    {L"Ческино 2(3) порядка, 1й способ", {SolveMethod::CHESKINO, 2, 1}},
-    {L"Фалберг 2(3) порядка, 1й способ", {SolveMethod::FALBERG, 2, 1}},
-    {L"Фалберг 2(3) порядка, 2й способ", {SolveMethod::FALBERG, 2, 2}},
-    {L"Мерсон 3(4) порядка, 1й способ", {SolveMethod::MERSON, 3, 1}},
-    {L"Дорман-Принс 4(5) порядка, 1й способ", {SolveMethod::DORMAN_PRINCE, 4, 1}}
-};
-const std::map<sf::String, SolveStruct> strToImplicitSolve = {
-    {L"Лобатто 2 порядка, 1й способ", {SolveMethod::LOBATTO, 2, 1}},
-    {L"Лобатто 2 порядка, 2й способ", {SolveMethod::LOBATTO, 2, 2}},
-    {L"Лобатто 2 порядка, 3й способ", {SolveMethod::LOBATTO, 2, 3}},
-    {L"Лобатто 2 порядка, 4й способ", {SolveMethod::LOBATTO, 2, 4}},
-    {L"Лобатто 4 порядка, 1й способ", {SolveMethod::LOBATTO, 4, 1}},
-    {L"Лобатто 4 порядка, 2й способ", {SolveMethod::LOBATTO, 4, 2}},
-    {L"Лобатто 4 порядка, 3й способ", {SolveMethod::LOBATTO, 4, 3}},
-    {L"Лобатто 4 порядка, 4й способ", {SolveMethod::LOBATTO, 4, 4}},
-    {L"Лобатто 6 порядка, 1й способ", {SolveMethod::LOBATTO, 6, 1}},
-    {L"Лобатто 6 порядка, 2й способ", {SolveMethod::LOBATTO, 6, 2}},
-    {L"Лобатто 6 порядка, 3й способ", {SolveMethod::LOBATTO, 6, 3}},
-    {L"Лобатто 6 порядка, 4й способ", {SolveMethod::LOBATTO, 6, 4}},
-    {L"Гаусс 2 порядка, 1й способ",        {SolveMethod::GAUSS, 2, 1}},
-    {L"Гаусс 4 порядка, 1й способ",        {SolveMethod::GAUSS, 4, 1}},
-    {L"Гаусс 6 порядка, 1й способ",        {SolveMethod::GAUSS, 6, 1}},
-    {L"Л-стабильный 3 порядка, 1й способ", {SolveMethod::L_STABLE_DIAGONAL, 3, 1}},
-    {L"Л-стабильный 4 порядка, 1й способ", {SolveMethod::L_STABLE_DIAGONAL, 4, 1}},
-    {L"Радо 1 порядка, 1й способ",         {SolveMethod::RADO, 1, 1}},
-    {L"Радо 3 порядка, 1й способ",         {SolveMethod::RADO, 3, 1}},
-    {L"Радо 5 порядка, 1й способ",         {SolveMethod::RADO, 5, 1}}
-};
-
-const std::map<sf::String, IterationAlgo> strToIteration = {
-    {L"Метод Ньютона", IterationAlgo::NEWTON},
-    {L"Метод Зейделя", IterationAlgo::ZEIDEL},
-    {L"Метод простой итерации", IterationAlgo::SIMPLE_ITERATION}
-    //{"Явный шаг", IterationAlgo::EXPLICIT_STEP}
-};
-
-std::vector<std::vector<float128_t>> Y0;
 
 enum PageNumber {
     MENU_PAGE,
@@ -86,9 +26,6 @@ enum PageNumber {
 //void init
 
 void initPages (PageHolder &holder) {
-    Y0.resize(toUnderlying(TaskType::ERROR));
-    Y0[toUnderlying(TaskType::KOSHI)].resize(2, 0.0);
-    Y0[toUnderlying(TaskType::CHEMICAL)].resize(6 , 0.0);
     //page 1
     auto menuPage = std::make_unique<Page>();
     auto p1_ButtonBox = std::make_shared<Box>();
@@ -98,30 +35,30 @@ void initPages (PageHolder &holder) {
     auto p1_toSolverConstructorButton = std::make_shared<Button>(L"Конструктор методов");
     auto p1_toSettingsButton = std::make_shared<Button>(L"Настройки");
     auto p1_toAboutProgramButton = std::make_shared<Button>(L"О программе");
-    p1_toKoshiTaskODUButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p1_toKoshiTaskODUButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [&] () {
             holder.setActivePage(1);
         }
     );
-    p1_toKoshiTaskSDUButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p1_toKoshiTaskSDUButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [&] () {
             holder.setActivePage(2);
         }
     );
-    p1_toChemicalCineticButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p1_toChemicalCineticButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [&] () {
             holder.setActivePage(3);
         }
     );
-    p1_ButtonBox->addGUIElement(p1_toKoshiTaskODUButton);
-    p1_ButtonBox->addGUIElement(p1_toKoshiTaskSDUButton);
-    p1_ButtonBox->addGUIElement(p1_toChemicalCineticButton);
-    p1_ButtonBox->addGUIElement(p1_toSolverConstructorButton);
-    p1_ButtonBox->addGUIElement(p1_toSettingsButton);
-    p1_ButtonBox->addGUIElement(p1_toAboutProgramButton);
-    //p1_ButtonBox->update();
+    p1_ButtonBox->add("p1_toKoshiTaskODUButton", p1_toKoshiTaskODUButton);
+    p1_ButtonBox->add("p1_toKoshiTaskSDUButton", p1_toKoshiTaskSDUButton);
+    p1_ButtonBox->add("p1_toChemicalCineticButton", p1_toChemicalCineticButton);
+    p1_ButtonBox->add("p1_toSolverConstructorButton", p1_toSolverConstructorButton);
+    p1_ButtonBox->add("p1_toSettingsButton", p1_toSettingsButton);
+    p1_ButtonBox->add("p1_toAboutProgramButton", p1_toAboutProgramButton);
+    p1_ButtonBox->update();
     p1_ButtonBox->setPosition(960 - p1_ButtonBox->getSize().x / 2, 200);
-    menuPage->addGUIElement(p1_ButtonBox);
+    menuPage->add("p1_ButtonBox", p1_ButtonBox);
     holder.addPage(std::move(menuPage));
 
     //page 2
@@ -142,31 +79,31 @@ void initPages (PageHolder &holder) {
     auto p2_textLabel3 = std::make_shared<Label>(L"=");
     auto p2_textFiled1 = std::make_shared<TextField>();
     auto p2_textFiled2 = std::make_shared<TextField>();
-    p2_backButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p2_backButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [&] () {
             holder.setActivePage(0);
         }
     );
-    p2_buttonBox->addGUIElement(p2_toSolverChoiceButton);
-    p2_buttonBox->addGUIElement(p2_backButton);
-    p2_buttonBox->addGUIElement(p2_textLabel1);
+    p2_buttonBox->add("p2_toSolverChoiceButton", p2_toSolverChoiceButton);
+    p2_buttonBox->add("p2_backButton", p2_backButton);
+    p2_buttonBox->add("p2_textLabel1", p2_textLabel1);
     p2_buttonBox->setAlignment(Box::Alignment::RIGHT);
     //p2_buttonBox->update();
-    p2_Box1->addGUIElement(p2_textFiled1);
-    p2_Box1->addGUIElement(p2_textLabel3);
-    p2_Box1->addGUIElement(p2_textFiled2);
+    p2_Box1->add("p2_textFiled1", p2_textFiled1);
+    p2_Box1->add("p2_textLabel3", p2_textLabel3);
+    p2_Box1->add("p2_textFiled2", p2_textFiled2);
     p2_Box1->setOrientation(Box::Orientation::HORIZONTAL);
     p2_Box1->setAlignment(Box::Alignment::UP);
     //p2_Box1->update();
-    p2_taskEnterBox->addGUIElement(p2_textLabel2);
-    p2_taskEnterBox->addGUIElement(p2_Box1);
+    p2_taskEnterBox->add("p2_textLabel2", p2_textLabel2);
+    p2_taskEnterBox->add("p2_Box1", p2_Box1);
     p2_taskEnterBox->setAlignment(Box::Alignment::LEFT);
     //p2_taskEnterBox->update();
-    p2_Box2->addGUIElement(p2_buttonBox);
-    p2_Box2->addGUIElement(p2_taskEnterBox);
+    p2_Box2->add("p2_buttonBox", p2_buttonBox);
+    p2_Box2->add("p2_taskEnterBox", p2_taskEnterBox);
     p2_Box2->setAlignment(Box::Alignment::LEFT);
     //p2_Box2->update();
-    koshiTaskODUPage->addGUIElement(p2_Box2);
+    koshiTaskODUPage->add("p2_Box2", p2_Box2);
     holder.addPage(std::move(koshiTaskODUPage));
 
     //page 3
@@ -215,28 +152,14 @@ void initPages (PageHolder &holder) {
     auto p4_textFiled7 = std::make_shared<TextField>(L"24044.00");
     auto p4_textFiled8 = std::make_shared<TextField>(L"0.00");
     auto size = p4_textFiled3->getSize();
-    p4_selector3->setSignal(Interactable::Status::CHANGED_VALUE,
-        [=] () {
-            std::cout << "Val: " << Y0[toUnderlying(TaskType::CHEMICAL)][p4_selector3->getCurrIdx()] << '\n';
-            p4_textFiled8->getLine().setString(std::to_string(Y0[toUnderlying(TaskType::CHEMICAL)][p4_selector3->getCurrIdx()]));
-            p4_textFiled8->update();
-        }
-    );
-    p4_textFiled8->setSignal(Interactable::Status::CHANGED_VALUE,
-        [=] () {
-            std::cout << "idx: " << p4_selector3->getCurrIdx() << '\n';
-            std::cout << "Val to add: " << p4_textFiled8->getLine().toDouble64() << '\n';
-            Y0[toUnderlying(TaskType::CHEMICAL)][p4_selector3->getCurrIdx()] = p4_textFiled8->getLine().toDouble64();
-        }
-    );
     //p4_textFiled3->setSize({size.x * 2, size.y});
     //p4_textFiled4->setSize({size.x * 2, size.y});
-    p4_backButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p4_backButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [&] () {
             holder.setActivePage(0);
         }
     );
-    p4_solverChoiceButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p4_solverChoiceButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [&] () {
             holder.setActivePage(4);
         }
@@ -244,99 +167,99 @@ void initPages (PageHolder &holder) {
     //p4_selector1->setVarList({"1", "2", "3"});
     //p4_selector2->setVarList({"Изотерма, rho = const", "Адиабата, rho = const", "Изотерма, P = const", "Адиабата, P = const"});
     //p4_textFiled1->set
-    p4_Box1_1_2_1_1->addGUIElement(p4_textLabel2);
-    p4_Box1_1_2_1_1->addGUIElement(p4_textFiled1);
+    p4_Box1_1_2_1_1->add("p4_textLabel2", p4_textLabel2);
+    p4_Box1_1_2_1_1->add("p4_textFiled1", p4_textFiled1);
     p4_Box1_1_2_1_1->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box1_1_2_1_1->setAlignment(Box::Alignment::UP);
 
-    p4_Box1_1_2_1_2->addGUIElement(p4_textLabel3);
-    p4_Box1_1_2_1_2->addGUIElement(p4_textFiled2);
+    p4_Box1_1_2_1_2->add("p4_textLabel3", p4_textLabel3);
+    p4_Box1_1_2_1_2->add("p4_textFiled2", p4_textFiled2);
     p4_Box1_1_2_1_2->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box1_1_2_1_2->setAlignment(Box::Alignment::UP);
 
-    p4_Box1_1_2_1->addGUIElement(p4_Box1_1_2_1_1);
-    p4_Box1_1_2_1->addGUIElement(p4_Box1_1_2_1_2);
+    p4_Box1_1_2_1->add("p4_Box1_1_2_1_1", p4_Box1_1_2_1_1);
+    p4_Box1_1_2_1->add("p4_Box1_1_2_1_2", p4_Box1_1_2_1_2);
     p4_Box1_1_2_1->setOrientation(Box::Orientation::VERTICAL);
     p4_Box1_1_2_1->setAlignment(Box::Alignment::LEFT);
 
-    p4_Box1_1_2_2->addGUIElement(p4_textLabel4);
-    p4_Box1_1_2_2->addGUIElement(p4_selector2);
+    p4_Box1_1_2_2->add("p4_textLabel4", p4_textLabel4);
+    p4_Box1_1_2_2->add("p4_selector2", p4_selector2);
     p4_Box1_1_2_2->setOrientation(Box::Orientation::VERTICAL);
     p4_Box1_1_2_2->setAlignment(Box::Alignment::LEFT);
 
-    p4_Box1_1_1->addGUIElement(p4_textLabel1);
-    p4_Box1_1_1->addGUIElement(p4_selector1);
-    p4_Box1_1_1->addGUIElement(std::make_shared<Spacer>(50, 0));
+    p4_Box1_1_1->add("p4_textLabel1", p4_textLabel1);
+    p4_Box1_1_1->add("p4_selector1", p4_selector1);
+    p4_Box1_1_1->add("p4_spacer1_1_1", std::make_shared<Spacer>(50, 0));
     p4_Box1_1_1->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box1_1_1->setAlignment(Box::Alignment::UP);
     p4_Box1_1_1->saveOffset(true);
 
-    p4_Box1_1_2->addGUIElement(p4_Box1_1_2_1);
-    p4_Box1_1_2->addGUIElement(p4_Box1_1_2_2);
+    p4_Box1_1_2->add("p4_Box1_1_2_1", p4_Box1_1_2_1);
+    p4_Box1_1_2->add("p4_Box1_1_2_2", p4_Box1_1_2_2);
     p4_Box1_1_2->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box1_1_2->setAlignment(Box::Alignment::UP);
 
-    p4_Box1_1->addGUIElement(p4_Box1_1_1);
-    p4_Box1_1->addGUIElement(p4_Box1_1_2);
+    p4_Box1_1->add("p4_Box1_1_1", p4_Box1_1_1);
+    p4_Box1_1->add("p4_Box1_1_2", p4_Box1_1_2);
     p4_Box1_1->setOrientation(Box::Orientation::VERTICAL);
     p4_Box1_1->setAlignment(Box::Alignment::LEFT);
 
-    p4_Box1_2->addGUIElement(p4_addButton);
-    p4_Box1_2->addGUIElement(p4_deleteButton);
-    p4_Box1_2->addGUIElement(p4_solverChoiceButton);
-    p4_Box1_2->addGUIElement(p4_backButton);
+    p4_Box1_2->add("p4_addButton", p4_addButton);
+    p4_Box1_2->add("p4_deleteButton", p4_deleteButton);
+    p4_Box1_2->add("p4_solverChoiceButton", p4_solverChoiceButton);
+    p4_Box1_2->add("p4_backButton", p4_backButton);
     p4_Box1_2->setOrientation(Box::Orientation::VERTICAL);
     p4_Box1_2->setAlignment(Box::Alignment::CENTER);
 
-    p4_Box1->addGUIElement(p4_Box1_1);
-    p4_Box1->addGUIElement(p4_Box1_2);
+    p4_Box1->add("p4_Box1_1", p4_Box1_1);
+    p4_Box1->add("p4_Box1_2", p4_Box1_2);
     p4_Box1->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box1->setAlignment(Box::Alignment::UP);
 
-    p4_Box2_1->addGUIElement(p4_textFiled3);
-    p4_Box2_1->addGUIElement(p4_textLabel6);
-    p4_Box2_1->addGUIElement(p4_textFiled4);
+    p4_Box2_1->add("p4_textFiled3", p4_textFiled3);
+    p4_Box2_1->add("p4_textLabel6", p4_textLabel6);
+    p4_Box2_1->add("p4_textFiled4", p4_textFiled4);
     p4_Box2_1->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box2_1->setAlignment(Box::Alignment::UP);
     p4_Box2_1->saveOffset(true);
 
-    p4_Box2_2->addGUIElement(p4_textLabel7);
-    p4_Box2_2->addGUIElement(p4_textFiled5);
-    p4_Box2_2->addGUIElement(p4_textLabel8);
-    p4_Box2_2->addGUIElement(p4_textFiled6);
-    p4_Box2_2->addGUIElement(p4_textLabel9);
-    p4_Box2_2->addGUIElement(p4_textFiled7);
+    p4_Box2_2->add("p4_textLabel7", p4_textLabel7);
+    p4_Box2_2->add("p4_textFiled5", p4_textFiled5);
+    p4_Box2_2->add("p4_textLabel8", p4_textLabel8);
+    p4_Box2_2->add("p4_textFiled6", p4_textFiled6);
+    p4_Box2_2->add("p4_textLabel9", p4_textLabel9);
+    p4_Box2_2->add("p4_textFiled7", p4_textFiled7);
     p4_Box2_2->saveOffset(true);
     p4_Box2_2->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box2_2->setAlignment(Box::Alignment::UP);
 
-    p4_Box2->addGUIElement(p4_textLabel5);
-    p4_Box2->addGUIElement(p4_Box2_1);
-    p4_Box2->addGUIElement(std::make_shared<Label>(L"Аррениусовские константы:"));
-    p4_Box2->addGUIElement(p4_Box2_2);
+    p4_Box2->add("p4_textLabel5", p4_textLabel5);
+    p4_Box2->add("p4_Box2_1", p4_Box2_1);
+    p4_Box2->add("p4_label_arrenius", std::make_shared<Label>(L"Аррениусовские константы:"));
+    p4_Box2->add("p4_Box2_2", p4_Box2_2);
     p4_Box2->setOrientation(Box::Orientation::VERTICAL);
     p4_Box2->setAlignment(Box::Alignment::LEFT);
 
-    p4_Box3->addGUIElement(p4_textLabel11);
-    p4_Box3->addGUIElement(p4_selector3);
-    p4_Box3->addGUIElement(p4_textLabel10);
-    p4_Box3->addGUIElement(p4_textFiled8);
-    p4_Box3->addGUIElement(std::make_shared<Spacer>(50, 0));
+    p4_Box3->add("p4_textLabel11", p4_textLabel11);
+    p4_Box3->add("p4_selector3", p4_selector3);
+    p4_Box3->add("p4_textLabel10", p4_textLabel10);
+    p4_Box3->add("p4_textFiled8", p4_textFiled8);
+    p4_Box3->add("p4_box3_spacer", std::make_shared<Spacer>(50, 0));
     p4_Box3->setOrientation(Box::Orientation::HORIZONTAL);
     p4_Box3->setAlignment(Box::Alignment::UP);
     p4_Box3->saveOffset(true);
 
-    p4_finalBox->addGUIElement(p4_Box3);
-    p4_finalBox->addGUIElement(p4_Box2);
-    p4_finalBox->addGUIElement(p4_Box1);
+    p4_finalBox->add("p4_Box3", p4_Box3);
+    p4_finalBox->add("p4_Box2", p4_Box2);
+    p4_finalBox->add("p4_Box1", p4_Box1);
     p4_finalBox->setOrientation(Box::Orientation::VERTICAL);
     p4_finalBox->setAlignment(Box::Alignment::LEFT);
 
     auto p4_testBox = std::make_shared<Box>();
     auto p4_copiumBox = std::make_shared<Box>();
-    auto p4_inScroller = std::make_shared<Box>();
-    auto p4_scroller = std::make_shared<Scroller>();
-    auto p4_tableScroller = std::make_shared<Scroller>();
+    auto p4_inScrollingWindow = std::make_shared<Box>();
+    auto p4_scroller = std::make_shared<ScrollingWindow>();
+    auto p4_tableScrollingWindow = std::make_shared<ScrollingWindow>();
     std::vector<std::vector<sf::String>> content = {
         {L"№", L"Название вещества", L"Атомная масса (кг/моль)"},
         {"1", "H2", "0.002016"},
@@ -346,40 +269,40 @@ void initPages (PageHolder &holder) {
         {"5", "H", "0.001008"},
         {"6", "O", "0.015999"}
     };
-    p4_tableScroller->addGUIElement(std::make_shared<Table>(content));
-    p4_tableScroller->setSize(p4_tableScroller->getSize().x, p4_tableScroller->getSize().y / 2);
+    p4_tableScrollingWindow->add("p4_table", std::make_shared<Table>(content));
+    p4_tableScrollingWindow->setSize(p4_tableScrollingWindow->getSize().x, p4_tableScrollingWindow->getSize().y / 2);
     p4_scroller->needXAxis(false);
-    p4_scroller->addGUIElement(p4_inScroller);
-    //p4_inScroller->addGUIElement(std::make_shared<Label>("1)"));
-    p4_inScroller->setOrientation(Box::Orientation::VERTICAL);
-    p4_inScroller->setAlignment(Box::Alignment::LEFT);
-    p4_testBox->addGUIElement(std::make_shared<Label>(L"Таблица допустимых веществ:"));
-    p4_testBox->addGUIElement(p4_tableScroller);
-    p4_testBox->addGUIElement(std::make_shared<Label>(L"Итоговый список уравнений:"));
-    p4_testBox->addGUIElement(p4_scroller);
+    p4_scroller->add("p4_inScrollingWindow", p4_inScrollingWindow);
+    //p4_inScrollingWindow->add("", std::make_shared<Label>("1)"));
+    p4_inScrollingWindow->setOrientation(Box::Orientation::VERTICAL);
+    p4_inScrollingWindow->setAlignment(Box::Alignment::LEFT);
+    p4_testBox->add("p4_testBox_label1", std::make_shared<Label>(L"Таблица допустимых веществ:"));
+    p4_testBox->add("p4_tableScrollingWindow", p4_tableScrollingWindow);
+    p4_testBox->add("p4_testBox_label2", std::make_shared<Label>(L"Итоговый список уравнений:"));
+    p4_testBox->add("p4_scroller", p4_scroller);
     p4_testBox->setOrientation(Box::Orientation::VERTICAL);
     p4_testBox->setAlignment(Box::Alignment::LEFT);
-    //p4_testBox->addGUIElement(std::make_shared<TextField>("ONG frfr no cap"));
+    //p4_testBox->add("", std::make_shared<TextField>("ONG frfr no cap"));
     //p4_testBox->setPosition(400, 450);
-    p4_addButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p4_addButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [=] () {
             sf::String str;
-            str = std::to_string(p4_inScroller->getContentSize() + 1) + ") " + p4_textFiled3->getLine().getString() + " " + p4_textLabel6->getString() + " " + p4_textFiled4->getLine().getString() + "\n";
-            str += "\t" + p4_textLabel7->getString() + " " + p4_textFiled5->getLine().getString() + "\n";
-            str += "\t" + p4_textLabel8->getString() + " " + p4_textFiled6->getLine().getString() + "\n";
-            str += "\t" + p4_textLabel9->getString() + " " + p4_textFiled7->getLine().getString();
+            str = std::to_string(p4_inScrollingWindow->getContentSize() + 1) + ") " + p4_textFiled3->getInputLine().getString() + " " + p4_textLabel6->getString() + " " + p4_textFiled4->getInputLine().getString() + "\n";
+            str += "\t" + p4_textLabel7->getString() + " " + p4_textFiled5->getInputLine().getString() + "\n";
+            str += "\t" + p4_textLabel8->getString() + " " + p4_textFiled6->getInputLine().getString() + "\n";
+            str += "\t" + p4_textLabel9->getString() + " " + p4_textFiled7->getInputLine().getString();
             auto label = std::make_shared<Label>(str);
             //label->setPosition(20, 20);
-            p4_inScroller->addGUIElement(label);
-            //p4_inScroller->getGUIElement(0)->setScale(2.f, 2.f); //addGUIElement(std::make_shared<Label>(L"1)"));
+            p4_inScrollingWindow->add("", label);
+            //p4_inScrollingWindow->getGUIElement(0)->setScale(2.f, 2.f); //add("", std::make_shared<Label>(L"1)"));
         }
     );
-    p4_copiumBox->addGUIElement(p4_finalBox);
-    p4_copiumBox->addGUIElement(p4_testBox);
+    p4_copiumBox->add("p4_finalBox", p4_finalBox);
+    p4_copiumBox->add("p4_testBox", p4_testBox);
     p4_copiumBox->setOrientation(Box::Orientation::HORIZONTAL);
     p4_copiumBox->setAlignment(Box::Alignment::UP);
-    chemicalCineticPage->addGUIElement(p4_copiumBox);
-    //chemicalCineticPage->addGUIElement(p4_testBox);
+    chemicalCineticPage->add("p4_copiumBox", p4_copiumBox);
+    //chemicalCineticPage->add("", p4_testBox);
     //chemicalCineticPage->update();
     holder.addPage(std::move(chemicalCineticPage));
 
@@ -458,22 +381,22 @@ void initPages (PageHolder &holder) {
     auto p5_preFinalBox = std::make_shared<Box>();
     auto p5_plot = std::make_shared<Plot2D>(points);
     auto p5_solverTable = std::make_shared<Table>(p5_tableContent);
-    auto p5_tableScroller = std::make_shared<Scroller>();
+    auto p5_tableScrollingWindow = std::make_shared<ScrollingWindow>();
     auto p5_buttonBox = std::make_shared<ButtonBox>(std::vector<sf::String>{L"Явные методы", L"Вложенные методы", L"Неявные методы"});
     auto p5_solMethSlider = std::make_shared<Selector>(explicitMethodList);
     auto p5_iterSlider = std::make_shared<Selector>(iterationMethodList);
     auto p5_accurField = std::make_shared<TextField>("0.00100");
     p5_plot->setColors({sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Black, sf::Color::Yellow, sf::Color::Magenta});
-    p5_plot->addLegends({"H2", "OH", "H2O", "O2", "H", "O"});
+    //p5_plot->addLegends({"H2", "OH", "H2O", "O2", "H", "O"});
     p5_plot->setXName("T(ms)");
     p5_plot->setYName("rho");
     p5_accurField->setCheckFunc(TextField::isFloat);
-    p5_backButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p5_backButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [&] () {
             holder.setActivePage(3);
         }
     );
-    p5_buttonBox->setSignal(Interactable::Status::CHANGED_VALUE,
+    p5_buttonBox->setSignal(Interactable::Signal::CHANGED_VALUE,
         [=] () {
             switch(p5_buttonBox->getCurrent()) {
                 case 0:
@@ -491,106 +414,55 @@ void initPages (PageHolder &holder) {
         }
     );
     p5_buttonBox->setFonColor(sf::Color(200, 200, 200));
-    p5_calcButton->setSignal(Interactable::Status::RECEIVED_FOCUS,
+    p5_calcButton->setSignal(Interactable::Signal::RECEIVED_FOCUS,
         [=] () {
-            ChemicalSystem chemSys;
-            //chemSys.initFromFile("./../../test/ChemicTest/bufermm.txt");
-            chemSys.addAdditive("M", {1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
-            float128_t X0, Xn, h, approx;
-            uint64_t order, way, time = 0;
-            Matrix<float128_t> butcher;
-            std::vector<std::string> inputLines;
-            std::vector<float128_t> &Ykoshi = Y0[toUnderlying(TaskType::KOSHI)];
-            SolveMethod method;
-            IterationAlgo iteration;
-            SolveStruct solveStruct;
-            std::string analiticLine;
-            std::chrono::time_point <std::chrono::system_clock> startT, endT;
-            std::vector<std::vector<float128_t>> solution;
-            ReactionType reactionType = static_cast<ReactionType>(p4_selector2->getCurrIdx());
-            approx = p5_accurField->getLine().toDouble64();
-            switch (p5_buttonBox->getCurrent()) {
-                case 0:
-                    solveStruct = strToExplicitSolve.at(p5_solMethSlider->getCurrVal());
-                    break;
-                case 1:
-                    solveStruct = strToEmbeededSolve.at(p5_solMethSlider->getCurrVal());
-                    break;
-                case 2:
-                    solveStruct = strToImplicitSolve.at(p5_solMethSlider->getCurrVal());
-                    break;
-                default:
-                    break;
-            }
-            method = solveStruct.method;
-            order = solveStruct.order;
-            way = solveStruct.way;
-            //butcher = createButcherTable(method, order, way);
-            iteration = strToIteration.at(p5_iterSlider->getCurrVal());
-            h = 1e-8;
-            chemSys.setTemperature(p4_textFiled1->getLine().toDouble64());
-            chemSys.setPressure(p4_textFiled2->getLine().toDouble64());
-            chemSys.setConcentrations(Y0[toUnderlying(TaskType::CHEMICAL)]);
-            chemSys.addReaction("H2 + O2 <==> 2OH", 1.7 * std::pow(10, 7), 0, 24044);
-            chemSys.addReaction("H + O2 <==> OH + O", 1.987 * std::pow(10, 8), 0, 8456);
-            chemSys.addReaction("H2 + OH <==> H2O + H", 1.024 * std::pow(10, 2), 1.6, 1660);
-            chemSys.addReaction("H2 + O <==> OH + H", 5.119 * std::pow(10, -2), 2.67, 3163);
-            chemSys.addReaction("2OH <==> H2O + O", 1.506 * std::pow(10, 3), 1.14, 50);
-            chemSys.addReaction("H + OH + M <==> H2O + M", 2.212 * std::pow(10, 10), -2.0, 0);
-            chemSys.addReaction("2H + M <==> H2 + M", 9.791 * std::pow(10, 7), -0.6, 0);
-            chemSys.setConcentrations({0.5, 0.0, 0.0, 0.5, 0.0, 0.0});
-            chemSys.rightPartGen();
-            chemSys.printInfo(std::cout);
-            //solution = ChemicalSolver(method, chemSys, butcher, h, iteration, approx, reactionType);
-            for (auto el : solution) {
-                std::cout << el.back() << '\n';
-            }
+            
         }
     );
 
-    p5_solChoiceBox_1->addGUIElement(p5_buttonBox);
+    p5_solChoiceBox_1->add("p5_buttonBox", p5_buttonBox);
     p5_solChoiceBox_1->setOrientation(Box::Orientation::HORIZONTAL);
     p5_solChoiceBox_1->setAlignment(Box::Alignment::UP);
-    p5_solChoiceBox_2->addGUIElement(std::make_shared<Label>(L"Метод решения:"));
-    p5_solChoiceBox_2->addGUIElement(p5_solMethSlider);
-    p5_solChoiceBox_2->addGUIElement(std::make_shared<Label>(L"Метод итерации:"));
-    p5_solChoiceBox_2->addGUIElement(p5_iterSlider);
-    p5_solChoiceBox_2->addGUIElement(std::make_shared<Label>(L"Точность решения:"));
-    p5_solChoiceBox_2->addGUIElement(p5_accurField);
+    p5_solChoiceBox_2->add("p5_label_methodSolve", std::make_shared<Label>(L"Метод решения:"));
+    p5_solChoiceBox_2->add("p5_solMethSlider", p5_solMethSlider);
+    p5_solChoiceBox_2->add("p5_label_methodIteration", std::make_shared<Label>(L"Метод итерации:"));
+    p5_solChoiceBox_2->add("p5_iterSlider", p5_iterSlider);
+    p5_solChoiceBox_2->add("p5_label_approx", std::make_shared<Label>(L"Точность решения:"));
+    p5_solChoiceBox_2->add("p5_accurField", p5_accurField);
     p5_solChoiceBox_2->setOrientation(Box::Orientation::VERTICAL);
     p5_solChoiceBox_2->setAlignment(Box::Alignment::LEFT);
-    p5_solChoiceBox->addGUIElement(p5_solChoiceBox_1);
-    p5_solChoiceBox->addGUIElement(p5_solChoiceBox_2);
+    p5_solChoiceBox->add("p5_solChoiceBox_1", p5_solChoiceBox_1);
+    p5_solChoiceBox->add("p5_solChoiceBox_2", p5_solChoiceBox_2);
     p5_solChoiceBox->setOrientation(Box::Orientation::HORIZONTAL);
     p5_solChoiceBox->setAlignment(Box::Alignment::UP);
 
-    p5_buttBox->addGUIElement(p5_backButton);
-    p5_buttBox->addGUIElement(p5_calcButton);
-    p5_buttBox->addGUIElement(p5_reportButton);
+    p5_buttBox->add("p5_backButton", p5_backButton);
+    p5_buttBox->add("p5_calcButton", p5_calcButton);
+    p5_buttBox->add("p5_reportButton", p5_reportButton);
     p5_buttBox->setOrientation(Box::Orientation::HORIZONTAL);
     p5_buttBox->setAlignment(Box::Alignment::UP);
 
-    p5_plotBox->addGUIElement(p5_plot);
+    p5_plotBox->add("p5_plot", p5_plot);
 
-    p5_tableScroller->addGUIElement(p5_solverTable);
-    p5_tableBox->addGUIElement(p5_tableScroller);
+    p5_tableScrollingWindow->add("p5_solverTable", p5_solverTable);
+    p5_tableBox->add("p5_tableScrollingWindow", p5_tableScrollingWindow);
 
-    p5_tableAndChoiceBox->addGUIElement(p5_solChoiceBox);
-    p5_tableAndChoiceBox->addGUIElement(p5_tableBox);
+    p5_tableAndChoiceBox->add("p5_solChoiceBox", p5_solChoiceBox);
+    p5_tableAndChoiceBox->add("p5_tableBox", p5_tableBox);
     p5_tableAndChoiceBox->setOrientation(Box::Orientation::VERTICAL);
     p5_tableAndChoiceBox->setAlignment(Box::Alignment::LEFT);
 
-    p5_preFinalBox->addGUIElement(p5_tableAndChoiceBox);
-    p5_preFinalBox->addGUIElement(p5_plotBox);
+    p5_preFinalBox->add("p5_tableAndChoiceBox", p5_tableAndChoiceBox);
+    p5_preFinalBox->add("p5_plotBox", p5_plotBox);
     p5_preFinalBox->setOrientation(Box::Orientation::HORIZONTAL);
     p5_preFinalBox->setAlignment(Box::Alignment::UP);
 
-    p5_finalBox->addGUIElement(p5_preFinalBox);
-    p5_finalBox->addGUIElement(p5_buttBox);
+    p5_finalBox->add("p5_preFinalBox", p5_preFinalBox);
+    p5_finalBox->add("p5_buttBox", p5_buttBox);
     p5_finalBox->setOrientation(Box::Orientation::VERTICAL);
     p5_finalBox->setAlignment(Box::Alignment::LEFT);
 
-    solutionChoicePage->addGUIElement(p5_finalBox);
+    solutionChoicePage->add("p5_finalBox", p5_finalBox);
     holder.addPage(std::move(solutionChoicePage));
 }
 
@@ -604,45 +476,28 @@ void block_until_gained_focus(sf::Window& window) {
 }
 
 int main () {
-    std::cout << "PageHolder " << sizeof(PageHolder) << "\n";
-    std::cout << "Page " << sizeof(Page) << "\n";
-    std::cout << "Button " << sizeof(Button) << "\n";
-    std::cout << "Selector " << sizeof(Selector) << "\n";
-    std::cout << "Slider " << sizeof(Slider) << "\n";
-    std::cout << "Plot2D " << sizeof(Plot2D) << "\n";
-    std::cout << "Box " << sizeof(Box) << "\n";
-    std::cout << "ButtonBox " << sizeof(ButtonBox) << "\n";
-    std::cout << "TextField " << sizeof(TextField) << "\n";
-    std::cout << "Label " << sizeof(Label) << "\n";
-    std::cout << "Table " << sizeof(Table) << "\n";
-    std::cout << "ScrollingWindow " << sizeof(Scroller) << "\n";
-    std::cout << "Spacer " << sizeof(Spacer) << "\n";
-    std::cout << "RenderTexture " << sizeof(sf::RenderTexture) << "\n";
-    std::cout << "RectangleShape " << sizeof(sf::RectangleShape) << "\n";
-    std::cout << "Sprite " << sizeof(sf::Sprite) << "\n";
-    std::cout << "GUIElement " << sizeof(GUIElement) << "\n";
-    std::cout << "GUIContainer " << sizeof(GUIContainer) << "\n";
-    std::cout << "RenderTextureBased " << sizeof(RenderTextureBased) << "\n";
-    std::cout << "TextBased " << sizeof(TextBased) << "\n";
-    std::cout << "InputLine " << sizeof(InputLine) << "\n";
-    std::cout << "Interactable " << sizeof(Interactable) << "\n";
-
-    // PageHolder holder;
-    // PageHolder holder2;
-    // PageHolder holder3;
-    // PageHolder holder4;
-    // PageHolder holder5;
     setlocale(0, "");
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), L"Page Holder");
-    window.setFramerateLimit(20);
+    std::cout << "Fizz\n";
 
-    PageHolder holder;
+    PageHolder holder, hold;
     initPages(holder);
     holder.setPosition(20, 20);
-    holder.updateAll();
+    holder.saveToFile("Goida.bin");
+    //holder.update();
+    //holder.updateAll();
+    try {
+        //hold.loadFromFile("Goida.bin");
+    } catch (std::exception &exp) {
+        int a;
+        std::cout << exp.what() << '\n';
+        std::cin >> a;
+    }
+    std::cout << "Created pages\n";
 
     sf::Vector2i pixelPos;
     sf::Vector2f mousePos;
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), L"Gui Test");
+    window.setFramerateLimit(20);
     while (window.isOpen()) {
         sf::Event event;
         pixelPos = sf::Mouse::getPosition(window);
@@ -656,7 +511,12 @@ int main () {
             }
             holder.handleEvent(event, mousePos);
         }
-        holder.update();
+        //try {
+            holder.update();
+        // } catch (...) {
+        //     std::cout << "terrible thing happend\n";
+        //     return -1;
+        // }
 
         window.clear(sf::Color(200, 200, 200));
         window.draw(holder);

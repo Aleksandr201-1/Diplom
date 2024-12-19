@@ -12,6 +12,8 @@ target_sources(${KOSHI_SOLVER_LIB}
 target_link_libraries(${KOSHI_SOLVER_LIB} 
     PRIVATE
         ${ODE_GENERAL_LIB}
+        ${MATH_LIB}
+        ${BUTCHER_LIB}
 )
 
 target_include_directories(${KOSHI_SOLVER_LIB}

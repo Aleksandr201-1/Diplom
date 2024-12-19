@@ -15,20 +15,20 @@ IterationAlgo stringToIterationAlgo (const std::string &str) {
     return stringToEnum(str, iteration_algos);
 }
 
-float128_t norma (const std::vector<float128_t> &a, const std::vector<float128_t> &b) {
+double norma (const std::vector<double> &a, const std::vector<double> &b) {
     uint64_t size = std::min(a.size(), b.size());
-    float128_t ans = 0;
+    double ans = 0;
     for (uint64_t i = 0; i < size; ++i) {
         ans = std::max(ans, std::abs(a[i] - b[i]));
     }
     return ans;
 }
 
-float128_t derivative (const std::function<float128_t (const std::vector<float128_t> &, const std::vector<std::vector<float128_t>> &, const Matrix<float128_t> &)> &f, const std::vector<float128_t> &X, const std::vector<std::vector<float128_t>> &K, const Matrix<float128_t> &butcher, float128_t h, uint64_t idx, uint64_t idy) {
-    //std::vector<float128_t> args(X);
-    //Matrix<float128_t> tmp(butcher);
-    std::vector<std::vector<float128_t>> Ktmp(K);
-    float128_t a, b, c, d;
+double derivative (const std::function<double (const std::vector<double> &, const std::vector<std::vector<double>> &, const Matrix<double> &)> &f, const std::vector<double> &X, const std::vector<std::vector<double>> &K, const Matrix<double> &butcher, double h, uint64_t idx, uint64_t idy) {
+    //std::vector<double> args(X);
+    //Matrix<double> tmp(butcher);
+    std::vector<std::vector<double>> Ktmp(K);
+    double a, b, c, d;
     //args[idx] += 2 * h;
     Ktmp[idx][idy] += 2 * h;
     a = f(X, Ktmp, butcher);
@@ -41,25 +41,23 @@ float128_t derivative (const std::function<float128_t (const std::vector<float12
     return (-a + 8 * b - 8 * c + d) / (12 * h);
 }
 
-std::vector<std::vector<float128_t>> ExplicitStep (const std::vector<std::vector<float128_t>> &K, const std::vector<std::vector<float128_t>> &Yi, uint64_t idx, const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f, const Matrix<float128_t> &butcher, float128_t h) {
-    std::vector<std::vector<float128_t>> next = K;
+std::vector<std::vector<double>> ExplicitStep (const std::vector<std::vector<double>> &K, const std::vector<std::vector<double>> &Yi, uint64_t idx, const std::vector<std::function<double (const std::vector<double> &)>> &f, const Matrix<double> &butcher, double h) {
+    std::vector<std::vector<double>> next = K;
     uint64_t orderOfTask = next.size(), orderOfApprox = next[0].size();
-    std::vector<float128_t> args(Yi.size(), 0);
+    std::vector<double> args(Yi.size(), 0);
     for (uint64_t j = 0; j < args.size(); ++j) {
         args[j] = Yi[j][idx];
     }
     //std::cout << args.size() << " " << orderOfTask << " " << orderOfApprox << "\n";
-    //exit(0);
     for (uint64_t j = 0; j < orderOfApprox; ++j) {
         //аргументы для функций
         args[0] = Yi[0][idx] + butcher(j, 0) * h;
         for (uint64_t k = 1; k < orderOfTask + 1; ++k) {
             args[k] = Yi[k][idx];
-            for (uint64_t l = 0; l < orderOfApprox; ++l) { //изменить orderOfApprox на j?
+            for (uint64_t l = 0; l < j; ++l) { //изменить orderOfApprox на j?
                 args[k] += butcher(j, l + 1) * next[k - 1][l];
             }
         }
-        //exit(0);
         //коэффициенты
         // for (auto el : args) {
         //     std::cout << el << "\n";
@@ -67,25 +65,23 @@ std::vector<std::vector<float128_t>> ExplicitStep (const std::vector<std::vector
         // for (uint64_t i = 0; i < f.size(); ++i) {
         //     std::cout << "\tFunc " << i + 1 << ": " << f[i](args) << "\n";
         // }
-        ///exit(0);
         for (uint64_t k = 0; k < orderOfTask; ++k) {
             next[k][j] = h * f[k](args);
         }
     }
-    //exit(0);
     return next;
 }
 
-std::vector<std::vector<float128_t>> SimpleIteration (const std::vector<std::vector<float128_t>> &K, const std::vector<std::vector<float128_t>> &Yi, uint64_t idx, const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f, const Matrix<float128_t> &butcher, float128_t h, float128_t approx, IterationAlgo algo) {
+std::vector<std::vector<double>> SimpleIteration (const std::vector<std::vector<double>> &K, const std::vector<std::vector<double>> &Yi, uint64_t idx, const std::vector<std::function<double (const std::vector<double> &)>> &f, const Matrix<double> &butcher, double h, double approx, IterationAlgo algo) {
     //std::cout << "eeee\n";
-    std::vector<float128_t> args(Yi.size(), 0);
+    std::vector<double> args(Yi.size(), 0);
     for (uint64_t j = 0; j < args.size(); ++j) {
         args[j] = Yi[j][idx];
     }
-    std::vector<std::vector<float128_t>> prev = K, next = K;
+    std::vector<std::vector<double>> prev = K, next = K;
     uint64_t orderOfTask = f.size(), orderOfApprox = butcher.size().m - 1;
-    std::vector<float128_t> new_args;
-    float128_t prevDiff, diff = INFINITY;
+    std::vector<double> new_args;
+    double prevDiff, diff = INFINITY;
     uint64_t iter = 0;
     //std::cout << "eeee\n";
     do {
@@ -125,17 +121,17 @@ std::vector<std::vector<float128_t>> SimpleIteration (const std::vector<std::vec
     return next;
 }
 
-std::vector<std::vector<float128_t>> NewtonIteration (const std::vector<std::vector<float128_t>> &K, const std::vector<std::vector<float128_t>> &Yi, uint64_t idx, const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f, const Matrix<float128_t> &butcher, float128_t h, float128_t approx) {
-    std::vector<std::vector<float128_t>> prev = K, next = K;
+std::vector<std::vector<double>> NewtonIteration (const std::vector<std::vector<double>> &K, const std::vector<std::vector<double>> &Yi, uint64_t idx, const std::vector<std::function<double (const std::vector<double> &)>> &f, const Matrix<double> &butcher, double h, double approx) {
+    std::vector<std::vector<double>> prev = K, next = K;
     uint64_t orderOfTask = K.size(), orderOfApprox = butcher.size().m - 1;
-    std::vector<float128_t> args(Yi.size(), 0);
+    std::vector<double> args(Yi.size(), 0);
     for (uint64_t j = 0; j < args.size(); ++j) {
         args[j] = Yi[j][idx];
     }
-    std::vector<float128_t> new_args(args.size(), 0);
-    float128_t prevDiff, diff = INFINITY;
+    std::vector<double> new_args(args.size(), 0);
+    double prevDiff, diff = INFINITY;
     uint64_t iter = 0;
-    Matrix<std::function<float128_t (const std::vector<float128_t> &, const std::vector<std::vector<float128_t>> &, const Matrix<float128_t> &)>> F(orderOfTask, orderOfApprox);
+    Matrix<std::function<double (const std::vector<double> &, const std::vector<std::vector<double>> &, const Matrix<double> &)>> F(orderOfTask, orderOfApprox);
     do {
         prevDiff = diff;
         diff = 0;
@@ -155,20 +151,20 @@ std::vector<std::vector<float128_t>> NewtonIteration (const std::vector<std::vec
             //std::cout << "task order size: " << orderOfTask << "\n";
             //std::cout << "eeee\n";
             //F
-            //std::vector<std::vector<std::function<float128_t (const std::vector<float128_t> &, const std::vector<std::vector<float128_t>> &, const Matrix<float128_t> &)>>> F(orderOfTask);
+            //std::vector<std::vector<std::function<double (const std::vector<double> &, const std::vector<std::vector<double>> &, const Matrix<double> &)>>> F(orderOfTask);
             for (uint64_t j = 0; j < orderOfTask; ++j) {
                 //args.size = orderOfTask * orderOfApprox + orderOfTask + 2
-                // std::vector<float128_t> Kargs(X.size(), 0);
+                // std::vector<double> Kargs(X.size(), 0);
                 // for (uint64_t k = 0; k < X.size(); ++k) {
                 //     Kargs[k] = new_args[k];
                 //     for (uint64_t l = 0; l < X[0].size(); ++l) {
                 //         Kargs[k] += prev[k][l] * butcher(k, l);
                 //     }
                 // }
-                auto lambda = [=] (const std::vector<float128_t> &args, const std::vector<std::vector<float128_t>> &K, const Matrix<float128_t> &butcher) -> float128_t {
-                    //float128_t ans = butcher(j, i);
-                    float128_t ans = K[j][i];
-                    std::vector<float128_t> arg = args;
+                auto lambda = [=] (const std::vector<double> &args, const std::vector<std::vector<double>> &K, const Matrix<double> &butcher) -> double {
+                    //double ans = butcher(j, i);
+                    double ans = K[j][i];
+                    std::vector<double> arg = args;
                     arg[0] += butcher(i, 0) * h;
                     for (uint64_t k = 1; k < orderOfTask + 1; ++k) {
                         //arg[k] = 0;
@@ -188,7 +184,7 @@ std::vector<std::vector<float128_t>> NewtonIteration (const std::vector<std::vec
         }
         //std::cout << "eeee\n";
         //матрица Якоби
-        Matrix<float128_t> Yakobi(orderOfApprox * orderOfTask);
+        Matrix<double> Yakobi(orderOfApprox * orderOfTask);
         for (uint64_t i = 0; i < orderOfApprox; ++i) {
             for (uint64_t j = 0; j < orderOfTask; ++j) {
                 for (uint64_t k = 0; k < orderOfApprox; ++k) {
@@ -228,7 +224,7 @@ std::vector<std::vector<float128_t>> NewtonIteration (const std::vector<std::vec
     return next;
 }
 
-std::vector<std::vector<float128_t>> IterationStep (const std::vector<std::vector<float128_t>> &X, const std::vector<std::vector<float128_t>> &Yi, uint64_t idx, const std::vector<std::function<float128_t (const std::vector<float128_t> &)>> &f, const Matrix<float128_t> &butcher, float128_t h, float128_t approx, IterationAlgo algo) {
+std::vector<std::vector<double>> IterationStep (const std::vector<std::vector<double>> &X, const std::vector<std::vector<double>> &Yi, uint64_t idx, const std::vector<std::function<double (const std::vector<double> &)>> &f, const Matrix<double> &butcher, double h, double approx, IterationAlgo algo) {
     switch (algo) {
         case IterationAlgo::ZEIDEL:
         case IterationAlgo::SIMPLE_ITERATION:

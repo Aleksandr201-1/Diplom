@@ -12,6 +12,8 @@ target_sources(${CHEMICAL_SOLVER_LIB}
 target_link_libraries(${CHEMICAL_SOLVER_LIB} 
     PRIVATE
         ${ODE_GENERAL_LIB}
+        ${NUMERIC_METHODS_LIB}
+        ${BUTCHER_LIB}
 )
 
 target_include_directories(${CHEMICAL_SOLVER_LIB}

@@ -16,7 +16,7 @@ void help (const std::string &name) {
 
 std::string readLine (std::istream &input) {
     std::string str;
-    while (str.empty()) {
+    while (str.empty() && !input.eof()) {
         //std::cout << "1\n";
         std::getline(input, str);
         if (!str.empty() && str[0] == '#') {

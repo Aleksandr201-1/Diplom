@@ -7,15 +7,15 @@
 #include <chrono>
 #include <ctime>
 #include <unordered_map>
-#include <General/General.hpp>
 #include <ODUSolver/Koshi/KoshiTask.hpp>
+#include <ODUSolver/Chemical/ChemicalTask.hpp>
 #include <ODUSolver/IterationAlgo.hpp>
-#include <General/LSM.hpp>
-#include <General/ButcherTable.hpp>
+#include <NumericMethods/LSM.hpp>
+#include <Butcher/ButcherTable.hpp>
 
-std::vector<std::vector<float128_t>> getAnaliticSolution (const std::vector<float128_t> &X, const std::vector<FunctionalTree> &func);
+std::vector<std::vector<double>> getAnaliticSolution (const std::vector<double> &X, const std::vector<FuncMaker> &func);
 
-std::tuple<float128_t, float128_t> getAnaliticCompare (const std::vector<float128_t> &Yn, const std::vector<float128_t> &Ya);
+std::tuple<double, double> getAnaliticCompare (const std::vector<double> &Yn, const std::vector<double> &Ya);
 
 enum class ReportType {
     TXT,
@@ -26,18 +26,19 @@ enum class ReportType {
 struct ReportInfo {
     TaskType type;
     SolveMethod method;
+    ReactionType react;
     IterationAlgo algo;
     uint64_t order, way;
-    Matrix<float128_t> butcher;
+    Matrix<double> butcher;
 
     std::vector<std::string> input_task;
     Task *task;
-    float128_t h, tough_coeff, approx;
+    double h_min, h_max, h_last, tough_coeff, approx;
 
     bool multigraph;
     std::vector<std::pair<std::string, std::string>> graph_info;
-    std::vector<std::vector<float128_t>> solution;
-    std::vector<FunctionalTree> analitic;
+    std::vector<std::vector<double>> solution;
+    std::vector<FuncMaker> analitic;
 
     std::unordered_map<std::string, std::unordered_map<std::string, uint64_t>> table;
     uint64_t workTime;

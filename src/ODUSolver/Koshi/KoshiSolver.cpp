@@ -1,17 +1,17 @@
 #include "KoshiSolver.hpp"
 
-std::vector<std::vector<float128_t>> KoshiSolver (SolveMethod method, const KoshiTask &task, const Matrix<float128_t> butcher, float128_t h, IterationAlgo iter_alg, float128_t approx) {
-    float128_t X0, Xn;
+std::vector<std::vector<double>> KoshiSolver (SolveMethod method, const KoshiTask &task, const Matrix<double> butcher, double h, IterationAlgo iter_alg, double approx) {
+    double X0, Xn;
     std::tie(X0, Xn) = task.getBorders();
     const auto &func = task.getODE();
     const auto &Y0 = task.getY0();
     uint64_t orderOfTask = func.size(), orderOfApprox = butcher.size().m - 1;
-    float128_t min_h = (Xn - X0) / MIN_H_SIZE;
-    float128_t max_h = (Xn - X0) / MAX_H_SIZE;
-    float128_t tough = 0;
+    double min_h = (Xn - X0) / MIN_H_SIZE;
+    double max_h = (Xn - X0) / MAX_H_SIZE;
+    double tough = 0;
 
-    std::vector<std::vector<float128_t>> Yi(orderOfTask + 1); //X Y Y' Y'' ...
-    std::vector<float128_t> control;
+    std::vector<std::vector<double>> Yi(orderOfTask + 1); //X Y Y' Y'' ...
+    std::vector<double> control;
 
     //инициализация начальных условий
     Yi[0].push_back(X0);
@@ -25,7 +25,7 @@ std::vector<std::vector<float128_t>> KoshiSolver (SolveMethod method, const Kosh
     //K1 K2 K3 K4 | order of task
     //L1 L2 L3 L4 |
     //M1 M2 M3 M4 V
-    std::vector<std::vector<float128_t>> K(orderOfTask, std::vector<float128_t>(orderOfApprox, 0));
+    std::vector<std::vector<double>> K(orderOfTask, std::vector<double>(orderOfApprox, 0));
 
     uint64_t stepNum = 1;
     bool expl;
@@ -64,7 +64,7 @@ std::vector<std::vector<float128_t>> KoshiSolver (SolveMethod method, const Kosh
         //добавление нового значения
         Yi[0].push_back(Yi[0].back() + h);
         for (uint64_t j = 0; j < orderOfTask; ++j) {
-            float128_t delta = 0;
+            double delta = 0;
             for (uint64_t k = 1; k <= orderOfApprox; ++k) {
                 delta += butcher(orderOfApprox, k) * K[j][k - 1];
             }
@@ -77,12 +77,12 @@ std::vector<std::vector<float128_t>> KoshiSolver (SolveMethod method, const Kosh
 
         //изменение шага
         if (butcher.size().m != butcher.size().n) {
-            float128_t delta_control = 0;
+            double delta_control = 0;
             for (uint64_t k = 1; k <= orderOfApprox; ++k) {
                 delta_control += butcher(orderOfApprox + 1, k) * K[0][k - 1];
             }
             control.push_back(control.back() + delta_control);
-            float128_t R = std::abs(Yi[1].back() - control.back()); //norma(Yi[1], control);
+            double R = std::abs(Yi[1].back() - control.back()); //norma(Yi[1], control);
             if (R > approx && h > min_h) {
                 h /= 2;
             } else if (R < approx / 64) {
@@ -90,19 +90,19 @@ std::vector<std::vector<float128_t>> KoshiSolver (SolveMethod method, const Kosh
             }
         }
         //  else if (Yi[0].size() > 1) {
-        //     std::vector<float128_t> tmpY2h(Yi.size());
+        //     std::vector<double> tmpY2h(Yi.size());
         //     for (uint64_t i = 0; i < Yi.size(); ++i) {
         //         tmpY2h[i] = Yi[i][stepNum];
         //     }
-        //     float128_t R = 0, tmpR;
-        //     //float128_t h2Y;
-        //     float128_t half_step = h / 2;
+        //     double R = 0, tmpR;
+        //     //double h2Y;
+        //     double half_step = h / 2;
         //     for (uint64_t i = 0; i < 2; ++i) {}
 
         //     K = IterationStep(K, Yi, stepNum - 1, func, butcher, half_step, approx, iter_alg);
         //     Yi[0][stepNum] = Yi[0][stepNum - 1] + half_step;
         //     for (uint64_t j = 0; j < orderOfTask; ++j) {
-        //         float128_t delta = 0;
+        //         double delta = 0;
         //         for (uint64_t k = 1; k <= orderOfApprox; ++k) {
         //             delta += butcher(orderOfApprox, k) * K[j][k - 1];
         //         }
@@ -114,7 +114,7 @@ std::vector<std::vector<float128_t>> KoshiSolver (SolveMethod method, const Kosh
         //     K = IterationStep(K, Yi, stepNum, func, butcher, half_step, approx, iter_alg);
         //     Yi[0][stepNum] = Yi[0][stepNum] + half_step;
         //     for (uint64_t j = 0; j < orderOfTask; ++j) {
-        //         float128_t delta = 0;
+        //         double delta = 0;
         //         for (uint64_t k = 1; k <= orderOfApprox; ++k) {
         //             delta += butcher(orderOfApprox, k) * K[j][k - 1];
         //         }

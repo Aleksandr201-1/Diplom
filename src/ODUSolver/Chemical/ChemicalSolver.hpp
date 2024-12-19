@@ -2,19 +2,24 @@
 #define CHEMICAL_SOLVER_HPP
 
 #include <vector>
-#include <General/General.hpp>
 //#include <General/FuncMaker.hpp>
-#include <General/ButcherTable.hpp>
+#include <Butcher/ButcherTable.hpp>
 #include <ODUSolver/ToughDet.hpp>
 #include <ODUSolver/IterationAlgo.hpp>
 #include <ODUSolver/Chemical/ChemicalTask.hpp>
 
-std::vector<std::vector<float128_t>> ChemicalSolver (SolveMethod method,
+std::vector<std::vector<double>> drop (const std::vector<std::vector<double>> &vv, uint64_t newSize);
+
+double NewtonFindT (const std::function<double (double)> &f, double x, double approx, DiffConfig conf = DiffConfig::POINTS2_ORDER1_WAY3);
+
+std::vector<std::vector<double>> ChemicalSolver (SolveMethod method,
                                                      const ChemicalSystem &task,
-                                                     const Matrix<float128_t> butcher,
-                                                     float128_t h,
+                                                     const Matrix<double> butcher,
+                                                     double h_min,
+                                                     double h_max,
+                                                     double h_last,
                                                      IterationAlgo iter_alg,
-                                                     float128_t approx,
+                                                     double approx,
                                                      ReactionType type);
 
 #endif

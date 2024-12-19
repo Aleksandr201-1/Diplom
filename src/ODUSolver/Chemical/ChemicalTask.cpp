@@ -1,6 +1,21 @@
 #include "ChemicalTask.hpp"
 
-float128_t PhiFunction::operator() (float128_t t) const {
+const std::map<ReactionType, std::string> reaction_types = {
+    {ReactionType::ISOTERM_CONST_RHO, "IsotermConstRho"},
+    {ReactionType::ADIABAT_CONST_RHO, "AdiabatConstRho"},
+    {ReactionType::ISOTERM_CONST_P, "IsotermConstP"},
+    {ReactionType::ADIABAT_CONST_P, "AdiabatConstP"}
+};
+
+std::string reactionTypeToString (ReactionType method) {
+    return enumToString(method, reaction_types);
+}
+
+ReactionType stringToReactionType (const std::string &str) {
+    return stringToEnum(str, reaction_types);
+}
+
+double PhiFunction::operator() (double t) const {
     for (uint64_t i = 0; i < T.size(); ++i) {
         if (t >= T[i].first && t < T[i].second) {
             t = t / 10000;
@@ -10,7 +25,7 @@ float128_t PhiFunction::operator() (float128_t t) const {
     return 0;
 }
 
-float128_t PhiFunction::der1 (float128_t t) const {
+double PhiFunction::der1 (double t) const {
     for (uint64_t i = 0; i < T.size(); ++i) {
         if (t >= T[i].first && t < T[i].second) {
             t = t / 10000;
@@ -20,7 +35,7 @@ float128_t PhiFunction::der1 (float128_t t) const {
     return 0;
 }
 
-float128_t PhiFunction::der2 (float128_t t) const {
+double PhiFunction::der2 (double t) const {
     for (uint64_t i = 0; i < T.size(); ++i) {
         if (t >= T[i].first && t < T[i].second) {
             t = t / 10000;
@@ -173,7 +188,7 @@ void ChemicalReaction::setOutput (const std::vector<uint64_t> &out) {
     output = out;
 }
 
-void ChemicalReaction::setParameters (float128_t A, float128_t n, float128_t E) {
+void ChemicalReaction::setParameters (double A, double n, double E) {
     this->A = A;
     this->n = n;
     this->E = E;
@@ -195,7 +210,7 @@ const std::vector<uint64_t> &ChemicalReaction::getOutputAdditive () const {
     return output_add;
 }
 
-std::tuple<float128_t, float128_t, float128_t> ChemicalReaction::getParameters () const {
+std::tuple<double, double, double> ChemicalReaction::getParameters () const {
     return std::make_tuple(A, n, E);
 }
 
@@ -278,8 +293,8 @@ std::ostream &operator<< (std::ostream &out, const ChemicalReaction &reaction) {
     return out;
 }
 
-const float128_t ChemicalSystem::R = 8.3144;
-const float128_t ChemicalSystem::P0 = 101325;
+const double ChemicalSystem::R = 8.3144;
+const double ChemicalSystem::P_ATM = 101325;
 
 std::string ChemicalSystem::readAtom (const std::string &sub, uint64_t &i) const {
     std::string ans;
@@ -331,7 +346,9 @@ void ChemicalSystem::initTable () {
 }
 
 
-ChemicalSystem::ChemicalSystem () {}
+ChemicalSystem::ChemicalSystem () {
+    T = P = 0;
+}
 
 ChemicalSystem::ChemicalSystem (const ChemicalSystem &system) {
     table = system.table;
@@ -367,7 +384,7 @@ ChemicalSystem::ChemicalSystem (ChemicalSystem &&system) {
     P = std::move(system.P);
 }
 
-ChemicalSystem::ChemicalSystem (const std::string &filename) {
+ChemicalSystem::ChemicalSystem (const std::string &filename) : ChemicalSystem() {
     initFromFile(filename);
 }
 
@@ -381,7 +398,7 @@ std::vector<std::string> ChemicalSystem::getAtomList () const {
     return atoms;
 }
 
-const std::unordered_map<std::string, float128_t> &ChemicalSystem::getAtomMasses () const {
+const std::unordered_map<std::string, double> &ChemicalSystem::getAtomMasses () const {
     return atom_mass;
 }
 
@@ -393,11 +410,11 @@ std::vector<std::string> ChemicalSystem::getSubstanceList () const {
     return substances;
 }
 
-const std::unordered_map<std::string, float128_t> &ChemicalSystem::getSubstanceMasses () const {
+const std::unordered_map<std::string, double> &ChemicalSystem::getSubstanceMasses () const {
     return substance_mass;
 }
 
-void ChemicalSystem::addReaction (const std::string &reaction, float128_t A, float128_t n, float128_t E) {
+void ChemicalSystem::addReaction (const std::string &reaction, double A, double n, double E) {
     ChemicalReaction react(reaction, atoms, substances, additives, table);
     react.setParameters(A, n, E);
     reactions.push_back(react);
@@ -407,7 +424,7 @@ void ChemicalSystem::addReaction (const ChemicalReaction &reaction) {
     reactions.push_back(reaction);
 }
 
-void ChemicalSystem::changeReaction (uint64_t i, const std::string &reaction, float128_t A, float128_t n, float128_t E) {
+void ChemicalSystem::changeReaction (uint64_t i, const std::string &reaction, double A, double n, double E) {
     ChemicalReaction react(reaction, atoms, substances, additives, table);
     react.setParameters(A, n, E);
     reactions[i] = react;
@@ -425,7 +442,7 @@ void ChemicalSystem::clearReactions () {
     reactions.clear();
 }
 
-void ChemicalSystem::addAdditive (const std::string &name, const std::vector<float128_t> &additive) {
+void ChemicalSystem::addAdditive (const std::string &name, const std::vector<double> &additive) {
     if (additive.size() != substances.size()) {
         throw std::runtime_error("ChemicalSystem::addAdditive: additive.size() != substances.size()");
     }
@@ -434,19 +451,19 @@ void ChemicalSystem::addAdditive (const std::string &name, const std::vector<flo
     additive_configs[name] = additive;
 }
 
-void ChemicalSystem::setPressure (float128_t P) {
+void ChemicalSystem::setPressure (double P) {
     this->P = P;
 }
 
-float128_t ChemicalSystem::getPressure () const {
+double ChemicalSystem::getPressure () const {
     return P;
 }
 
-void ChemicalSystem::setTemperature (float128_t T) {
+void ChemicalSystem::setTemperature (double T) {
     this->T = T;
 }
 
-float128_t ChemicalSystem::getTemperature () const {
+double ChemicalSystem::getTemperature () const {
     return T;
 }
 
@@ -454,31 +471,55 @@ std::unordered_map<std::string, std::unordered_map<std::string, uint64_t>> &Chem
     return table;
 }
 
-void ChemicalSystem::setReactionParameters (uint64_t i, float128_t A, float128_t n, float128_t E) {
+void ChemicalSystem::setReactionParameters (uint64_t i, double A, double n, double E) {
     reactions[i].setParameters(A, n, E);
 }
 
-std::tuple<float128_t, float128_t, float128_t> ChemicalSystem::getReactionParameters (uint64_t i) const {
+std::tuple<double, double, double> ChemicalSystem::getReactionParameters (uint64_t i) const {
     return reactions[i].getParameters();
 }
 
-void ChemicalSystem::setConcentrations (const std::vector<float128_t> &conc) {
-    concentrations = conc;
+void ChemicalSystem::setConcentrations (const std::vector<double> &conc, ConcentrationMode mode) {
+    if (mode == ConcentrationMode::MOLAR_MASS) {
+        concentrations = conc;
+    } else if (mode == ConcentrationMode::PERCENT) {
+        concentrations = conc;
+        double rho = 0;
+        for (uint64_t j = 0; j < concentrations.size(); ++j) {
+            rho += concentrations[j] * substance_mass.find(substances[j])->second;
+        }
+        for (uint64_t j = 0; j < concentrations.size(); ++j) {
+            concentrations[j] = concentrations[j] / rho;
+        }
+    }
+}
+// std::vector<double> ChemicalSystem::getConcentrations () const {
+//     return concentrations;
+// }
+
+double ChemicalSystem::getRho () const {
+    auto &gamma = concentrations;
+    double rho = 0;
+    for (uint64_t j = 0; j < gamma.size(); ++j) {
+        rho += gamma[j];// * substance_mass.find(substances[j])->second;
+    }
+    return P / (R * T * rho);
+}
+ 
+std::vector<double> ChemicalSystem::getY0 () const {
+    // auto gamma = concentrations;
+    // double rho = 0;
+    // for (uint64_t j = 0; j < gamma.size(); ++j) {
+    //     rho += gamma[j] * substance_mass.find(substances[j])->second;
+    // }
+    // for (uint64_t j = 0; j < gamma.size(); ++j) {
+    //     gamma[j] = gamma[j] / rho;
+    // }
+    // return gamma;
+    return concentrations;
 }
 
-std::vector<float128_t> ChemicalSystem::getY0 () const {
-    auto gamma = concentrations;
-    float128_t rho = 0;
-    for (uint64_t j = 0; j < gamma.size(); ++j) {
-        rho += gamma[j] * substance_mass.find(substances[j])->second;
-    }
-    for (uint64_t j = 0; j < gamma.size(); ++j) {
-        gamma[j] = gamma[j] / rho;
-    }
-    return gamma;
-}
-
-const std::vector<std::function<float128_t (float128_t)>> &ChemicalSystem::getGFunc () const {
+const std::vector<std::function<double (double)>> &ChemicalSystem::getGFunc () const {
     return GFunc;
 }
 
@@ -486,7 +527,12 @@ const std::vector<PhiFunction> &ChemicalSystem::getPhiFunc () const {
     return phi;
 }
 
+const std::vector<std::function<double (double)>> &ChemicalSystem::getEnthalpy () const {
+    return enthalpy;
+}
+
 void ChemicalSystem::initFromFile (const std::string &filename) {
+    std::cout << "init from file " << filename << "\n";
     std::ifstream file(filename);
     if (!file.good()) {
         throw std::logic_error("ChemicalSystem::initFromFile: cant open file with name \"" + filename + "\"");
@@ -494,7 +540,7 @@ void ChemicalSystem::initFromFile (const std::string &filename) {
     uint64_t countOfSubstances, countOfAtoms, count;
     std::string str;
     char tmpChar;
-    float128_t mass;
+    double mass;
     file >> countOfSubstances >> countOfAtoms;
     atoms.resize(countOfAtoms);
     substances.resize(countOfSubstances);
@@ -514,7 +560,7 @@ void ChemicalSystem::initFromFile (const std::string &filename) {
             file >> count;
             table[atoms[j]][substances[i]] = count;
         }
-        std::pair<float128_t, float128_t> pairH0;
+        std::pair<double, double> pairH0;
         file >> pairH0.first >> pairH0.second >> count;
         pairH0.first  *= 1000;
         pairH0.second *= 1000;
@@ -530,10 +576,15 @@ void ChemicalSystem::initFromFile (const std::string &filename) {
         }
     }
     for (uint64_t i = 0; i < substances.size(); ++i) {
-        auto func = [=] (float128_t t) -> float128_t {
-            return H0[i].first - H0[i].second - t * phi[i](t);
+        auto gfunc = [=] (double t) -> double {
+            return H0[i].first - H0[i].second - t * this->phi[i](t);
         };
-        GFunc.push_back(func);
+        GFunc.push_back(gfunc);
+        auto efunc = [=] (double t) -> double {
+            return gfunc(t) - t * (-t * phi[i].der1(t) - phi[i](t)); //experimental
+            //return gfunc(t) - t * derivative(gfunc, t, 0.01, DiffConfig::POINTS2_ORDER1_WAY3); //normal
+        };
+        enthalpy.push_back(efunc);
     }
 
     file.close();
@@ -557,9 +608,9 @@ void ChemicalSystem::printInfo (std::ostream &out) const {
         out << std::setw(5) << el.first << "  " << el.second << "\n";
     }
 
-    // std::vector<std::function<float128_t (float128_t)>> GFunc;
+    // std::vector<std::function<double (double)>> GFunc;
     // for (uint64_t i = 0; i < system.substances.size(); ++i) {
-    //     auto func = [=] (float128_t t) -> float128_t {
+    //     auto func = [=] (double t) -> double {
     //         return system.H0[i].first - system.H0[i].second - t * system.phi[i](t);
     //     };
     //     GFunc.push_back(func);
@@ -593,14 +644,14 @@ void ChemicalSystem::printInfo (std::ostream &out) const {
 
     //вывод констант скоростей при заданной температуре
     out << "\nReactions:\n";
-    auto K = [] (float128_t A, float128_t n, float128_t T, float128_t E) {
+    auto K = [] (double A, double n, double T, double E) {
         return A * std::pow(T, n) * std::exp(-E / T);
     };
     for (uint64_t i = 0; i < reactions.size(); ++i) {
-        float128_t A, n, E;
+        double A, n, E;
         std::tie(A, n, E) = reactions[i].getParameters();
-        float128_t Kright = K(A, n, T, E);
-        float128_t Kleft = 0;
+        double Kright = K(A, n, T, E);
+        double Kleft = 0;
         auto input = reactions[i].getInput();
         auto output = reactions[i].getOutput();
         for (uint64_t j = 0; j < input.size(); ++j) {
@@ -660,6 +711,14 @@ ChemicalSystem &ChemicalSystem::operator= (ChemicalSystem &&system) {
     return *this;
 }
 
+ChemicalReaction ChemicalSystem::at (uint64_t i) const {
+    return reactions[i];
+}
+
+ChemicalReaction &ChemicalSystem::at (uint64_t i) {
+    return reactions[i];
+}
+
 ChemicalReaction ChemicalSystem::operator[] (uint64_t i) const {
     return reactions[i];
 }
@@ -668,113 +727,78 @@ ChemicalReaction &ChemicalSystem::operator[] (uint64_t i) {
     return reactions[i];
 }
 
-std::tuple<std::vector<float128_t>, std::vector<float128_t>> readInfo (const std::string &str) {
-    std::vector<float128_t> phi, entalpil;
+std::tuple<std::vector<double>, std::vector<double>> readInfo (const std::string &str) {
+    std::vector<double> phi, entalpil;
     return std::make_tuple(phi, entalpil);
 }
 
 void ChemicalSystem::rightPartGen () {
     ode_system.clear();
     Y.clear();
-    //std::vector<std::function<float128_t(const std::vector<float128_t> &)>> rightPart;
-    float128_t A, n, E;
+    double A, n, E;
     const ChemicalSystem &system = *this;
-    auto K = [] (float128_t A, float128_t n, float128_t T, float128_t E) {
+    auto K = [] (double A, double n, double T, double E) {
         return A * std::pow(T, n) * std::exp(-E / T);
     };
-    // std::vector<std::function<float128_t (float128_t)>> GFunc;
-    // for (uint64_t i = 0; i < system.substances.size(); ++i) {
-    //     auto func = [=] (float128_t t) -> float128_t {
-    //         return system.H0[i].first - system.H0[i].second - t * system.phi[i](t);
-    //     };
-    //     GFunc.push_back(func);
-    // }
-    // std::cout << "GFunc:\n";
-    // for (uint64_t i = 0; i < GFunc.size(); ++i) {
-    //     std::cout << "func " << i + 1 << ": " << GFunc[i](T) << "\n";
-    // }
-    std::cout << "creating reactions speeds\n";
-    std::vector<std::function<float128_t (const std::vector<float128_t> &)>> Wright(system.getCount()), Wleft(system.getCount());
+    Wright.clear();
+    Wleft.clear();
+    Wright.resize(system.getCount());
+    Wleft.resize(system.getCount());
     for (uint64_t i = 0; i < system.getCount(); ++i) {
-        std::cout << "\nReaction " << i + 1 << "\n";
         std::tie(A, n, E) = system[i].getParameters();
-        float128_t Kright = K(A, n, T, E);
-        float128_t Kleft = 0;
-        auto in = system[i].getInput();
-        auto out = system[i].getOutput();
-        //const float128_t P0 = 101'325;
+        double Kright = K(A, n, T, E);
+        double Kleft = 0;
+        auto &in = system[i].getInput();
+        auto &out = system[i].getOutput();
         for (uint64_t j = 0; j < in.size(); ++j) {
-            Kleft += (int64_t)(in[j] - out[j]) * (GFunc[j](T) / (R * T) + std::log(R * T / P0));
-            //std::cout << "curr Kleft: " << Kleft << "\n";
-            //std::cout << "for " << substances[j] << ": " << (int64_t)(in[j] - out[j]) << "\n";
+            Kleft += (int64_t)(in[j] - out[j]) * (GFunc[j](T) / (R * T) + std::log(R * T / P_ATM));
         }
-        //std::cout << "SUM: " << (GFunc[0](T) - 2*GFunc[1](T) + GFunc[3](T)) / (R * T) << "\n";
         Kleft = std::exp(-Kleft) * Kright;
-        //std::cout << "K right: " << Kright << "\n";
-        //std::cout << "K left: " << Kleft << "\n";
-        //exit(0);
         //args = t, gamma_1, gamma_2, ..., gamma_n, rho, T
-        auto Fin = [=] (const std::vector<float128_t> &args) -> float128_t {
-            float128_t Rho = args[args.size() - 2];
-            float128_t Temp = args[args.size() - 1];
-            float128_t ans = K(A, n, Temp, E);
-            float128_t tmp = 0;
-            //std::cout << "Kin: " << ans << "\n";
-            auto input = system[i].getInput();
-            auto input_add = system[i].getInputAdditive();
+        auto Fin = [=] (const std::vector<double> &args) -> double {
+            double Rho = args[args.size() - 2];
+            double Temp = args[args.size() - 1];
+            double ans = K(A, n, Temp, E);
+            double tmp = 0;
+            auto &input = this->at(i).getInput();
+            auto &input_add = this->at(i).getInputAdditive();
             for (uint64_t j = 0; j < in.size(); ++j) {
                 tmp = std::pow(args[j + 1] * Rho, input[j]);
-                // if (tmp != 0.0) {
-                //     ans *= tmp;
-                // }
                 ans *= tmp;
             }
             for (uint64_t j = 0; j < input_add.size(); ++j) {
                 tmp = 0;
-                auto coeff = additive_configs.find(additives[input_add[j]])->second;
+                auto &coeff = this->additive_configs.find(this->additives[input_add[j]])->second;
                 for (uint64_t k = 0; k < coeff.size(); ++k) {
-                    //std::cout << k << ": " << coeff[k] << " * " << args[k + 1] << "\n"; 
                     tmp += coeff[k] * args[k + 1];
                 }
-                //std::cout << "in M: " << tmp * Rho << "\n";
-                //std::cout << "sum = " << tmp << "\n";
                 ans *= tmp * Rho;
-                //exit(0);
             }
-            //exit(0);
             return ans;
         };
 
-        auto Fout = [=] (const std::vector<float128_t> &args) -> float128_t {
-            float128_t Rho = args[args.size() - 2];
-            float128_t Temp = args[args.size() - 1];
-            float128_t ans = 0;
-            auto input = system[i].getInput();
-            auto output = system[i].getOutput();
+        auto Fout = [=] (const std::vector<double> &args) -> double {
+            double Rho = args[args.size() - 2];
+            double Temp = args[args.size() - 1];
+            double ans = 0;
+            auto &input = this->at(i).getInput();
+            auto &output = this->at(i).getOutput();
             for (uint64_t j = 0; j < in.size(); ++j) {
-                ans += (int64_t)(input[j] - output[j]) * (GFunc[j](Temp) / (R * Temp) + std::log(R * Temp / P0));
+                ans += (int64_t)(input[j] - output[j]) * (GFunc[j](Temp) / (R * Temp) + std::log(R * Temp / P_ATM));
             }
             ans = std::exp(-ans) * K(A, n, Temp, E);
-            //std::cout << "Kout: " << ans << "\n";
-            float128_t tmp = 0;
-            auto output_add = system[i].getOutputAdditive();
+            double tmp = 0;
+            auto &output_add = this->at(i).getOutputAdditive();
             for (uint64_t j = 0; j < output.size(); ++j) {
-                //for (uint64_t k = 0; k < out[j].second; ++k) {
                     tmp = std::pow(args[j + 1] * Rho, output[j]);
-                    // if (tmp != 0.0) {
-                    //     ans *= tmp;
-                    // }
                     ans *= tmp;
-                    //ans *= std::pow(args[j + 1] * rho, out[j]);
-                //}
             }
             for (uint64_t j = 0; j < output_add.size(); ++j) {
                 tmp = 0;
-                auto coeff = additive_configs.find(additives[output_add[j]])->second;
+                auto &coeff = this->additive_configs.find(this->additives[output_add[j]])->second;
                 for (uint64_t k = 0; k < coeff.size(); ++k) {
                     tmp += coeff[k] * args[k + 1];
                 }
-                //std::cout << "out M: " << tmp * Rho << "\n";
                 ans *= tmp * Rho;
             }
             return ans;
@@ -782,48 +806,21 @@ void ChemicalSystem::rightPartGen () {
         Wright[i] = std::move(Fin);
         Wleft[i] = std::move(Fout);
     }
-    std::cout << "Wright size: " << Wright.size() << "\n";
-    std::cout << "Wleft size: " << Wleft.size() << "\n";
-    std::cout << "creating substances speeds\n";
     for (uint64_t i = 0; i < system.substances.size(); ++i) {
-        auto Wsub = [=] (const std::vector<float128_t> &args) -> float128_t {
-            float128_t ans = 0;
-            float128_t Rho = args[args.size() - 2];
-            // for (uint64_t j = 1; j < args.size(); ++j) {
-            //     rho += args[j];
-            // }
-            // rho = P / (R * T * rho);
-            //std::cout << "www\n";
-            //std::cout << "REACTION " << i + 1 << "\n";
-            for (uint64_t j = 0; j < Wright.size(); ++j) {
-                auto in = system[j].getInput();
-                auto out = system[j].getOutput();
-                float128_t right = Wright[j](args), left = Wleft[j](args);
+        auto Wsub = [=] (const std::vector<double> &args) -> double {
+            double ans = 0;
+            double Rho = args[args.size() - 2];
+            for (uint64_t j = 0; j < this->Wright.size(); ++j) {
+                auto &in = this->at(j).getInput();
+                auto &out = this->at(j).getOutput();
+                double right = this->Wright[j](args), left = this->Wleft[j](args);
                 ans += out[i] * right;
                 ans -= in[i]  * right;
                 ans += in[i]  * left;
                 ans -= out[i] * left;
-                // auto input_add = system[j].getInputAdditive();
-                // auto output_add = system[j].getOutputAdditive();
-                // for (uint64_t k = 0; k < input_add.size(); ++k) {
-                //     //std::cout << "got M in reaction " << j + 1 << "to work\n";
-                //     ans += additive_configs[additives[output_add[k]]][i] * right;
-                //     ans -= additive_configs[additives[input_add[k]]][i]  * right;
-                //     ans += additive_configs[additives[input_add[k]]][i]  * left;
-                //     ans -= additive_configs[additives[output_add[k]]][i] * left;
-                // }
             }
-            //37 000
-            //
-            //std::cout << "W" << i << ": " << ans / Rho << "\n";
-            //exit(0);
             return ans / Rho;
         };
-        ode_system.push_back(Wsub);
+        ode_system.push_back(std::move(Wsub));
     }
-    //std::cout << "Chem size: " << rightPart.size() << "\n";
-    //std::cout << "Chemic func exmpl: " << rightPart[0]({0, 0.5, 0, 0, 0.5, 0, 0}) << "\n";
-
-    //std::cout << "done\n";
-    //return rightPart;
 }
