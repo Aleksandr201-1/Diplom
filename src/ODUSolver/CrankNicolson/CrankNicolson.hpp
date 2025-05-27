@@ -7,6 +7,7 @@
 #include <NumericMethods/LU.hpp>
 #include <NumericMethods/CubeSpline.hpp>
 #include <NumericMethods/Integral.hpp>
+//#include <NumericMethods/Alg1Solve.hpp>
 //#include <General/Interpolation.hpp>
 #include <NumericMethods/Differentiation.hpp>
 #include <Math/Matrix.hpp>
@@ -14,6 +15,7 @@
 #include <General/Underlying.hpp>
 #include <ODUSolver/Chemical/ChemicalSolver.hpp>
 #include <PDFReporter/ReportGenerator.hpp>
+#include <iomanip>
 
 enum ARGS {
     U = 0,
@@ -84,6 +86,7 @@ struct ChemicalProfile {
     //double toPhysical (uint64_t i) const;
     double toNormal (double val) const;
     double getPhysical (double x) const;
+    double getNormal (double val) const;
 
     ChemicalProfile ();
     ChemicalProfile (uint64_t size);
@@ -125,18 +128,22 @@ inline std::vector<std::function<double (const std::vector<Matrix<double>> &, co
         [] (const std::vector<Matrix<double>> &f, const std::vector<ValueProfile> &vals, const std::vector<ChemicalProfile> &chems, double R, uint64_t i, uint64_t j) -> double {
             auto size = f[U].size();
             uint64_t b = size.m - 1, m = 0;
-            while (std::abs(f[U](i, b) - f[U](i, size.m - 1)) / vals[U].in < 0.01 && b > 1) {
+            while (f[U](0, b) == f[U](0, size.m - 1)) {
                 --b;
             }
-            while (std::abs(f[U](i, m) - f[U](i, 0)) / vals[U].in < 0.01 && m < size.m - 1) {
+            while (f[U](0, m) == f[U](0, 0)) {
                 ++m;
             }
-            if (b > 1) {
+            while (std::abs(f[U](i, b) - f[U](0, b)) / vals[U].in > 0.1 && b < size.m - 1) {
                 ++b;
             }
-            if (m < size.m - 1) {
+            while (std::abs(f[U](i, m) - f[U](0, m)) / vals[U].in > 0.1 && m > 0) {
                 --m;
             }
+            ++b;
+            --m;
+            //b = size.m / 2 + 5;
+            //m = size.m / 2 - 5;
             auto fy = [&] (uint64_t idx) -> double {
                 return f[Y](i, idx);
             };
@@ -153,7 +160,7 @@ inline std::vector<std::function<double (const std::vector<Matrix<double>> &, co
             double Ub = vals[U].toNormal(f[U](i, b)), Um = vals[U].toNormal(f[U](i, m));
             double RHOb = vals[RHO].toNormal(f[RHO](i, b)), RHOm = vals[RHO].toNormal(f[RHO](i, m));
             double yHalf = 1.0 / 2.0 * (RHOb * Ub + RHOm * Um);
-            if (j > m && j < b) {
+            if (j >= m && j <= b) {
                 return vals[MU].in * (293.15 + 110.0) / (110.0 + f[T](i, j)) * std::pow(f[T](i, j) / 293.15, 3.0 / 2.0) / R / vals[U].in / vals[RHO].in + vals[MU].in / (R * f[RHO](i, j) * f[U](i, j)) + 0.0135 * vals[RHO].toNormal(f[RHO](i, j)) * Um * std::sqrt(0.07 * std::pow(1.0 - Ub / Um, 2.0)) * yHalf;
                 //return vals[MU].in / (R * f[RHO](i, j) * f[U](i, j)) + vals[MU].in / (R * f[RHO](i, j) * f[U](i, j)) + 0.0135 * vals[RHO].toNormal(f[RHO](i, j)) * Um * std::sqrt(0.07 * std::pow(1.0 - Ub / Um, 2.0)) * yHalf;
             } else {
@@ -174,20 +181,28 @@ inline std::vector<std::function<double (const std::vector<Matrix<double>> &, co
         [] (const std::vector<Matrix<double>> &f, const std::vector<ValueProfile> &vals, const std::vector<ChemicalProfile> &chems, double R, uint64_t i, uint64_t j) -> double {
             auto size = f[U].size();
             uint64_t b = size.m - 1, m = 0;
-            while (std::abs(f[U](i, b) - f[U](i, size.m - 1)) < 0.01 && b > 1) {
+            while (f[U](0, b) == f[U](0, size.m - 1)) {
                 --b;
-                //std::cout << "B: " << b << "\n";
             }
-            while (std::abs(f[U](i, m) - f[U](i, 0)) < 0.01 && m < size.m - 1) {
+            while (f[U](0, m) == f[U](0, 0)) {
                 ++m;
-                //std::cout << "M: " << m << "\n";
             }
-            if (b > 1) {
+            while (std::abs(f[U](i, b) - f[U](0, b)) > 0.1 && b < size.m - 1) {
                 ++b;
             }
-            if (m < size.m - 1) {
+            while (std::abs(f[U](i, m) - f[U](0, m)) > 0.1 && m > 0) {
                 --m;
             }
+            ++b;
+            --m;
+            //b = size.m / 2 + 5;
+            //m = size.m / 2 - 5;
+            // if (b > 1) {
+            //     ++b;
+            // }
+            // if (m < size.m - 1) {
+            //     --m;
+            // }
             auto fy = [&] (uint64_t idx) -> double {
                 return f[Y](i, idx);
             };
