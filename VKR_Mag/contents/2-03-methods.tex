@@ -1,0 +1,514 @@
+\section{ТЕОРЕТИЧЕСКИЕ ОСНОВЫ И МАТЕМАТИЧЕСКАЯ МОДЕЛЬ}
+
+Моделирование течения струй газа с неравновесными химическими процессами требует строгого математического описания, объединяющего уравнения гидродинамики и кинетики реакций. В данном разделе излагаются теоретические основы, положенные в основу численного алгоритма, и приводится полная математическая постановка задачи.
+
+Ключевой особенностью рассматриваемых процессов является взаимное влияние газодинамики и химических превращений. Турбулентное перемешивание определяет скорость доставки реагентов, в то время как выделение тепла в реакциях существенно меняет структуру течения.
+
+Особое внимание уделяется параболизированной постановке уравнений Навье-Стокса, позволяющей существенно снизить вычислительные затраты при сохранении приемлемой точности для инженерных расчетов. Приводятся критерии применимости такого подхода и анализ возникающих погрешностей.
+
+Данный раздел служит теоретическим фундаментом для последующего изложения вычислительного алгоритма и результатов моделирования, обеспечивая строгую связь между физической постановкой задачи и её программной реализацией.
+
+\subsection{Постановка задачи}
+
+Итак, рассмотрим течение гомогенной смеси газов, содержащей $N$ компонент, заполняющих один и тот же объём. Компоненты газовой смеси характеризуются собственным молекулярным весом $\mu_i$, плотностью $\rho_i$, парциальным давлением $P_i$, скоростью $v_i$ и внутренней энергией $e_i$. Плотность смеси $\rho$, давление $P$, мольно-массовые концентрации компонентов $C_i$ и молекулярный вес смеси $\mu_\Sigma$ определяется следующим образом:
+
+\begin{equation}
+%\label{eq1}
+\normalspacing
+\begin{split}
+\rho &= \sum_{i = 1}^{N}\rho_i, \\
+P &= \sum_{i = 1}^{N} P_i, \\
+\overrightarrow{V} &= \frac{1}{\rho}\sum_{i = 1}^N\rho_i v_i, \\
+C_i &= \frac{\rho_i}{\rho\mu_i}, \\
+\mu_\Sigma &= \left(\sum_{i = 1}^{N} C_i\right)^{-1}.
+\end{split}
+\end{equation}
+
+Обозначим через $\overrightarrow{I_l} = \rho_i(\overrightarrow{v_l} - \overrightarrow{V})$ вектор плотности потока массы $i$-го  компонента, причем для вектора потока диффузии справедливо
+
+\begin{equation}
+\begin{split}
+\sum_{i = 1}^{N}\overrightarrow{I_l} &= 0. \\
+\end{split}
+\end{equation}
+
+Относительно газовых компонентов, сделаем следующее предположение. Будем считать, что поступательные, вращательные и колебательные степени свободы молекул находятся в равновесии~\cite{book3}. Для расчета термодинамических свойств газовых компонент можно с большой степенью точности пользоваться зависимостями индивидуальных энтальпий от температуры. Тогда справедливо:
+
+\begin{equation}
+%\label{eq1}
+\normalspacing
+\begin{split}
+e_i(T) &= C_i(h_i^0 + h_i(T)), \\
+P_i &= \rho_i RT\mu_i^{-1}, \\
+P &= \rho RT\mu_\Sigma^{-1},
+\end{split}
+\end{equation}
+где $h_i(T)$ ~--- индивидуальная энтальпия компонента.
+
+Изменение параметров спутной реагирующей струи может быть описано с помощью системы уравнений газовой динамики, которая представляет собой выраженные в дифференциальной форме законы сохранения массы, импульса, энергии и отдельных компонентов~\cite{book1_tur, book2_tur, book3_tur, book4_tur, book5_tur, book6_tur, book7_tur, book8_tur, book9_tur}. Имеем:
+
+\begin{equation}
+%\label{eq1}
+\normalspacing
+\begin{gathered}
+\frac{\partial \rho}{\partial t} + div(\rho \overrightarrow{V}) = 0, \\
+\frac{\partial \rho \overrightarrow{V}}{\partial t} + div(\rho \overrightarrow{V} * \overrightarrow{V}) = \rho \overrightarrow{F} - grad(P) + div(\hat{\tau}), \\
+\frac{\partial \rho E}{\partial t} + div(\rho \overrightarrow{V} * E) = \rho \overrightarrow{F} \overrightarrow{V} + div(\hat{\tau}\overrightarrow{V}) - div(P\overrightarrow{V}) - div(\overrightarrow{q}) - \rho Q, \\
+\frac{\partial C_i}{\partial t} + div(C_i \overrightarrow{V}) = div(\overrightarrow{I_l}) + W_i^*, i = 1,...,N, \\
+E = \sum_{i = 1}^{N}e_i = \frac{\overrightarrow{V}^2}{2} - \frac{P}{\rho}, \\
+P = \rho RT \mu_\Sigma^{-1}.
+\end{gathered}
+\end{equation}
+
+Здесь  $\overrightarrow{F}$ — вектор внешних сил, $Q$ — приток лучистой энергии, $W_i^*$ — скорость образования $i$-ой компоненты в результате протекания химических реакций, $\hat{\tau}$ — тензор вязких напряжений, $\overrightarrow{q}$ — вектор плотности теплового потока. 
+
+Выпишем систему уравнений, описывающую стационарное турбулентное движение многокомпонентного реагирующего газа, например, в цилиндрической системе координат $(x, y, \phi)$, где $\frac{\partial f}{\partial \phi} = 0$: 
+
+\begin{equation}
+\label{eq1:full_navie}
+\normalspacing
+\begin{gathered}
+%rho
+\frac{\partial}{\partial x}(\rho U y^\nu) + \frac{\partial}{\partial y}(\rho V y^\nu) = 0, \\
+%U
+\rho U \frac{\partial U}{\partial x} + \rho V \frac{\partial U} {\partial y} = -\frac{\partial P}{\partial x} + \frac{4}{3}(\frac{\partial}{\partial x}\mu\frac{\partial U}{\partial x}) - \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu\frac{\partial U}{\partial y}) + \frac{\partial}{\partial y}(\mu\frac{\partial V}{\partial x})-\\
+- \frac{2}{3}\frac{\partial}{\partial x}(\mu\frac{\partial V}{\partial y}) - \frac{2}{3}\nu\frac{\partial}{\partial x}(\mu\frac{V}{y}) + \nu\frac{\mu}{y}\frac{\partial V}{\partial x}, \\
+%V
+\rho U \frac{\partial V}{\partial x} + \rho V \frac{\partial V}{\partial y} = -\frac{\partial P}{\partial y} + \frac{\partial}{\partial x}(\mu\frac{\partial V}{\partial x}) + \frac{4}{3}\frac{\partial}{\partial y}(\mu\frac{\partial V}{\partial y}) - \frac{2}{3}\frac{\partial}{\partial y}(\mu\frac{\partial U}{\partial x})+\\
++ \frac{\partial}{\partial x}(\mu\frac{\partial U}{\partial y}) - \frac{2}{3}\nu\frac{\partial}{\partial y}(\mu\frac{V}{y}) + 2\nu\mu\frac{\partial}{\partial y}(\frac{V}{y}) + \nu\rho\frac{W^2}{y}, \\
+%W
+\rho U \frac{\partial W}{\partial x} + \rho V \frac{\partial W}{\partial y} = \frac{\partial}{\partial y}(\mu\frac{\partial W}{\partial y}) - \frac{\partial}{\partial y}(\mu\frac{W}{y}) + 2\mu\frac{\partial}{\partial y}(\frac{W}{y}) - \rho\frac{V W}{y}, \text{ при }\nu = 1, \\
+%J
+\rho U \frac{\partial J}{\partial x} + \rho V \frac{\partial J}{\partial y} = \frac{\partial}{\partial x}(\frac{\mu}{Pr}\frac{\partial J}{\partial x}) + \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\frac{\mu}{Pr}\frac{\partial J}{\partial y}) + (\frac{4}{3} - \frac{1}{Pr})\frac{\partial}{\partial x}(\mu U\frac{\partial U}{\partial x})+\\
++ (1 - \frac{1}{Pr})\frac{\partial}{\partial x}(\mu W\frac{\partial W}{\partial x}) + (1 - \frac{1}{Pr})\frac{\partial}{\partial x}(\mu V\frac{\partial V}{\partial x}) + (1 - \frac{1}{Pr})\frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu U\frac{\partial U}{\partial y})+\\
++ (\frac{4}{3} - \frac{1}{Pr})\frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu V\frac{\partial V}{\partial y}) + (1 - \frac{1}{Pr})\frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu W\frac{\partial W}{\partial y}) + \frac{\partial}{\partial x}(\mu V\frac{\partial U}{\partial y})+\\
++ \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu U\frac{\partial V}{\partial x}) - \frac{2}{3}\nu\frac{\partial}{\partial x}(\frac{1}{y^\nu}\mu UV) - \frac{2}{3}\nu\frac{1}{y^\nu}\frac{\partial}{\partial y}(\mu V^2)-\\
+- \nu\frac{1}{y^\nu}\frac{\partial}{\partial y}(\mu W^2) - \frac{2}{3}\frac{\partial}{\partial x}(\mu U \frac{\partial V}{\partial y}) - \frac{2}{3}\frac{1}{y^\nu}\frac{\partial}{\partial y}(\mu Vy^\nu \frac{\partial U}{\partial x})-\\
+- (1 - \frac{1}{Le})\frac{\partial}{\partial x}(\frac{\mu}{Pr}\sum_{i = 1}^{N} h_i(T)\frac{\partial C_i}{\partial x}) - (1 - \frac{1}{Le})\frac{1}{y^\nu}\frac{\partial}{\partial y}(\frac{\mu}{Pr}y^\nu\sum_{i = 1}^{N} h_i(T)\frac{\partial C_i}{\partial y}) - \rho Q, \\
+%
+\rho U \frac{\partial C_i}{\partial x} + \rho V \frac{\partial C_i}{\partial y} = \frac{\partial}{\partial x}(\frac{\mu}{Sc}\frac{\partial C_i}{\partial x}) + \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\frac{\mu}{Sc}\frac{\partial C_i}{\partial y}) + W_i^*, i = 1,...N, \\
+%
+J = \sum_{i = 1}^{N} h_i(T)C_i + \frac{1}{2}(U^2 + V^2 + W^2), \\
+%
+P = \rho RT\mu_\Sigma^{-1}.
+\end{gathered}
+\end{equation}
+
+Здесь $Pr, Sc$ и $Le$ ~---  эффективные числа Прандтля, Шмидта и Льюиса, которые определяются следующим образом:
+
+\begin{equation}
+\normalspacing
+\begin{split}
+    Pr &= \frac{\mu C_p}{\lambda}, \\
+    Sc &= \frac{\mu}{\rho D}, \\
+    Le &= \frac{\rho D C_p}{\lambda} = \frac{Pr}{Sc}.
+\end{split}
+\end{equation}
+
+Система~(\ref{eq1:full_navie}) представляет собой систему полных уравнений Навье-Стокса, дополненных уравнениями сохранения энергии и массы каждой компоненты. Для того, чтобы система уравнений , связывающая $N + 6$ неизвестных функций $U, V, W, \rho, P, T, C_i, i = 1,...,N$,  была замкнута, систему необходимо дополнить соответствующей моделью для вычисления эффективной вязкости. В силу того, что система~(\ref{eq1:full_navie}) относится к уравнениям эллиптического типа, для однозначного определения решения этих уравнений нужно сформулировать граничные условия для каждой из искомых функций на плоскостях, ограничивающих область течения, в которой ищется решение, т.е., сформулировать краевую задачу.
+
+\subsection{Параболизация уравнений}
+
+Для моделирования струйных стационарных вязких течений наряду с системой полных уравнений Навье-Стокса, относящихся к эллиптическому типу, часто используют системы, состоящие из уравнений параболического типа. Изменение типа уравнений существенно упрощает математическую задачу — краевую задачу сводит к задаче Коши и позволяет вместо метода установления, применяющегося для решения уравнений полной системы уравнений Навье-Стокса, воспользоваться маршевым методом пошагового интегрирования уравнений сохранения. Отметим некоторые особенности моделей, предназначенных для описания вязких течений с, преимущественным направлением потока: приближения пограничного слоя, приближения узкого канала и модели, основанной на параболизованных уравнениях Навье-Стокса~\cite{book16_tur, book17_tur, book18_tur, book19_tur, book20_tur, book21_tur}.
+
+Цилиндрическая или декартова системы координат не являются единственно возможными системами для записи уравнений Навье-Стокса~\cite{book9_tur, book10_tur, book11_tur, book12_tur, book13_tur, book14_tur, book15_tur}. По сравнению с другими системами можно провести лишь единичные примеры использования таких координат для струйных течений. Гораздо чаще используются координаты, непосредственно связанные с характером изменения зависимых переменных в расчетной области, например, координаты Мизеса $(x, \psi)$, где $\psi$ — функция тока.
+
+Координаты Мизеса $(x, \psi)$ определены следующим образом:
+
+\begin{equation}
+\normalspacing
+\begin{split}
+    \frac{\partial \psi}{\partial x} &= -\rho V\left(\frac{y}{\psi}\right)^\nu, \\
+    \frac{\partial \psi}{\partial y} &= \rho V\left(\frac{y}{\psi}\right)^\nu.
+\end{split}
+\end{equation}
+
+Формально параболизация полной системы уравнений Навье-Стокса ~\ref{eq1:full_navie} сводится к отбрасыванию вторых производных по координате, совпадающей с основным направлением движения. Проделаем это преобразование:
+
+%    \begin{array}{c}
+\begin{equation}
+\label{eq1:navie_dd}
+\normalspacing
+\begin{gathered}
+%rho
+\frac{\partial}{\partial x}\left(\rho U y^\nu\right)+\frac{\partial}{\partial y}\left(\rho V y^\nu\right) = 0, \\
+%U
+\rho U \frac{\partial U}{\partial x}+\rho V \frac{\partial U}{\partial y}=-\frac{\partial P}{\partial x}+\frac{1}{y^\nu} \frac{\partial}{\partial y}\left(y^\nu \mu \frac{\partial U}{\partial y}\right) +\frac{\partial}{\partial y}\left(\mu \frac{\partial V}{\partial x}\right)-\frac{2}{3} \frac{\partial}{\partial x}\left(\mu \frac{\partial V}{\partial y}\right)-\\
+-\frac{2}{3} \nu \frac{\partial}{\partial x}\left(\mu \frac{V}{y}\right)+\nu \frac{\mu}{y} \frac{\partial V}{\partial x}, \\
+%V
+\rho U \frac{\partial V}{\partial x}+\rho V \frac{\partial V}{\partial y}=-\frac{\partial P}{\partial y}+\frac{4}{3} \frac{\partial}{\partial y}\left(\mu \frac{\partial V}{\partial y}\right)-\frac{2}{3} \frac{\partial}{\partial y}\left(\mu \frac{\partial U}{\partial x}\right) +\frac{\partial}{\partial x}\left(\mu \frac{\partial U}{\partial y}\right)-\\
+-\frac{2}{3} \nu \frac{\partial}{\partial y}\left(\mu \frac{V}{y}\right)+2 \nu \mu \frac{\partial}{\partial y}\left(\frac{V}{y}\right), \\
+%W
+\rho U \frac{\partial W}{\partial x}+\rho V \frac{\partial W}{\partial y}=\frac{\partial}{\partial y}\left(\mu \frac{\partial W}{\partial y}\right)-\frac{\partial}{\partial y}\left(\mu \frac{W}{y}\right)+2 \mu \frac{\partial}{\partial y}\left(\frac{W}{y}\right)-\\
+- \rho \frac{V \cdot W}{y}, \text { при } \nu=1, \\
+%J
+\rho U \frac{\partial J}{\partial x}+\rho V \frac{\partial J}{\partial y}=\frac{1}{y^\nu} \frac{\partial}{\partial y}\left(y^\nu \frac{\mu}{P r} \frac{\partial J}{\partial y}\right)+\left(1-\frac{1}{P r}\right) \frac{1}{y^\nu} \frac{\partial}{\partial y}\left(y^\nu \mu U \frac{\partial U}{\partial y}\right)+\\
++\left(\frac{4}{3}-\frac{1}{P r}\right) \frac{1}{y^\nu} \frac{\partial}{\partial y}\left(y^\nu \mu V \frac{\partial V}{\partial y}\right) +\frac{\partial}{\partial x}\left(\mu V \frac{\partial U}{\partial y}\right)+\frac{1}{y^\nu} \frac{\partial}{\partial y}\left(y^\nu \mu U \frac{\partial V}{\partial x}\right)-\\
+-\frac{2}{3} \nu \frac{\partial}{\partial x}\left(\frac{1}{y^\nu} \mu U V\right) - \frac{2}{3} \nu \frac{1}{y^\nu} \frac{\partial}{\partial y}\left(\mu V^{2}\right)-\frac{2}{3} \frac{\partial}{\partial x}\left(\mu U \frac{\partial V}{\partial y}\right)-\\
+-\frac{2}{3} \frac{1}{y^\nu} \frac{\partial}{\partial y}\left(\mu V y^\nu \frac{\partial U}{\partial x}\right)-\left(1-\frac{1}{L e}\right) \frac{1}{y^\nu} \frac{\partial}{\partial y}\left(\frac{\mu}{P r} y^\nu \sum_{i=1}^{N} h_{i}(T) \frac{\partial C_{i}}{\partial y}\right)-\rho Q, \\
+%Ci
+\rho U \frac{\partial C_{i}}{\partial x}+\rho V \frac{\partial C_{i}}{\partial y}=\frac{1}{y^\nu} \frac{\partial}{\partial y}\left(y^\nu \frac{\mu}{S c} \frac{\partial C_{i}}{\partial y}\right)+W_{i}^{*}, \quad i=1, \cdots N, \\
+%T
+J = \sum_{i = 1}^{N}h_i(T)C_i + \frac{1}{2}(U^2 + V^2 + W^2), \\
+%P
+P = \rho RT\mu_\Sigma^{-1}.
+%\end{array}
+\end{gathered}
+\end{equation}
+
+Систему уравнений~(\ref{eq1:navie_dd}), записанную в координатах $(x, y)$ преобразуем в координаты Мизеса и распишем их в виде отдельных уравнений по каждой переменной:
+
+\begin{equation}
+\label{eq1:navie_parabol1}
+\normalspacing
+\begin{split}
+%rho
+&\frac{\partial}{\partial x}\left(\frac{1}{\rho U y^\nu}\right)=\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\frac{V}{U}\right),
+\end{split}
+\end{equation}
+\begin{equation}
+\label{eq1:navie_parabol2}
+\normalspacing
+\begin{split}
+%U
+\frac{\partial U}{\partial x}&=-\frac{1}{\rho U} \frac{\partial P}{\partial x}+\frac{V}{U}\left(\frac{1}{\psi}\right)^\nu \frac{\partial P}{\partial \psi}+\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U\left(\frac{y^{2}}{\psi}\right)^\nu \frac{\partial U}{\partial \psi}\right)+\\
+&+\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \frac{\partial V}{\partial x}\right) -\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho V\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right)-\\
+&-\frac{2}{3} \frac{1}{\rho U} \frac{\partial}{\partial x}\left(\mu \rho U\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right) -\frac{2}{3} \nu \frac{1}{\rho U} \frac{\partial}{\partial x}\left(\mu \frac{V}{y}\right)+\\
+&+\frac{2}{3} \frac{V}{U}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right)+\frac{2}{3} \nu \frac{V}{U}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \frac{V}{y}\right) +\\
+&+\nu \frac{1}{\rho U} \frac{\mu}{y} \frac{\partial V}{\partial x}-\nu \frac{\mu V}{U}\left(\frac{1}{\psi}\right)^\nu \frac{\partial V}{\partial \psi},
+\end{split}
+\end{equation}
+
+\begin{equation}
+\label{eq1:navie_parabol3}
+\normalspacing
+\begin{split}
+%V
+\frac{\partial V}{\partial x}&=-\left(\frac{y}{\psi}\right)^\nu \frac{\partial P}{\partial \psi}+\frac{4}{3}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right)-\\
+&-\frac{2}{3}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \frac{\partial U}{\partial x}\right) +\frac{2}{3}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho V\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right)+\\
+&+\frac{1}{\rho U} \frac{\partial}{\partial x}\left(\mu \rho U\left(\frac{y}{\psi}\right)^\nu \frac{\partial U}{\partial \psi}\right) -\frac{V}{U}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U\left(\frac{y}{\psi}\right)^\nu \frac{\partial U}{\partial \psi}\right)-\\
+&-\frac{2}{3} \nu\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \frac{V}{y}\right)+2 \nu \mu\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\frac{V}{y}\right),
+\end{split}
+\end{equation}
+
+\begin{equation}
+\label{eq1:navie_parabol4}
+\normalspacing
+\begin{split}
+%W
+\frac{\partial W}{\partial x}&=-\frac{V}{U} \frac{W}{y}+\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U\left(\frac{y}{\psi}\right)^\nu \frac{\partial W}{\partial \psi}\right)+\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \frac{W}{y}\right)+\\
+&+2 \mu\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\frac{W}{y}\right) \text {, } \\
+\end{split}
+\end{equation}
+\begin{equation}
+\label{eq1:navie_parabol5}
+\normalspacing
+\begin{split}
+%J
+\frac{\partial J}{\partial x}&=\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\frac{\mu}{P r} \rho U\left(\frac{y^{2}}{\psi}\right)^\nu \frac{\partial J}{\partial \psi}\right)+\left(\frac{1}{\psi}\right)^\nu\left(1-\frac{1}{P r}\right) \frac{\partial}{\partial \psi}\left(\mu \rho U^{2}\left(\frac{y^{2}}{\psi}\right)^\nu \frac{\partial U}{\partial \psi}\right) \\
+&+\left(\frac{1}{\psi}\right)^\nu\left(\frac{4}{3}-\frac{1}{P r}\right) \frac{\partial}{\partial \psi}\left(\mu \rho U V\left(\frac{y^{2}}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right)+\frac{1}{\rho U} \frac{\partial}{\partial x}\left(\mu \rho U V\left(\frac{y}{\psi}\right)^\nu \frac{\partial U}{\partial \psi}\right) \\
+&-\frac{V}{U}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U V\left(\frac{y}{\psi}\right)^\nu \frac{\partial U}{\partial \psi}\right)+\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(y^\nu \mu U\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial x}\right) \\
+&-\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U V\left(\frac{y^{2}}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right)-\frac{2}{3} \frac{1}{\rho U} \frac{\partial}{\partial x}\left(\mu \rho U^{2}\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right) \\
+&-\frac{2}{3} \nu\left[\frac{1}{\rho U} \frac{\partial}{\partial x}\left(\left(\frac{1}{y}\right)^\nu \mu U V\right)-\frac{V}{U}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\left(\frac{1}{y}\right)^\nu \mu U V\right)+\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu V^{2}\right)\right] \\
+&-\frac{2}{3}\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(y^\nu \mu V \frac{\partial U}{\partial x}\right)+\frac{2}{3} \frac{V}{U}\left(\frac{y}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho U^{2}\left(\frac{y}{\psi}\right)^\nu \frac{\partial V}{\partial \psi}\right) \\
+&+\frac{2}{3}\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\mu \rho V^{2}\left(\frac{y}{\psi}\right)^\nu \frac{\partial U}{\partial \psi}\right) \\
+&-\left(1-\frac{1}{L e}\right)\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\frac{\mu}{P r} \rho U\left(\frac{y^{2}}{\psi}\right)^\nu \sum_{i=1}^{N} h_{i}(T) \frac{\partial C_{i}}{\partial \psi}\right)-\frac{Q}{U},
+\end{split}
+\end{equation}
+\begin{equation}
+\label{eq1:navie_parabol6}
+\normalspacing
+\begin{split}
+&\frac{\partial C_{i}}{\partial x}=\left(\frac{1}{\psi}\right)^\nu \frac{\partial}{\partial \psi}\left(\frac{\mu}{S c} \rho U\left(\frac{y^{2}}{\psi}\right)^\nu \frac{\partial C_{i}}{\partial \psi}\right)+\frac{1}{\rho U} W_{i}{ }^{*}, \quad i=1, \cdots N \text {, }
+\end{split}
+\end{equation}
+\begin{equation}
+\label{eq1:navie_parabol7}
+\normalspacing
+\begin{split}
+&J=\sum_{i=1}^{N} h_{i}(T) C_{i}+\frac{1}{2}\left(U^{2}+V^{2}+W^{2}\right),
+\end{split}
+\end{equation}
+
+\begin{equation}
+\label{eq1:navie_parabol8}
+\normalspacing
+\begin{split}
+&P=\rho R T \mu_{\Sigma}{ }^{-1}.
+\end{split}
+\end{equation}
+
+Система уравнений~(\ref{eq1:navie_parabol1}-\ref{eq1:navie_parabol8}) всё ещё не является замкнутой. Для того, чтобы её можно было использовать для расчётов, нужно дополнить её моделью турбулентности для вычисления эффективной вязкости. 
+
+\subsection{Турбулентность}
+
+Турбулентное течение представляет собой сложный нестационарный процесс, характеризующийся хаотическими пульсациями скорости и давления. В реактивных струях турбулентность возникает вследствие градиентов скорости на границе истекающей струи и окружающей среды, а также из-за сдвиговых течений и химических реакций, изменяющих локальные свойства потока.
+
+Ключевой особенностью турбулентных течений является их много масштабность. Интегральный масштаб турбулентности, определяющий размер наиболее энергонасыщенных вихрей, может превышать микроскопический масштаб на несколько порядков. Эта особенность количественно описывается числом Рейнольдса, представляющим отношение инерционных сил к вязким.
+
+Современные подходы к моделированию турбулентности можно разделить на три основных направления. Прямое численное моделирование (DNS) предполагает решение полных уравнений Навье-Стокса без каких-либо упрощений, что требует чрезвычайно мелких расчетных сеток и ограничено течениями с умеренными числами Рейнольдса.
+
+Метод крупных вихрей (LES) предлагает компромиссное решение, непосредственно разрешая крупномасштабные вихревые структуры и моделируя влияние мелкомасштабных пульсаций. Этот подход обеспечивает хороший баланс между точностью и вычислительными затратами.
+
+Наиболее распространенным в инженерной практике остается подход, основанный на осреднении по Рейнольдсу (RANS). В этом случае решаются уравнения для осредненных величин, а влияние турбулентных пульсаций учитывается с помощью специальных моделей.
+
+Альтернативой служит модель $k-\omega$, сочетающая преимущества двух подходов и лучше описывающая течения с отрывом. Для сложных случаев, требующих повышенной точности, применяются гибридные методы (DES, DDES), комбинирующие достоинства RANS и LES подходов.
+
+Моделирование турбулентного горения сопряжено с рядом фундаментальных сложностей. Нелинейность химических источниковых членов и необходимость учета флуктуаций состава требуют специальных подходов. На практике часто применяют модель ламинарного пламени или метод функции плотности вероятности, позволяющие адекватно описать взаимодействие химических и турбулентных процессов.
+
+Турбулентность существенно влияет на процесс горения, усиливая перемешивание реагентов и увеличивая эффективную площадь фронта пламени. Это приводит к заметному изменению скорости горения по сравнению с ламинарным случаем.
+
+\subsection{Схемы дифференцирования}
+
+В общем случае, уравнения по каждому параметру системы имеют следующий вид:
+
+\begin{align}
+    \frac{\partial d}{\partial x} &= \frac{\partial}{\partial y}(A\frac{\partial f}{\partial y}) + B\frac{\partial f}{\partial y} + Cf + D
+\end{align}
+
+Производные, в свою очередь, можно аппроксимировать по следующим схемам~\cite{Wikipedia1, journal1}:
+
+\begin{align}
+    \frac{\partial f}{\partial x} &\longrightarrow \frac{f_{n + 1}^m - f_{n - 1}^m}{2L}, \\
+    \frac{\partial f}{\partial y} &\longrightarrow \frac{f_n^{m + 1} - f_n^{m - 1}}{2H}, \\
+    \frac{\partial}{\partial x}(A\frac{\partial f}{\partial x}) &\longrightarrow \frac{1}{L}(A_{n + 1}^m\frac{f_{n + 1}^m - f_n^m}{L} - A_{n - 1}^m\frac{f_n^m - f_{n - 1}^m}{L}), \\
+    \frac{\partial}{\partial y}(A\frac{\partial f}{\partial y}) &\longrightarrow \frac{1}{H}(A_n^{m + 1}\frac{f_n^{m + 1} - f_n^m}{H} - A_n^{m - 1}\frac{f_n^m - f_n^{m - 1}}{H}), \\
+    \frac{\partial}{\partial y}(A\frac{\partial f}{\partial x}) &\longrightarrow \frac{1}{2H}(A_n^{m + 1}\frac{f_{n + 1}^{m + 1} - f_{n - 1}^{m + 1}}{2L} - A_n^{m - 1}\frac{f_{n + 1}^{m - 1} - f_{n - 1}^{m - 1}}{2L}), \\
+    \frac{\partial}{\partial x}(A\frac{\partial f}{\partial y}) &\longrightarrow \frac{1}{2L}(A_{n + 1}^m\frac{f_{n + 1}^{m + 1} - f_{n + 1}^{m - 1}}{2H} - A_{n - 1}^m\frac{f_{n - 1}^{m + 1} - f_{n - 1}^{m - 1}}{2H}).
+\end{align}
+
+\subsection{Химическая модель}
+
+Для описания химической реакции необходимо знать закономерности её протекания во времени, а именно, скорость и механизм. Скорость и механизм химических превращений изучает раздел химии ~--- химическая кинетика \cite{Article5, book7, book8}.
+
+Будем рассматривать многокомпонентную систему переменного состава из $N$ веществ, в которой протекает $N_R$ реакций вида:
+
+\begin{equation}
+    \begin{gathered}
+    \sum\limits_{i = 1}^{N}\overrightarrow{\nu_i^{(r)}}M_i \xleftrightarrow[\overrightarrow{W^{(r)}}]{\overleftarrow{W^{(r)}}} \sum\limits_{i = 1}^{N}\overleftarrow{\nu_i^{(r)}}M_i,\\
+    \overleftrightarrow{q^{(r)}} = \sum\limits_{i = 1}^{N}\overleftrightarrow{\nu_i^{(r)}},\\
+    r = 1, ..., N_R,\\
+    i = 1, ..., N
+    \end{gathered}
+    \label{eq:ChemCommon}
+\end{equation}
+
+Здесь $r$ ~--- порядковый номер реакции, $i$ ~--- порядковый номер вещества, $\overleftrightarrow{\nu_i}$ ~--- стехиометрические коэффициенты
+(коэффициенты, стоящие перед молекулами веществ в химических уравнениях), $\overleftrightarrow{q^{(r)}}$ ~--- молекулярность
+соответствующих элементарных реакций (число частиц, которые участвуют в элементарном акте химического взаимодействия).
+
+В записи каждой реакции фигурирует $W^{(r)}$ ~--- скорость химической реакции. Она прямо пропорциональна произведению объёмных концентраций
+участвующих в ней компонентов и так называемой константы скорости реакции $\overleftrightarrow{K^{r}}(T)$, зависящей от температуры
+(в общем случае и от давления).
+
+Общий вид формул скоростей химических реакций:
+
+\begin{equation}
+    \overleftrightarrow{W^{r}} = \overleftrightarrow{K^{r}}(T)\prod\limits_i(\rho\gamma_i)^{\overleftrightarrow{\nu^{r}}}
+    \label{eq:Warrow}
+\end{equation}
+
+Константы скорости реакции $\overleftrightarrow{K^{r}}(T)$ расчитываются для прямого и оборатного хода реакции по следующим формулам:
+
+\begin{equation}
+    \overrightarrow{K^{r}}(T) = AT^n\exp{(-\dfrac{E}{T})}
+    \label{eq:Kright}
+\end{equation}
+
+\begin{equation}
+    \overleftarrow{K^{r}}(T) = \overrightarrow{K^{r}}(T)\exp{\bigg(\sum\limits_{i=1}^N(\overrightarrow{\nu_i^{(r)}} - \overleftarrow{\nu_i^{(r)}})(\dfrac{G_i^0(T)}{RT} + \ln{\dfrac{RT}{p_0}})\bigg)}
+    \label{eq:Kleft}
+\end{equation}
+
+Здесь $A, n, E$ ~--- Аррениусовские константы, $r = 1, ..., N_R$ ~--- порядковый номер реакции, $G_i^0(T)$ ~--- стандартный молярный потенциал
+Гиббса. Для вычисления $G_i^0(T)$ используются полиномиальные аппроксимационные формулы:
+
+\begin{equation}
+    G_i^0(T) = \Delta_fH^0(T_0) - [H^0(T_0) - H^0(0)] - T\text{Ф}(T_0),
+    \label{eq:Gi}
+\end{equation}
+
+где $H^0(0)$ ~--- стандартная энтальпия при абсолютном нуле, $H^0(T_0)$ ~--- стандартная энтальпия при $T_0$. Для задания $\text{Ф}^0(T)$
+применяют полиномы.
+
+\begin{equation}
+    \text{Ф}^0(T) = \phi_0 + \phi_{ln}\ln x + \phi_{-2}x^{-2} + \phi_{-1}x^{-1} + \phi_{1}x + \phi_{2}x^{2} + \phi_{3}x^{3}
+    \label{eq:F_i}
+\end{equation}
+
+Здесь $\phi_0, \phi_{ln}, \phi_{-2}, ..., \phi_3$ ~--- числовые коэффициенты, индивидуальные для каждого вещества.
+
+Используя скорости $W^{(r)}$, можно составить уравнения изменения мольно-массовых концентраций по времени,
+имеющих следующий вид:
+
+\begin{equation}
+    \begin{cases}
+        %\rho \dfrac{d\gamma_i}{dt} = \overrightarrow{W_i}(\rho, T, \gamma_1, ..., \gamma_N) - \overleftarrow{W_i}(\rho, T, \gamma_1, ..., \gamma_N)\\
+        \rho \dfrac{d\gamma_i}{dt} = W_i(\rho, T, \gamma_1, ..., \gamma_N)\\
+        \gamma_i(t_0) = \gamma_i^0,\\
+        i = 1, ..., N
+    \end{cases}
+    \label{eq:GammaI}
+\end{equation}
+
+где $W_i$ ~--- скорость образования i-го вещества. Вычисляется $W_i$ по формуле (\ref{eq:Wi}):
+
+\begin{equation}
+    W_i = \sum\limits_{r = 1}^{N_R}(\overrightarrow{\nu_i^{(r)}} - \overleftarrow{\nu_i^{(r)}})(\overrightarrow{W^{(r)}} - \overleftarrow{W^{(r)}})
+    \label{eq:Wi}
+\end{equation}
+
+В формулах (\ref{eq:GammaI}) помимо $\gamma_i$ фигурируют плотность $\rho$ и температура $T$. Их значения могут быть как константами по
+времи вычисления, так и переменными. В работе реализовано моделирование случая, когда плотность меняется по закону 
+(\ref{eq:Rho}), а температура константна, и случая, когда температура меняется, а плотность считается константой.
+
+\begin{equation}
+    \rho = \dfrac{P}{RT\sum\limits_{i = 1}^{N}\gamma_i}
+    \label{eq:Rho}
+\end{equation}
+
+Второй случай, связанный с изменением температуры немного сложнее в реализации, так как температуру приходится находить итерационными
+методами из уравнения (\ref{eq:TempFind}).
+
+%GFunc[j](T) - T * derivative(GFunc[j], T, 0.001, DiffConfig::POINTS4_ORDER1_WAY1) - R * T
+\begin{equation}
+    U_E = \sum\limits_{i = 1}^{N}(G_i^0(T) - T\dfrac{\partial G_i^0(T)}{\partial T} - RT)\gamma_i,
+    \label{eq:TempFind}
+\end{equation}
+
+где $U_E$ ~--- полная внутренняя энергия системы, которая считается перед решением и сохраняется постоянной до конца расчётов. Если
+представить данное уравнение в виде (\ref{eq:TempFind2}), то можно использовать, к примеру, метод Ньютона для поиска корня уравнения.
+
+\begin{equation}
+    F(T) = U_E - \sum\limits_{i = 1}^{N}(G_i^0(T) - T\dfrac{\partial G_i^0(T)}{\partial T} - RT)\gamma_i
+    \label{eq:TempFind2}
+\end{equation}
+
+Так как $U_E$, является константой, то решение $F(T) = 0$ будет соответствовать значению температуры на следующем шаге интегрирования.
+
+\subsection{Дифференциальные уравнения}
+
+При использовании прямого численного моделирования течения, требуется на каждой итерации отдельно считать шаг по уравнениям химической кинетики. Для этого химическую модель можно представить в виде СДУ, для решения которой можно использовать маршевые методы семейства Рунге-Кутты~\cite{book6, book9}.
+
+Задача горения сводится к решению ДУ произвольного порядка. Общий вид такой задачи представлен в примере (\ref{eq:Koshi}).
+
+\begin{equation}
+    \begin{cases}
+        y^{(n)} = f(x, y, y', y'', ..., y^{(n - 1)})\\
+        y(x_0) = y_0\\
+        y'(x_0) = y_1\\
+        y''(x_0) = y_2\\
+        ...\\
+        y^{(n - 1)}(x_0) = y_{n - 1}
+    \end{cases}
+    \label{eq:Koshi}
+\end{equation}
+
+Данное уравнение произвольного порядка $n$ может быть преобразовано в систему из $n$ ДУ первого порядка путём замены переменных. Пример (\ref{eq:KoshiSystem}) демонстрирует преобразование задачи Коши второго порядка в систему из 2-х уравнений первого порядка, путём замены $y'$ на $z$:
+
+\begin{equation}
+    \begin{cases}
+        z' = f(x, y, y', y'')\\
+        y' = z\\
+        y(x_0) = y_0\\
+        z(x_0) = y_1
+    \end{cases}
+    \label{eq:KoshiSystem}
+\end{equation}
+
+Для решения жёстких и нежёстких задач~\cite{Article3, Article4} можно использовать различные семейства методов. В данной работе для моделирования химической кинетики отдельно используются явный метод Рунге-Кутты 6-го порядка и неявный метод Гаусса 6-го порядка. Все эти методы представлены в виде таблиц Бутчера \cite{book1, cite_1_3}.
+
+Для более жёстких задач метод Рунге-Кутты 4-го порядка может быть недостаточно точным. Иногда приходится сильно уменьшать шаг
+интегрирования для того, чтобы решение было устойчивым. Другой путь ~--- использование методов более высоких порядков, например метода Рунге-Кутты 6-го порядка. Схема данного метода представлена на рисунке \ref{fig:RungeKutta6}.
+
+\begin{figure}
+    \begin{minipage}[t]{7.5cm}
+        {\small
+        \begin{equation*}
+            \begin{cases}
+                y_{k + 1} = y_k + \Delta y_k\\
+                \Delta y_k = \frac{7}{90} (K_1^k + K_6^k) + \frac{16}{45} (K_2^k + K_5^k) -\\
+                - \frac{1}{3}K_3^k + \frac{7}{15}K_4^k\\
+                K_1^k = hf(x_k, y_k)\\
+                K_2^k = hf(x_k + \frac{1}{4}h, y_k + \frac{1}{4}K_1^k)\\
+                K_3^k = hf(x_k + \frac{1}{2}h, y_k + \frac{1}{2}K_1^k)\\
+                K_4^k = hf(x_k + \frac{1}{2}h, y_k + \frac{1}{7}K_1^k + \frac{2}{7}K_2^k +\\
+                + \frac{1}{14}K_3^k)\\
+                K_5^k = hf(x_k + \frac{3}{4}h, y_k + \frac{3}{8}K_1^k - \frac{1}{2}K_3^k +\\
+                + \frac{7}{8}K_4^k)\\
+                K_6^k = hf(x_k + h, y_k - \frac{4}{7}K_1^k + \frac{12}{7}K_2^k -\\
+                - \frac{2}{7}K_3^k - K_4^k + \dfrac{8}{7}K_5^k)
+            \end{cases}
+            %\label{eq-koshi-system}
+        \end{equation*}
+        }
+    \end{minipage}
+    \begin{minipage}[t]{7.5cm}
+        \begin{table}    
+            %\caption{Таблица Бутчера для метода явного метода Рунге-Кутты 6-го порядка}
+            \begin{tabular}{|c|c|c|c|c|c|c|}
+            \hline
+            $0$ & $0$ & $0$ & $0$ & $0$ & $0$ & $0$\\
+            \hline
+            $\frac{1}{4}$ & $\frac{1}{4}$ & $0$ & $0$ & $0$ & $0$ & $0$\\
+            \hline
+            $\frac{1}{2}$ & $\frac{1}{2}$ & $0$ & $0$ & $0$ & $0$ & $0$\\
+            \hline
+            $\frac{1}{2}$ & $\frac{1}{7}$ & $\frac{2}{7}$ & $\frac{1}{14}$ & $0$ & $0$ & $0$\\
+            \hline
+            $\frac{3}{4}$ & $\frac{3}{8}$ & $0$ & $-\frac{1}{2}$ & $\frac{7}{8}$ & $0$ & $0$\\
+            \hline
+            $1$ & $-\frac{4}{7}$ & $\frac{12}{7}$ & $-\frac{2}{7}$ & $-1$ & $7$ & $0$\\
+            \hline
+            $0$ &  $\frac{7}{90}$ &  $\frac{16}{45}$ &  $-\frac{1}{3}$ &  $\frac{7}{15}$ &  $\frac{16}{45}$ &  $\frac{7}{90}$\\
+            \hline
+            \end{tabular}
+            %\label{tab:RungeKutta6}
+        \end{table}
+    \end{minipage}
+    \caption{Схема Рунге-Кутты 6-го порядка}
+    \label{fig:RungeKutta6}
+\end{figure}
+
+Все явные методы относятся к классу условно устойчивых методов~\cite{Wikipedia11, Wikipedia12}. Точность решения условно устойчивых методов сильно зависит от размера шага, поэтому у каждого из них есть свой критерий устойчивости. В зависимости от требований к устойчивости можно взять для решения либо явную, либо не явную схему. На рисунке~\ref{fig:Gauss6} изображена общая схема неявной схемы.
+
+\begin{figure}
+        \begin{minipage}[t]{7.5cm}
+        {\small
+        \begin{equation*}
+            \begin{cases}
+                y_{k + 1} = y_k + \frac{5}{18}hK_1 + \frac{4}{9}hK_2 + \frac{5}{18}hK_3\\
+                K_1 = f(x_k + (\frac{1}{2} - \frac{\sqrt{15}}{10})h, y_k + \frac{5}{36}hK_1 +\\
+                + (\frac{2}{9} - \frac{\sqrt{15}}{15})hK_2\\
+                + (\frac{5}{36} - \frac{\sqrt{15}}{30})hK_3)\\
+                K_2 = f(x_k + \frac{1}{2}h, y_k + (\frac{5}{36} + \frac{\sqrt{15}}{24})hK_1\\
+                + \frac{2}{9}hK_2\\
+                + (\frac{5}{36} - \frac{\sqrt{15}}{24})hK_3)\\
+                K_3 = f(x_k + (\frac{1}{2} + \frac{\sqrt{15}}{10})h, y_k + (\frac{5}{36} + \frac{\sqrt{15}}{30})hK_1\\
+                + (\frac{2}{9} + \frac{\sqrt{15}}{15})hK_2\\
+                + \frac{5}{36}hK_3)\\
+            \end{cases}
+            %\label{eq-koshi-system}
+        \end{equation*}
+        }
+    \end{minipage}
+    \begin{minipage}[t]{7.5cm}
+        \begin{table}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                $\frac{1}{2} - \frac{\sqrt{15}}{10}$ & $\frac{5}{36}$ & $\frac{2}{9} - \frac{\sqrt{15}}{15}$ & $\frac{5}{36} - \frac{\sqrt{15}}{30}$\\
+                \hline
+                $\frac{1}{2}$ & $\frac{5}{36} + \frac{\sqrt{15}}{24}$ & $\frac{2}{9}$ & $\frac{5}{36} - \frac{\sqrt{15}}{24}$\\
+                \hline
+                $\frac{1}{2} + \frac{\sqrt{15}}{10}$ & $\frac{5}{36} + \frac{\sqrt{15}}{30}$ & $\frac{2}{9} + \frac{\sqrt{15}}{15}$ & $\frac{5}{36}$\\
+                \hline
+                $0$ &  $\frac{5}{18}$ &  $\frac{4}{9}$ &  $\frac{5}{18}$\\
+                \hline
+            \end{tabular}
+        \end{table}
+    \end{minipage}
+    \caption{Схема Гаусса 6-го порядка}
+    \label{fig:Gauss6}
+\end{figure}
+
+Неявные методы хоть и обладают большей устойчивостью, но проигрывают по времени вычисления даже при большем размере шага. Поэтому целесообразно использовать сначала явную схему для проверки её применимости.

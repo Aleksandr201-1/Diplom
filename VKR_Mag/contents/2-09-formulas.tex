@@ -1,0 +1,56 @@
+\section{ФОРМУЛЫ}
+
+Можно сделать заинлайненую формулу: $E = mc^2$. Можно сделать формулу по центру (окружение \texttt{equation}):
+
+\begin{equation}
+\normalspacing
+    \label{f1}
+    \begin{split}
+    E = mc^2,\\
+    E = mc^2,
+    \end{split}
+\end{equation}
+
+где $E$ --- энергия,\par $m$ --- масса,\par $c$ --- скорость света.
+
+В таком случае точки и знаки препинания лучше оставить внутри формулы. Обратите внимание, что пояснения указываются в порядке появления в формуле, каждое пояснение с новой строки (для этого используйте \texttt{\textbackslash par} после каждого пояснения). \textbf{Необходимо} оставлять пустую строку до (и после) окружений \texttt{equation}, \texttt{align}, \texttt{gather}, \texttt{split}, etc. иначе не будет нужного пустого расстояния.  
+
+Также можно ссылаться на формулу~(\ref{f1}).
+
+Несколько формул в окружении \texttt{align}:
+
+\begin{align}
+x'_1 &= \frac{-3 x_1 + 4 x_2 - x_3}{2 \tau} \\
+x'_i &= \frac{x_{i+1} - x_{i-1}}{2 \tau}, \qquad i = \overline{2, n-1} \\
+x'_n &= \frac{x_{n-2} - 4 x_{n-1} + 3 x_n}{2 \tau}
+\end{align}
+
+\begin{align}
+\frac{\partial}{\partial x}(\rho U y^\nu) + \frac{\partial}{\partial y}(\rho V y^\nu) &= 0, \\
+\rho U \frac{\partial U}{\partial x} + \rho V \frac{\partial U}{\partial y} &= -\frac{\partial P}{\partial x} + \frac{4}{3}(\frac{\partial}{\partial x}\mu\frac{\partial U}{\partial x}) - \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu\frac{\partial U}{\partial y}) + \frac{\partial}{\partial y}(\mu\frac{\partial V}{\partial x}) - \frac{2}{3}\frac{\partial}{\partial x}(\mu\frac{\partial V}{\partial y}) - \frac{2}{3}\nu\frac{\partial}{\partial x}(\mu\frac{V}{y}) + \nu\frac{\mu}{y}\frac{\partial V}{\partial x}, \\
+\rho U \frac{\partial V}{\partial x} + \rho V \frac{\partial V}{\partial y} &= -\frac{\partial P}{\partial y} + \frac{\partial}{\partial x}(\mu\frac{\partial V}{\partial x}) + \frac{4}{3}\frac{\partial}{\partial y}(\mu\frac{\partial V}{\partial y}) - \frac{2}{3}\frac{\partial}{\partial y}(\mu\frac{\partial U}{\partial x}) + \frac{\partial}{\partial x}(\mu\frac{\partial U}{\partial y}) - \frac{2}{3}\nu\frac{\partial}{\partial y}(\mu\frac{V}{y}) + 2\nu\mu\frac{\partial}{\partial y}(\frac{V}{y}) + \nu\rho\frac{W^2}{y}, \\
+\rho U \frac{\partial W}{\partial x} + \rho V \frac{\partial W}{\partial y} &= \frac{\partial}{\partial y}(\mu\frac{\partial W}{\partial y}) - \frac{\partial}{\partial y}(\mu\frac{W}{y}) + 2\mu\frac{\partial}{\partial y}(\frac{W}{y}) - \rho\frac{V W}{y}, \texttt{при}\nu = 1, \\
+\rho U \frac{\partial J}{\partial x} + \rho V \frac{\partial J}{\partial y} &= \frac{\partial}{\partial x}(\frac{\mu}{Pr}\frac{\partial J}{\partial x}) + \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\frac{\mu}{Pr}\frac{\partial J}{\partial y}) + (\frac{4}{3} - \frac{1}{Pr})\frac{\partial}{\partial x}(\mu U\frac{\partial U}{\partial x}) + (1 - \frac{1}{Pr})\frac{\partial}{\partial x}(\mu W\frac{\partial W}{\partial x}) + (1 - \frac{1}{Pr})\frac{\partial}{\partial x}(\mu V\frac{\partial V}{\partial x}) + (1 - \frac{1}{Pr})\frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu U\frac{\partial U}{\partial y}) + (\frac{4}{3} - \frac{1}{Pr})\frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu V\frac{\partial V}{\partial y}) + (1 - \frac{1}{Pr})\frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu W\frac{\partial W}{\partial y}) + \frac{\partial}{\partial x}(\mu V\frac{\partial U}{\partial y}) + \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\mu U\frac{\partial V}{\partial x}) - \frac{2}{3}\nu\frac{\partial}{\partial x}(\frac{1}{y^\nu}\mu UV) - \frac{2}{3}\nu\frac{1}{y^\nu}\frac{\partial}{\partial y}(\mu V^2) - \nu\frac{1}{y^\nu}\frac{\partial}{\partial y}(\mu W^2) - 
+\frac{2}{3}\frac{\partial}{\partial x}(\mu U \frac{\partial V}{\partial y}) - \frac{2}{3}\frac{1}{y^\nu}\frac{\partial}{\partial y}(\mu Vy^\nu \frac{\partial U}{\partial x}) - (1 - \frac{1}{Le})\frac{\partial}{\partial x}(\frac{\mu}{Pr}\Sigma_{i = 1}^N h_i(T)\frac{\partial C_i}{\partial x}) - (1 - \frac{1}{Le})\frac{1}{y^\nu}\frac{\partial}{\partial y}(\frac{\mu}{Pr}y^\nu\Sigma_{i = 1}^N h_i(T)\frac{\partial C_i}{\partial y}) - \rho Q, \\
+\rho U \frac{\partial C_i}{\partial x} + \rho V \frac{\partial C_i}{\partial y} &= \frac{\partial}{\partial x}(\frac{\mu}{Sc}\frac{\partial C_i}{\partial x}) + \frac{1}{y^\nu}\frac{\partial}{\partial y}(y^\nu\frac{\mu}{Sc}\frac{\partial C_i}{\partial y}) + W_i^*, i = 1,...N, \\
+J &= \Sigma_{i = 1}^N h_i(T)C_i + \frac{1}{2}(U^2 + V^2 + W^2), \\
+P &= \rho RT\mu_\Sigma^{-1}.
+\end{align}
+
+Несколько формул в окружении \texttt{gather}:
+
+\begin{gather} 
+2x - 5y =  8 \\ 
+3x^2 + 9y =  3a + c
+\end{gather}
+
+Формула на нескольких строках в окружении \texttt{split}. По умолчанию здесь тоже будет большое расстояние между строками. Чтобы этого избежать используйте команду \texttt{\textbackslash normalspacing} внутри \texttt{equation}:
+
+\begin{equation}
+\normalspacing
+\begin{split}
+F = {} &\{F_{x} \in  F_{c} : (|S| > |C|) \cap {} \\
+& \cap (\mathrm{minPixels}  < |S| < \mathrm{maxPixels}) \cap {} \\
+& \cap (|S_{\mathrm{conected}}| > |S| - \varepsilon) \}
+\end{split}
+\end{equation}
