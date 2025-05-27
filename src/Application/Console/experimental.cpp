@@ -1,34 +1,27 @@
-#include <ODUSolver/CrankNicolson/CrankNicolson.hpp>
+//#include <ODUSolver/CrankNicolson/CrankNicolson.hpp>
 #include <ODUSolver/Chemical/ChemicalSolver.hpp>
+#include <ODUSolver/CrankNicolson/LameSolver.hpp>
 #include <Input/InputHandle.hpp>
 #include <GUI/Plot2D.hpp>
 #include <GUI/Plot3D.hpp>
 #include <GUI/HeatMap.hpp>
 #include <GUI/Selector.hpp>
 #include <GUI/TextField.hpp>
+#include <GUI/PageHolder.hpp>
+#include <GUI/ScrollingWindow.hpp>
+#include <GUI/Box.hpp>
 #include <NumericMethods/Differentiation.hpp>
-
-//Численное моделирование течения струй газа с неравновесным химическим процессом
-
-//Newton для основного текста
-//Must-Type для математических формул
-//Курсив запрещён
-//Шлихтинг толстая книжка про вязкость
 
 using duration_t = std::chrono::milliseconds;
 
-double Newton (const std::function<double (double)> &function, double x, double approx) {
-    uint64_t count = 1;
-    double x2 = x - function(x) / derivative(function, x, 0.001, DiffConfig::POINTS2_ORDER1_WAY3);
-    while (std::abs(x2 - x) > approx) {
-        x = x2;
-        x2 = x - function(x) / derivative(function, x, 0.001, DiffConfig::POINTS2_ORDER1_WAY3);
-        ++count;
-        if (count > 200) {
-            throw std::runtime_error("Newton: the maximum number of iterations has been reached");
-        }
-    }
-    return x2;
+void getContextWindow (PageHolder &holder, uint64_t wWidth, uint64_t wHeight) {
+    auto window = std::make_shared<ScrollingWindow>();
+    auto mainBox = std::make_shared<Box>(40, Box::Alignment::LEFT, Box::Orientation::VERTICAL);
+    auto profileChoiceBox = std::make_shared<Box>(20, Box::Alignment::LEFT, Box::Orientation::VERTICAL);
+    auto sectionModBox = std::make_shared<Box>(20, Box::Alignment::LEFT, Box::Orientation::VERTICAL);
+    auto saveModBox = std::make_shared<Box>(20, Box::Alignment::LEFT, Box::Orientation::VERTICAL);
+
+
 }
 
 int main (int argc, char *argv[]) {
@@ -91,8 +84,6 @@ int main (int argc, char *argv[]) {
     std::vector<ValueProfile> valProf(ARGS::TOTAL_COUNT - 1, ValueProfile(profileSize));
     std::vector<ChemicalProfile> chemProf(sys.getSubstanceList().size(), ChemicalProfile(profileSize));
     in >> initProfileCount;
-    //???
-    //page №25 for V
     for (uint64_t i = 0; i < initProfileCount; ++i) {
         std::string valName;
         in >> valName;
@@ -121,17 +112,10 @@ int main (int argc, char *argv[]) {
     for (uint64_t i = 0; i < sys.getSubstanceList().size(); ++i) {
         in >> valueNames[i];
     }
-    // for (uint64_t i = 0; i < chemProf.size(); ++i) {
-    //     for (uint64_t j = 0; j < profileSize; ++j) {
-    //         chemProf[i].profile[j].first = j * xi_h / (profileSize - 1) * m;
-    //     }
-    // }
     for (uint64_t i = 0; i < profileSize; ++i) {
         for (uint64_t j = 0; j < chemProf.size(); ++j) {
             double val;
             in >> val;
-            // chemProf[strToArgs(valueNames[j])].profile[i].second = val;
-            // chemProf[strToArgs(valueNames[j])].profile[i].first = i * xi_h / (profileSize - 1) * m;
             chemProf[j].profile[i].second = val;
             chemProf[j].profile[i].first = i * xi_h / (profileSize - 1) * m;
         }
@@ -154,7 +138,6 @@ int main (int argc, char *argv[]) {
     for (uint64_t i = 0; i < order; ++i) {
         double A, n, E;
         std::string reaction = readLine(in);
-        //std::getline(in, reaction);
         in >> A >> n >> E;
         sys.addReaction(reaction, A, n, E);
     }
@@ -260,86 +243,10 @@ int main (int argc, char *argv[]) {
         sys.setPressure(f[P](0, i));
         sys.setConcentrations(pointGamma, ConcentrationMode::MOLAR_MASS);
         std::cout << "T: " << f[T](0, i) << " P: " << f[P](0, i) << " muSum: " << muSum << " rho: " << sys.getRho() << "\n";
-        //f[RHO](0, i) = sys.getRho();
         f[RHO](0, i) = f[P](0, i) / 8.3144 / f[T](0, i) / muSum;
     }
     valProf[RHO].in = f[RHO](0, 0);
     valProf[P].in = valProf[U].in * valProf[U].in * valProf[RHO].in;
-    std::vector<double> xiM(m, 0);
-    for (uint64_t i = 1; i < m; ++i) {
-        auto toFind = [=] (double x) -> double {
-            return std::pow(x, nu) * f[U](0, i) * f[RHO](0, i) / (valProf[U].in * valProf[RHO].in);
-        };
-        double tmp = IntegralTrapeze(toFind, f[Y](0, 0), f[Y](0, i), (f[Y](0, i) - f[Y](0, 0)) / i);
-        tmp *= (nu + 1);
-        xiM[i] = std::pow(tmp, 1.0 / (nu + 1));
-    }
-    std::cout << "Xi init mas:\n";
-    for (uint64_t j = 0; j < m; ++j) {
-        std::cout << xiM[j] << " ";
-    }
-    std::cout << "\n";
-    xi_h = xiM.back() / m;
-    std::cout << "new xi_h: " << xi_h << "\n";
-    //Y
-    auto YVec = f[Y].toVector(0, m);
-    f[Y](0, 0) = 0;
-    //std::vector<double> tmpMas(m, 0);
-    for (uint64_t j = 1; j < m; ++j) {
-        //1
-        // double xi = j * xi_h + Xi_0;
-        // double sum = 0;
-        // for (uint64_t k = 1; k < j; ++k) {
-        //     sum += (xi_h * k / (f[U](0, k) * f[RHO](0, k)) + xi_h * (k - 1) / (f[U](0, k - 1) * f[RHO](0, k - 1))) / 2 * xi_h;
-        // }
-        // double tmp = std::pow(f[Y](0, j - 1), nu + 1) + (nu + 1) * sum;
-        // f[Y](0, j) = std::pow(tmp, 1.0 / (nu + 1));
-        //2
-        // double xi = (j + 1) * xi_h + Xi_0;
-        // double tmp = std::pow(xi, nu + 1) / (f[U](0, j) * f[RHO](0, j) * (nu + 1));
-        // f[Y](0, j) = std::pow(tmp, 1.0 / (nu + 1));
-        //3
-        // auto toFind = [=] (uint64_t idx) {
-        //     double xi = idx * xi_h + Xi_0;
-        //     auto toSolve = [=] (double y) -> double {
-        //         double tmp = std::pow(xi, nu) / (f[U](0, idx) * f[RHO](0, idx) * f[Y](0, idx)) * xi_h;
-        //         return -std::pow(y, nu) * (y - f[Y](0, idx - 1)) + tmp;
-        //     };
-        //     return toSolve;
-        // };
-        // f[Y](0, j) = Newton(toFind(j), f[Y](0, j - 1), 0.01);
-        //4
-        // double xi = j * xi_h + Xi_0;
-        // double tmp = std::pow(xi, nu + 1) * (nu + 1) / (f[U](0, j) * f[RHO](0, j));
-        // f[Y](0, j) = std::pow(tmp, 1.0 / (nu + 1));
-        //5
-        // tmpMas[j] = std::pow(xi_h * j, nu) * f[RHO](0, j) / f[U](0, j) / 2;
-        // for (uint64_t k = 0; k < j - 1; ++k) {
-        //     tmpMas[j] = tmpMas[j] + 1.0 / f[RHO](0, k) / f[U](0, k) * std::pow(xi_h * k, nu);
-        // }
-        // tmpMas[j] *= (nu + 1);
-        // tmpMas[j] = std::pow(xi_h * tmpMas[j], 1.0 / (nu + 1));
-        // auto toFind = [&] (double x) -> double {
-        //     //std::cout << f[U](0, j) << " " << f[RHO](0, j) << "\n";
-        //     return std::pow(x, nu) / (f[U](0, j) * f[RHO](0, j)) * (valProf[U].in * valProf[RHO].in);
-        // };
-        // double tmp = IntegralTrapeze(toFind, Xi_0, j * xi_h + Xi_0, xi_h);
-        // tmp *= (nu + 1);
-        // f[Y](0, j) = std::pow(tmp, 1.0 / (nu + 1));
-    }
-    // std::cout << "tmpMas:\n";
-    // for (uint64_t j = 0; j < m; ++j) {
-    //     std::cout << tmpMas[j] << " ";
-    // }
-    // std::cout << "\nbefore inter:\n";
-    // for (uint64_t j = 0; j < m; ++j) {
-    //     std::cout << YVec[j] << " ";
-    // }
-    // std::cout << "\nafter init inter:\n";
-    // for (uint64_t j = 0; j < m; ++j) {
-    //     std::cout << f[Y](0, j) << " ";
-    // }
-    // std::cout << "\n";
     //MU
     for (uint64_t j = 0; j < m; ++j) {
         f[MU](0, j) = turbulence[usingTurb](f, valProf, chemProf, R0, 0, j);
@@ -351,7 +258,6 @@ int main (int argc, char *argv[]) {
             for (uint64_t k = 0; k < ental.size(); ++k) {
                 f[J](i, j) += ental[k](f[T](i, j)) * f[C1 + k](i, j);
             }
-            //f[J](i, j) /= (f[U](i, j) * f[U](i, j));
             f[J](i, j) += 1.0 / 2.0 * (f[U](i, j) * f[U](i, j) + f[V](i, j) * f[V](i, j) + f[W](i, j) * f[W](i, j));
         }
     }
@@ -371,22 +277,27 @@ int main (int argc, char *argv[]) {
         }
         std::cout << "\n";
     }
+    //заполнение доп. слоя
+    for (uint64_t i = 0; i < f.size(); ++i) {
+        for (uint64_t j = 0; j < m; ++j) {
+            f[i](1, j) = f[i](0, j);
+        }
+    }
 
-    //нормировка
-    for (uint64_t i = 0; i < C1; ++i) {
-        for (uint64_t j = 0; j < m; ++j) {
-            f[i](0, j) = valProf[i].toNormal(f[i](0, j));
-        }
-    }
-    for (uint64_t i = C1; i < f.size(); ++i) {
-        for (uint64_t j = 0; j < m; ++j) {
-            f[i](0, j) = chemProf[i - C1].toNormal(f[i](0, j));
-            //f[i](0, j) = chemProf[i - C1].getNormal((double)j * xi_h);
-        }
-    }
-    for (uint64_t j = 0; j < m; ++j) {
-        f[MU](0, j) *= valProf[MU].in;
-    }
+    //нормировка (отключена)
+    // for (uint64_t i = 0; i < C1; ++i) {
+    //     for (uint64_t j = 0; j < m; ++j) {
+    //         f[i](0, j) = valProf[i].toNormal(f[i](0, j));
+    //     }
+    // }
+    // for (uint64_t i = C1; i < f.size(); ++i) {
+    //     for (uint64_t j = 0; j < m; ++j) {
+    //         f[i](0, j) = chemProf[i - C1].toNormal(f[i](0, j));
+    //     }
+    // }
+    // for (uint64_t j = 0; j < m; ++j) {
+    //     f[MU](0, j) *= valProf[MU].in;
+    // }
 
     std::cout << "initial profiles:\n";
     //for vals
@@ -396,7 +307,7 @@ int main (int argc, char *argv[]) {
             str = "C" + std::to_string(i - C1 + 1);
         }
         std::cout << "profile " << str << ":\n";
-        std::cout << valProf[i].in << "\n";// << profiles[i].out << "\n";
+        std::cout << valProf[i].in << "\n";
         for (uint64_t j = 0; j < profileSize; ++j) {
             std::cout << "(" << valProf[i].profile[j].first << ", " << valProf[i].profile[j].second << ") ";
         }
@@ -424,53 +335,15 @@ int main (int argc, char *argv[]) {
         std::cout << "initial " << str << ":\n";
         for (uint64_t j = 0; j < m; ++j) {
             std::cout << f[i](0, j) << " ";
-            //f[P](0, i) = sys.getPressure();
-            //f[MU](0, i) = 0.4;
         }
         std::cout << "\n";
     }
-    //Y
-    f[Y](0, 0) = 0;
-    for (uint64_t j = 1; j < m; ++j) {
-        //5
-        auto toFind = [&] (double x) -> double {
-            return std::pow(x, nu) / (f[U](0, j) * f[RHO](0, j));
-        };
-        double tmp = IntegralTrapeze(toFind, Xi_0, j * xi_h + Xi_0, xi_h);
-        tmp *= (nu + 1);
-        f[Y](0, j) = std::pow(tmp, 1.0 / (nu + 1));
-    }
-    //Интерполяция по изменённому Y
-    for (uint64_t i = 0; i < f.size(); ++i) {
-        auto valueVec = f[i].toVector(0, m);
-        if (i == Y) {
-            continue;
-        }
-        // std::cout << "\n";
-        // std::string str = argToStr(ARGS(i));
-        // if (str == "Error") {
-        //     str = "C" + std::to_string(i - C1 + 1);
-        // }
-        // std::cout << "interpolated " << str << ":\n";
-        // std::cout << "vals in vec:\n";
-        // for (uint64_t j = 0; j < m; ++j) {
-        //     std::cout << valueVec[j] << " ";
-        // }
-        // std::cout << "\nvals in xi:\n";
-        // for (uint64_t j = 0; j < m; ++j) {
-        //     std::cout << xiM[j] << " ";
-        // }
-        // std::cout << "\n";
-        for (uint64_t j = 0; j < m; ++j) {
-            //f[i](0, j) = LinearInterpolation(YVec, valueVec, f[Y](0, j));
-            //std::cout << "step: " << xi_h * j << " have: " << valueVec[j] << " got: " << f[i](0, j) << "\n";
-        }
-    }
+
     std::vector<Matrix<double>> ans(n, Matrix<double>(m));
     std::cout << "solve method: kranc-nichalas\n";
     if (choice == 0) {
         auto startT = std::chrono::system_clock::now();
-        ans = SolveIBVP(info, f, 0.7, R0, x_h, xi_h, Method::KRANK_NICOLAS, ApproxLevel::NONE, ental, valProf, chemProf);
+        ans = SolveIBVP(info, f, 0.7, R0, x_h, xi_h, 1.e-6, Method::KRANK_NICOLAS, ApproxLevel::NONE, ental, valProf, chemProf);
         auto endT = std::chrono::system_clock::now();
         std::cout << "=====Конец расчёта=====\n";
         auto time = std::chrono::duration_cast<duration_t>(endT - startT).count();
