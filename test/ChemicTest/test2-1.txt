@@ -1,6 +1,6 @@
 ./../../test/ChemicTest/bufermm2.txt
 
-900.0
+2000.0
 101325.0
 
 1
@@ -85,6 +85,6 @@ H2O2 = 1.e-12
 HO2 = 1.e-12
 
 #h_min h_max h_last
-2e-9 4e-7 3.e-2
+1e-9 4e-8 3.e-2
 
 1

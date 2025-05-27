@@ -1,6 +1,6 @@
 ./../../test/ChemicTest/bufermm.txt
 
-950.0
+1950.0
 101325.0
 
 1
@@ -46,6 +46,7 @@ O2 = 0.5
 #OH = 0.1
 #H2O = 0.1
 
+#h_min h_max h_last
 1e-8 1e-8 2e-4
 
 1
