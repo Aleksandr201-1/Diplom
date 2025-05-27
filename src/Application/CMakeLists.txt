@@ -6,7 +6,7 @@ function(build_app TARGET_NAME SOURCES EXTRA_LIBS)
         PRIVATE
             ${PDF_REPORTER_LIB}
             ${KOSHI_SOLVER_LIB}
-            ${CRANK_NICOLSON_SOLVER_LIB}
+            #${CRANK_NICOLSON_SOLVER_LIB}
             ${CHEMICAL_SOLVER_LIB}
             ${EXTRA_LIBS}
             ${NUMERIC_METHODS_LIB}

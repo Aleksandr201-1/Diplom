@@ -241,7 +241,7 @@ int main (int argc, char* argv[]) {
     //generateReport(info, ReportType::TEX, out);
     file.close();
     //printTable1(info.solution, std::cout);
-    //exit(0);
+    exit(0);
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 6;
