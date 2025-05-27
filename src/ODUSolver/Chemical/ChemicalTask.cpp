@@ -581,8 +581,8 @@ void ChemicalSystem::initFromFile (const std::string &filename) {
         };
         GFunc.push_back(gfunc);
         auto efunc = [=] (double t) -> double {
-            return gfunc(t) - t * (-t * phi[i].der1(t) - phi[i](t)); //experimental
-            //return gfunc(t) - t * derivative(gfunc, t, 0.01, DiffConfig::POINTS2_ORDER1_WAY3); //normal
+            //return gfunc(t) - t * (-t * phi[i].der1(t) - phi[i](t)); //experimental
+            return gfunc(t) - t * derivative(gfunc, t, 0.01, DiffConfig::POINTS2_ORDER1_WAY3); //normal
         };
         enthalpy.push_back(efunc);
     }

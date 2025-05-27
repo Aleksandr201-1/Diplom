@@ -23,7 +23,10 @@ double NewtonFindT (const std::function<double (double)> &f, double x, double ap
         x = x2;
         x2 = x - f(x) / derivative(f, x, approx, conf);
         ++count;
-        if (count > ITERATION_CAP) {
+        if (count > 3000) {
+            std::cout << "NewtonFindT: the maximum number of iterations has been reached\n";
+            std::cout.flush();
+            exit(1);
             return x2;
             //throw std::runtime_error("NewtonFindT: the maximum number of iterations has been reached");
         }
@@ -167,13 +170,13 @@ std::vector<std::vector<double>> ChemicalSolver (SolveMethod method,
     std::vector<std::vector<double>> Yi(orderOfTask + 1); //t W1 W2 W3 ... Wn-2 rho T (n = orderOfTask)
     std::vector<double> control, args(orderOfTask + 1);
 
-    // std::ofstream output("chem_log.txt"), tough_output("tough_output.txt");
-    // output << "#\tt\t";
-    // auto names = task.getSubstanceList();
-    // for (auto el : names) {
-    //     output << el << "\t";
-    // }
-    // output << "rho\tT\n";
+    std::ofstream output("chem_log.txt"), tough_output("tough_output.txt");
+    output << "#\tt\t";
+    auto names = task.getSubstanceList();
+    for (auto el : names) {
+        output << el << "\t";
+    }
+    output << "rho\tT\n";
 
     //инициализация начальных условий
     Y.insert(Y.begin(), 0);
@@ -192,8 +195,6 @@ std::vector<std::vector<double>> ChemicalSolver (SolveMethod method,
     std::cout.setf(std::ios_base::fixed);
     U = getU(Ui, Y, T);
     double Ustart = U;
-    //U:     3654450.282096678856760
-    //U end: 3654450.282096415758133
 
     //std::cout << "U: " << U << "\n";
     //std::cout << "order of task: " << orderOfTask << "\norder of approx: " << orderOfApprox << "\n";
@@ -322,11 +323,11 @@ std::vector<std::vector<double>> ChemicalSolver (SolveMethod method,
     for (uint64_t i = 0; i < Yi.size(); ++i) {
         Yi[i].push_back(Yi[i][0]);
     }
-    // output << 0 << "\t";
-    // for (uint64_t j = 0; j < Yi.size() - 1; ++j) {
-    //     output << Yi[j][1] << "\t";
-    // }
-    // output << Yi.back()[1] << "\n";
+    output << 0 << "\t";
+    for (uint64_t j = 0; j < Yi.size() - 1; ++j) {
+        output << Yi[j][1] << "\t";
+    }
+    output << Yi.back()[1] << "\n";
 
     //пока не достигли конца интегрирования
     while (true) {
@@ -422,22 +423,22 @@ std::vector<std::vector<double>> ChemicalSolver (SolveMethod method,
             //std::cout << "speed: " << maxSpeed << "\n";
             //std::cout << "step " << stepNum << ": h * 1.1 = " << h << "\n";
         }
-        //if (stepNum % 200 == 0) {
-            //std::cout << "\nsolution: " << currLen / h_last * 100 << "%\nsteps: " << stepNum << ": h = " << h << "\n";
-            //std::cout << "T1 = " << Yi[Yi.size() - 1].back() << "\n T2 = " << Yi[Yi.size() - 1][Yi[Yi.size() - 1].size() - 2] << "\n";
-            //std::cout << "max speed: " << maxSpeed << "\n";
-            //output << stepNum << "\t";
-            //for (uint64_t j = 0; j < Yi.size() - 1; ++j) {
-                //Ytough[j] = Yi[j][1];
-                //Yprev[j] = Yi[j][0];
-                //output << Yi[j][1] << "\t";
-            //}
-            //output << Yi.back()[1] << "\n";
+        if (stepNum % 200 == 0) {
+            std::cout << "\nsolution: " << currLen / h_last * 100 << "%\nsteps: " << stepNum << ": h = " << h << "\n";
+            std::cout << "T1 = " << Yi[Yi.size() - 1].back() << "\n T2 = " << Yi[Yi.size() - 1][Yi[Yi.size() - 1].size() - 2] << "\n";
+            std::cout << "max speed: " << maxSpeed << "\n";
+            output << stepNum << "\t";
+            for (uint64_t j = 0; j < Yi.size() - 1; ++j) {
+                Ytough[j] = Yi[j][1];
+                Yprev[j] = Yi[j][0];
+                output << Yi[j][1] << "\t";
+            }
+            output << Yi.back()[1] << "\n";
             //exit(0);
-            // tough_coeff = ToughCoeff(func, Ytough, Yprev);
-            // std::cout << "Tough coeff: " << tough_coeff << "\n";
+            //tough_coeff = ToughCoeff(func, Ytough, Yprev);
+            //std::cout << "Tough coeff: " << tough_coeff << "\n";
             //tough_output << tough_coeff << "\n";
-        //}
+        }
         //окончание вычисления
         // bool stop = true;
         // for (uint64_t i = 1; i < Yi.size() - 2; ++i) {
@@ -457,8 +458,8 @@ std::vector<std::vector<double>> ChemicalSolver (SolveMethod method,
             break;
         }
     }
-    //output.close();
-    //tough_output.close();
+    output.close();
+    tough_output.close();
     //std::cout << "Total steps: " << stepNum << "\n";
     for (uint64_t i = 0; i < Y.size(); ++i) {
         Y[i] = Yi[i].back();
